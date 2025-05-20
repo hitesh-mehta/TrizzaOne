@@ -1,0 +1,59 @@
+
+{
+  "app": {
+    "name": "TrizzaOne",
+    "tagline": "SmartOps Kommandozentrale"
+  },
+  "auth": {
+    "login": "Anmelden",
+    "signup": "Registrieren",
+    "email": "E-mail",
+    "password": "Passwort",
+    "forgotPassword": "Passwort vergessen?",
+    "rememberMe": "Angemeldet bleiben",
+    "orContinueWith": "Oder fortfahren mit"
+  },
+  "language": {
+    "en": "Englisch",
+    "hi": "Hindi",
+    "de": "Deutsch",
+    "fr": "Französisch",
+    "select": "Sprache wählen"
+  },
+  "theme": {
+    "light": "Heller Modus",
+    "dark": "Dunkler Modus"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "forecast": "Prognose",
+    "sustainability": "Nachhaltigkeit",
+    "feedback": "Feedback",
+    "settings": "Einstellungen"
+  },
+  "dashboard": {
+    "overview": "Anlagenübersicht",
+    "quickStats": "Schnelle Statistiken",
+    "foodWaste": "Lebensmittelabfälle",
+    "energySaved": "Energieeinsparung",
+    "activeComplaints": "Aktive Beschwerden",
+    "sustainability": "Nachhaltigkeitswert",
+    "today": "Heute",
+    "lastUpdated": "Zuletzt aktualisiert"
+  },
+  "facility": {
+    "kitchen": "Küche",
+    "dining": "Speisebereich",
+    "pantry": "Speisekammer",
+    "temp": "Temperatur",
+    "occupancy": "Personen",
+    "cleaning": "Letzte Reinigung"
+  },
+  "buttons": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "export": "Exportieren",
+    "view": "Details anzeigen",
+    "submit": "Absenden"
+  }
+}

@@ -1,0 +1,59 @@
+
+{
+  "app": {
+    "name": "TrizzaOne",
+    "tagline": "स्मार्टऑप्स कमांड सेंटर"
+  },
+  "auth": {
+    "login": "लॉग इन",
+    "signup": "साइन अप",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "rememberMe": "मुझे याद रखें",
+    "orContinueWith": "या इसके साथ जारी रखें"
+  },
+  "language": {
+    "en": "अंग्रेजी",
+    "hi": "हिंदी",
+    "de": "जर्मन",
+    "fr": "फ्रेंच",
+    "select": "भाषा चुनें"
+  },
+  "theme": {
+    "light": "लाइट मोड",
+    "dark": "डार्क मोड"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "forecast": "पूर्वानुमान",
+    "sustainability": "स्थिरता",
+    "feedback": "प्रतिक्रिया",
+    "settings": "सेटिंग्स"
+  },
+  "dashboard": {
+    "overview": "सुविधा अवलोकन",
+    "quickStats": "त्वरित आँकड़े",
+    "foodWaste": "खाद्य अपशिष्ट",
+    "energySaved": "ऊर्जा बची",
+    "activeComplaints": "सक्रिय शिकायतें",
+    "sustainability": "स्थिरता स्कोर",
+    "today": "आज",
+    "lastUpdated": "आखरी अपडेट"
+  },
+  "facility": {
+    "kitchen": "रसोई",
+    "dining": "भोजन क्षेत्र",
+    "pantry": "पैंट्री",
+    "temp": "तापमान",
+    "occupancy": "व्यक्ति",
+    "cleaning": "आखिरी सफाई"
+  },
+  "buttons": {
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "export": "निर्यात",
+    "view": "विवरण देखें",
+    "submit": "सबमिट"
+  }
+}

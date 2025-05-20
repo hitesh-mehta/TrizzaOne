@@ -1,0 +1,59 @@
+
+{
+  "app": {
+    "name": "TrizzaOne",
+    "tagline": "SmartOps Command Center"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "orContinueWith": "Or continue with"
+  },
+  "language": {
+    "en": "English",
+    "hi": "Hindi",
+    "de": "German",
+    "fr": "French",
+    "select": "Select Language"
+  },
+  "theme": {
+    "light": "Light Mode",
+    "dark": "Dark Mode"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "forecast": "Forecast",
+    "sustainability": "Sustainability",
+    "feedback": "Feedback",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "overview": "Facility Overview",
+    "quickStats": "Quick Stats",
+    "foodWaste": "Food Wastage",
+    "energySaved": "Energy Saved",
+    "activeComplaints": "Active Complaints",
+    "sustainability": "Sustainability Score",
+    "today": "Today",
+    "lastUpdated": "Last Updated"
+  },
+  "facility": {
+    "kitchen": "Kitchen",
+    "dining": "Dining Area",
+    "pantry": "Pantry",
+    "temp": "Temperature",
+    "occupancy": "Occupants",
+    "cleaning": "Last Cleaned"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "export": "Export",
+    "view": "View Details",
+    "submit": "Submit"
+  }
+}
