@@ -45,6 +45,10 @@
     --sidebar-accent-foreground: 240 6% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217 91% 60%;
+    
+    --navy: 222 47% 11%;
+    --mintGreen: 159 65% 56%;
+    --coral: 0 85% 70%;
   }
 
   .dark {
@@ -84,6 +88,10 @@
     --sidebar-accent-foreground: 240 5% 96%;
     --sidebar-border: 240 4% 16%;
     --sidebar-ring: 217 91% 60%;
+    
+    --navy: 222 47% 11%;
+    --mintGreen: 159 65% 56%;  
+    --coral: 0 85% 70%;
   }
 }
 
@@ -117,5 +125,63 @@
   
   .text-gradient {
     @apply bg-gradient-to-r from-mintGreen to-blue-400 bg-clip-text text-transparent;
+  }
+  
+  /* 3D Model Animations */
+  .spin-slow {
+    animation: spin 12s linear infinite;
+  }
+  
+  .float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-light {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes scale-up {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .animate-pulse-light {
+    animation: pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-scale-up {
+    animation: scale-up 1s ease-out forwards;
+  }
+  
+  .bg-gradient-radial {
+    background-image: radial-gradient(circle, var(--tw-gradient-stops));
   }
 }
