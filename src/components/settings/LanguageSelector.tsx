@@ -12,10 +12,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ isInNavbar = false 
   const { t, i18n } = useTranslation();
   
   const languages = [
-    { code: 'en', name: t('language.en') },
-    { code: 'hi', name: t('language.hi') },
-    { code: 'de', name: t('language.de') },
-    { code: 'fr', name: t('language.fr') },
+    { code: 'en', name: 'English' },
+    { code: 'hi', name: 'हिंदी' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'fr', name: 'Français' },
   ];
 
   const handleLanguageChange = (value: string) => {
@@ -23,12 +23,17 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ isInNavbar = false 
     localStorage.setItem('trizzaone_language', value);
   };
 
+  const getCurrentLanguageName = () => {
+    const currentLang = languages.find(lang => lang.code === i18n.language);
+    return currentLang ? currentLang.name : 'English';
+  };
+
   return isInNavbar ? (
     <Select value={i18n.language} onValueChange={handleLanguageChange}>
       <SelectTrigger className="w-10 h-10 p-0 justify-center bg-transparent border-none">
         <Globe className="h-5 w-5" />
       </SelectTrigger>
-      <SelectContent align="end">
+      <SelectContent align="end" className="bg-background/95 backdrop-blur-sm border-mintGreen/20">
         {languages.map((language) => (
           <SelectItem key={language.code} value={language.code}>
             {language.name}
@@ -41,9 +46,9 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ isInNavbar = false 
       <p className="text-sm font-medium mb-2">{t('language.select')}</p>
       <Select value={i18n.language} onValueChange={handleLanguageChange}>
         <SelectTrigger className="w-full">
-          <SelectValue placeholder={t('language.select')} />
+          <SelectValue placeholder={getCurrentLanguageName()} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="bg-background/95 backdrop-blur-sm border-mintGreen/20">
           {languages.map((language) => (
             <SelectItem key={language.code} value={language.code}>
               {language.name}

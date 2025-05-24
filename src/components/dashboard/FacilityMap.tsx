@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +8,7 @@ const FacilityMap: React.FC = () => {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Mock facility data
+  // Mock facility data with added Hallway
   const facilityData = [
     {
       id: 'kitchen',
@@ -18,10 +17,10 @@ const FacilityMap: React.FC = () => {
       temp: '28°C',
       occupants: 5,
       lastCleaned: '45 min ago',
-      x: 0.2, // Position as percentage of canvas width
-      y: 0.5, // Position as percentage of canvas height
-      width: 0.3,
-      height: 0.4,
+      x: 0.15, // Position as percentage of canvas width
+      y: 0.45, // Position as percentage of canvas height
+      width: 0.25,
+      height: 0.35,
     },
     {
       id: 'dining',
@@ -30,10 +29,10 @@ const FacilityMap: React.FC = () => {
       temp: '24°C',
       occupants: 12,
       lastCleaned: '2 hrs ago',
-      x: 0.6,
-      y: 0.5,
-      width: 0.35,
-      height: 0.4,
+      x: 0.55,
+      y: 0.45,
+      width: 0.3,
+      height: 0.35,
     },
     {
       id: 'pantry',
@@ -43,9 +42,21 @@ const FacilityMap: React.FC = () => {
       occupants: 2,
       lastCleaned: '1 hr ago',
       x: 0.4,
-      y: 0.2,
+      y: 0.15,
       width: 0.2,
       height: 0.2,
+    },
+    {
+      id: 'hallway',
+      name: 'Hallway',
+      color: '#6366F1', // Purple for hallway
+      temp: '25°C',
+      occupants: 3,
+      lastCleaned: '30 min ago',
+      x: 0.2,
+      y: 0.82,
+      width: 0.6,
+      height: 0.12,
     }
   ];
 
