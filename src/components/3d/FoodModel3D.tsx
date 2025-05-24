@@ -23,12 +23,7 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
     sceneRef.current = scene;
 
     // Initialize camera
-    const camera = new THREE.PerspectiveCamera(
-      50,
-      1, // We'll update this ratio on resize
-      0.1,
-      1000
-    );
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
     camera.position.z = 5;
     cameraRef.current = camera;
 
@@ -37,7 +32,7 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
       antialias: true, 
       alpha: true 
     });
-    renderer.setClearColor(0x000000, 0); // Transparent background
+    renderer.setClearColor(0x000000, 0);
     renderer.setSize(size, size);
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
@@ -107,17 +102,12 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
         scene.add(cheese);
         
         // Top bun
-        geometry = new THREE.CylinderGeometry(1.5, 1.5, 0.7, 32, 1, false, 0, Math.PI * 2);
-        material = new THREE.MeshStandardMaterial({ color: 0xE9B872, roughness: 0.8 });
-        // Use a hemispehre for the top bun
         const topBun = new THREE.Mesh(
           new THREE.SphereGeometry(1.5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
           new THREE.MeshStandardMaterial({ color: 0xE9B872, roughness: 0.8 })
         );
         topBun.position.y = 0.9;
         scene.add(topBun);
-        
-        // We won't set modelRef as we've added multiple meshes
         break;
       
       case 'donut':
@@ -136,13 +126,11 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
           });
           const sprinkle = new THREE.Mesh(sprinkleGeometry, sprinkleMaterial);
           
-          // Position sprinkle on donut surface
           const angle = Math.random() * Math.PI * 2;
           const radius = 1;
           const x = Math.cos(angle) * radius;
           const z = Math.sin(angle) * radius;
           
-          // Small random offset to place on surface
           const radialAngle = Math.random() * Math.PI * 2;
           const offsetX = Math.cos(radialAngle) * 0.5;
           const offsetY = Math.sin(radialAngle) * 0.5;
@@ -159,7 +147,6 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
         
       case 'plate':
       default:
-        // Create a plate
         const plateGeometry = new THREE.CylinderGeometry(2, 2, 0.2, 32);
         const plateMaterial = new THREE.MeshStandardMaterial({ 
           color: 0xFAFAFA, 
@@ -169,7 +156,6 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
         const plate = new THREE.Mesh(plateGeometry, plateMaterial);
         scene.add(plate);
         
-        // Create a rim for the plate
         const rimGeometry = new THREE.TorusGeometry(2, 0.1, 16, 32);
         const rimMaterial = new THREE.MeshStandardMaterial({ 
           color: 0xE0E0E0,
@@ -181,24 +167,23 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
         rim.position.y = 0.1;
         scene.add(rim);
         
-        // Food items on plate (simplified)
         const food1 = new THREE.Mesh(
           new THREE.BoxGeometry(0.8, 0.3, 0.8),
-          new THREE.MeshStandardMaterial({ color: 0x8D6E63 }) // Brown food item
+          new THREE.MeshStandardMaterial({ color: 0x8D6E63 })
         );
         food1.position.set(0.5, 0.25, 0);
         scene.add(food1);
         
         const food2 = new THREE.Mesh(
           new THREE.SphereGeometry(0.3, 16, 16),
-          new THREE.MeshStandardMaterial({ color: 0x4CAF50 }) // Green food item
+          new THREE.MeshStandardMaterial({ color: 0x4CAF50 })
         );
         food2.position.set(-0.5, 0.3, 0.5);
         scene.add(food2);
         
         const food3 = new THREE.Mesh(
           new THREE.CylinderGeometry(0.3, 0.3, 0.3, 16),
-          new THREE.MeshStandardMaterial({ color: 0xFF9800 }) // Orange food item
+          new THREE.MeshStandardMaterial({ color: 0xFF9800 })
         );
         food3.position.set(-0.3, 0.15, -0.7);
         scene.add(food3);
@@ -216,7 +201,6 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
       requestAnimationFrame(animate);
       
       if (rotate) {
-        // Rotate entire scene for complex models
         scene.rotation.y += 0.01;
         
         if (modelRef.current && ['donut', 'pizza'].includes(type)) {
@@ -229,7 +213,6 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
     
     animate();
     
-    // Handle window resize
     const handleResize = () => {
       if (!rendererRef.current || !cameraRef.current) return;
       
