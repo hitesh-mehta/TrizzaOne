@@ -2,8 +2,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { BarChart3, MessageCircle, Home, Leaf, Menu } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  TrendingUp, 
+  Leaf, 
+  MessageSquare,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3
+} from 'lucide-react';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -12,79 +19,98 @@ interface SidebarProps {
   setActiveItem: (item: string) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ 
-  collapsed, 
-  setCollapsed, 
-  activeItem, 
-  setActiveItem 
+const Sidebar: React.FC<SidebarProps> = ({
+  collapsed,
+  setCollapsed,
+  activeItem,
+  setActiveItem
 }) => {
   const { t } = useTranslation();
 
-  const navigationItems = [
-    { id: 'dashboard', label: t('nav.dashboard'), icon: Home },
-    { id: 'forecast', label: t('nav.forecast'), icon: BarChart3 },
-    { id: 'sustainability', label: t('nav.sustainability'), icon: Leaf },
-    { id: 'feedback', label: t('nav.feedback'), icon: MessageCircle },
+  const menuItems = [
+    {
+      id: 'dashboard',
+      label: t('nav.dashboard'),
+      icon: LayoutDashboard,
+    },
+    {
+      id: 'forecast',
+      label: t('nav.forecast'),
+      icon: TrendingUp,
+    },
+    {
+      id: 'predictions',
+      label: 'AI Predictions',
+      icon: BarChart3,
+    },
+    {
+      id: 'sustainability',
+      label: t('nav.sustainability'),
+      icon: Leaf,
+    },
+    {
+      id: 'feedback',
+      label: t('nav.feedback'),
+      icon: MessageSquare,
+    },
   ];
 
   return (
-    <div 
-      className={cn(
-        'h-screen bg-card border-r border-border flex flex-col transition-all duration-300 ease-in-out',
-        collapsed ? 'w-16' : 'w-64'
-      )}
-    >
-      <div className="flex items-center h-16 px-4 border-b border-border">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-        
+    <div className={cn(
+      "bg-sidebar-background border-r border-sidebar-border h-full flex flex-col transition-all duration-300",
+      collapsed ? "w-16" : "w-64"
+    )}>
+      {/* Header */}
+      <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
         {!collapsed && (
-          <div className="ml-2 flex items-center flex-1">
+          <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-full bg-mintGreen flex items-center justify-center">
-              <span className="font-bold text-navy">T1</span>
+              <span className="font-bold text-sm text-navy">T1</span>
             </div>
-            <span className="ml-2 font-semibold text-lg">TrizzaOne</span>
+            <span className="font-semibold text-sidebar-foreground">TrizzaOne</span>
           </div>
         )}
+        
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="p-1 hover:bg-sidebar-accent rounded-md transition-colors"
+        >
+          {collapsed ? (
+            <ChevronRight className="h-4 w-4 text-sidebar-foreground" />
+          ) : (
+            <ChevronLeft className="h-4 w-4 text-sidebar-foreground" />
+          )}
+        </button>
       </div>
-      
-      <nav className="flex-1 py-6">
-        <ul className="space-y-2 px-2">
-          {navigationItems.map((item) => {
+
+      {/* Navigation */}
+      <nav className="flex-1 p-4">
+        <ul className="space-y-2">
+          {menuItems.map((item) => {
             const Icon = item.icon;
+            const isActive = activeItem === item.id;
+            
             return (
               <li key={item.id}>
-                <Button
-                  variant={activeItem === item.id ? "default" : "ghost"}
-                  className={cn(
-                    'w-full justify-start',
-                    activeItem === item.id ? 'bg-mintGreen hover:bg-mintGreen/90 text-navy' : '',
-                    collapsed ? 'justify-center px-0' : 'px-3'
-                  )}
+                <button
                   onClick={() => setActiveItem(item.id)}
+                  className={cn(
+                    "w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left",
+                    isActive 
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground" 
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  )}
                 >
-                  <Icon className={cn('h-5 w-5', collapsed ? 'mx-auto' : 'mr-2')} />
-                  {!collapsed && <span>{item.label}</span>}
-                </Button>
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {!collapsed && (
+                    <span className="truncate">{item.label}</span>
+                  )}
+                </button>
               </li>
             );
           })}
         </ul>
       </nav>
-      
-      <div className="p-4 border-t border-border">
-        {!collapsed && (
-          <div className="text-xs text-muted-foreground text-center">
-            &copy; 2025 TrizzaOne
-          </div>
-        )}
-      </div>
     </div>
   );
 };

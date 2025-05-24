@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -15,6 +14,7 @@ import Sustainability from '@/components/dashboard/Sustainability';
 import Feedback from '@/components/dashboard/Feedback';
 import { useToast } from "@/components/ui/use-toast";
 import FoodModel3D from '@/components/3d/FoodModel3D';
+import Predictions from '@/components/dashboard/Predictions';
 
 // Import language configuration
 import '@/i18n';
@@ -88,6 +88,8 @@ const Index = () => {
         return <Dashboard />;
       case 'forecast':
         return <Forecast />;
+      case 'predictions':
+        return <Predictions />;
       case 'sustainability':
         return <Sustainability />;
       case 'feedback':
