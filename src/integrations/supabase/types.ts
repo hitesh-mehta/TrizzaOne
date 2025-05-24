@@ -9,6 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      iot_data: {
+        Row: {
+          air_purifier_status: Database["public"]["Enums"]["air_purifier_status"]
+          battery_backup_level: number
+          cleaning_status: Database["public"]["Enums"]["cleaning_status"]
+          co2_level: number
+          created_at: string
+          energy_consumed_kwh: number
+          fire_alarm_triggered: Database["public"]["Enums"]["alarm_status"]
+          floor: number
+          gas_leak_detected: Database["public"]["Enums"]["alarm_status"]
+          humidity: number
+          id: string
+          last_cleaned_timestamp: string | null
+          light_level: number
+          motion_detected: Database["public"]["Enums"]["motion_status"]
+          occupancy_count: number
+          power_status: Database["public"]["Enums"]["power_status"]
+          temperature: number
+          timestamp: string
+          zone: Database["public"]["Enums"]["zone_type"]
+        }
+        Insert: {
+          air_purifier_status: Database["public"]["Enums"]["air_purifier_status"]
+          battery_backup_level: number
+          cleaning_status: Database["public"]["Enums"]["cleaning_status"]
+          co2_level: number
+          created_at?: string
+          energy_consumed_kwh: number
+          fire_alarm_triggered: Database["public"]["Enums"]["alarm_status"]
+          floor: number
+          gas_leak_detected: Database["public"]["Enums"]["alarm_status"]
+          humidity: number
+          id?: string
+          last_cleaned_timestamp?: string | null
+          light_level: number
+          motion_detected: Database["public"]["Enums"]["motion_status"]
+          occupancy_count: number
+          power_status: Database["public"]["Enums"]["power_status"]
+          temperature: number
+          timestamp?: string
+          zone: Database["public"]["Enums"]["zone_type"]
+        }
+        Update: {
+          air_purifier_status?: Database["public"]["Enums"]["air_purifier_status"]
+          battery_backup_level?: number
+          cleaning_status?: Database["public"]["Enums"]["cleaning_status"]
+          co2_level?: number
+          created_at?: string
+          energy_consumed_kwh?: number
+          fire_alarm_triggered?: Database["public"]["Enums"]["alarm_status"]
+          floor?: number
+          gas_leak_detected?: Database["public"]["Enums"]["alarm_status"]
+          humidity?: number
+          id?: string
+          last_cleaned_timestamp?: string | null
+          light_level?: number
+          motion_detected?: Database["public"]["Enums"]["motion_status"]
+          occupancy_count?: number
+          power_status?: Database["public"]["Enums"]["power_status"]
+          temperature?: number
+          timestamp?: string
+          zone?: Database["public"]["Enums"]["zone_type"]
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -41,7 +107,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      air_purifier_status: "on" | "off"
+      alarm_status: "yes" | "no"
+      cleaning_status: "pending" | "inprogress" | "done"
+      motion_status: "yes" | "no"
+      power_status: "on" | "off"
+      zone_type: "Zone01" | "Zone02" | "Zone03" | "Zone04"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -156,6 +227,13 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      air_purifier_status: ["on", "off"],
+      alarm_status: ["yes", "no"],
+      cleaning_status: ["pending", "inprogress", "done"],
+      motion_status: ["yes", "no"],
+      power_status: ["on", "off"],
+      zone_type: ["Zone01", "Zone02", "Zone03", "Zone04"],
+    },
   },
 } as const

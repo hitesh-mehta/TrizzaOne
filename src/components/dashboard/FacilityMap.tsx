@@ -1,253 +1,229 @@
-import React, { useRef, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Thermometer, Droplets, Users, Zap, Wifi } from 'lucide-react';
 
-// We'll create a simulated 2D map for the first version and plan to evolve to 3D later
 const FacilityMap: React.FC = () => {
   const { t } = useTranslation();
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [selectedArea, setSelectedArea] = useState('overview');
 
-  // Mock facility data with added Hallway
-  const facilityData = [
-    {
-      id: 'kitchen',
-      name: t('facility.kitchen'),
-      color: '#FF6B6B', // Coral for kitchen (higher temperature)
-      temp: '28°C',
-      occupants: 5,
-      lastCleaned: '45 min ago',
-      x: 0.15, // Position as percentage of canvas width
-      y: 0.45, // Position as percentage of canvas height
-      width: 0.25,
-      height: 0.35,
-    },
-    {
-      id: 'dining',
-      name: t('facility.dining'),
-      color: '#4ECCA3', // Mint green for dining (comfortable temperature)
-      temp: '24°C',
-      occupants: 12,
-      lastCleaned: '2 hrs ago',
-      x: 0.55,
-      y: 0.45,
-      width: 0.3,
-      height: 0.35,
-    },
-    {
-      id: 'pantry',
-      name: t('facility.pantry'),
-      color: '#1A535C', // Cool blue for pantry (cooler temperature)
-      temp: '22°C',
-      occupants: 2,
-      lastCleaned: '1 hr ago',
-      x: 0.4,
-      y: 0.15,
-      width: 0.2,
-      height: 0.2,
-    },
-    {
-      id: 'hallway',
-      name: 'Hallway',
-      color: '#6366F1', // Purple for hallway
-      temp: '25°C',
-      occupants: 3,
-      lastCleaned: '30 min ago',
-      x: 0.2,
-      y: 0.82,
-      width: 0.6,
-      height: 0.12,
-    }
+  const facilityAreas = [
+    { value: 'overview', label: 'Overview', icon: MapPin },
+    { value: 'kitchen', label: 'Kitchen', icon: Thermometer },
+    { value: 'dining', label: 'Dining Area', icon: Users },
+    { value: 'storage', label: 'Storage', icon: Droplets },
+    { value: 'hallway', label: 'Hallway', icon: Wifi },
   ];
 
-  // Function to draw the facility map
-  const drawMap = (
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-  ) => {
-    ctx.clearRect(0, 0, width, height);
-
-    // Draw background grid
-    ctx.strokeStyle = '#2A2A2A';
-    ctx.lineWidth = 0.5;
-    
-    const gridSize = 20;
-    for (let x = 0; x < width; x += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, height);
-      ctx.stroke();
+  const mockData = {
+    overview: {
+      temperature: '28.5°C',
+      humidity: '65%',
+      occupancy: 45,
+      status: 'Normal',
+      sensors: 12,
+      alerts: 0
+    },
+    kitchen: {
+      temperature: '32.1°C',
+      humidity: '70%',
+      occupancy: 8,
+      status: 'High Temp',
+      sensors: 6,
+      alerts: 1
+    },
+    dining: {
+      temperature: '26.8°C',
+      humidity: '60%',
+      occupancy: 35,
+      status: 'Normal',
+      sensors: 4,
+      alerts: 0
+    },
+    storage: {
+      temperature: '24.2°C',
+      humidity: '55%',
+      occupancy: 2,
+      status: 'Normal',
+      sensors: 2,
+      alerts: 0
+    },
+    hallway: {
+      temperature: '27.5°C',
+      humidity: '62%',
+      occupancy: 12,
+      status: 'Normal',
+      sensors: 3,
+      alerts: 0
     }
-    
-    for (let y = 0; y < height; y += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
-    }
-
-    // Draw facility zones
-    facilityData.forEach(zone => {
-      const x = zone.x * width;
-      const y = zone.y * height;
-      const zoneWidth = zone.width * width;
-      const zoneHeight = zone.height * height;
-
-      // Draw zone background
-      ctx.globalAlpha = 0.7;
-      ctx.fillStyle = zone.color;
-      ctx.fillRect(x, y, zoneWidth, zoneHeight);
-      ctx.globalAlpha = 1.0;
-
-      // Draw zone border
-      ctx.strokeStyle = '#FFF';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x, y, zoneWidth, zoneHeight);
-
-      // Draw zone name
-      ctx.fillStyle = '#FFF';
-      ctx.font = '14px Poppins';
-      ctx.textAlign = 'center';
-      ctx.fillText(zone.name, x + zoneWidth / 2, y + zoneHeight / 2);
-      
-      // Draw occupant indicators
-      const dotSize = 4;
-      const maxDotsPerRow = 5;
-      const spacing = 8;
-      const occupants = Math.min(zone.occupants, 15); // Limit to 15 for display
-      
-      for (let i = 0; i < occupants; i++) {
-        const row = Math.floor(i / maxDotsPerRow);
-        const col = i % maxDotsPerRow;
-        const dotX = x + 10 + col * spacing;
-        const dotY = y + zoneHeight - 10 - row * spacing;
-        
-        ctx.beginPath();
-        ctx.arc(dotX, dotY, dotSize, 0, Math.PI * 2);
-        ctx.fillStyle = '#FFF';
-        ctx.fill();
-      }
-    });
   };
 
-  // Set up canvas and draw the map
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const parent = canvas.parentElement;
-    if (parent) {
-      const dimensions = parent.getBoundingClientRect();
-      canvas.width = dimensions.width;
-      canvas.height = dimensions.height;
-      
-      drawMap(ctx, canvas.width, canvas.height);
-    }
-    
-    // Redraw on window resize
-    const handleResize = () => {
-      if (parent) {
-        const dimensions = parent.getBoundingClientRect();
-        canvas.width = dimensions.width;
-        canvas.height = dimensions.height;
-        
-        drawMap(ctx, canvas.width, canvas.height);
-      }
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    // Pulse animation effect
-    let alpha = 0.7;
-    let increasing = true;
-    
-    const animate = () => {
-      if (increasing) {
-        alpha += 0.01;
-        if (alpha >= 0.9) increasing = false;
-      } else {
-        alpha -= 0.01;
-        if (alpha <= 0.7) increasing = true;
-      }
-      
-      if (parent) {
-        ctx.globalAlpha = alpha;
-        drawMap(ctx, canvas.width, canvas.height);
-      }
-      
-      requestAnimationFrame(animate);
-    };
-    
-    const animationFrame = requestAnimationFrame(animate);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrame);
-    };
-  }, []);
+  const currentData = mockData[selectedArea as keyof typeof mockData];
 
   return (
-    <Card className="neumorphic-card h-[400px]">
-      <CardHeader>
-        <CardTitle className="flex items-center">
-          {t('dashboard.overview')}
-          <div className="ml-2 flex items-center">
-            <span className="pulse-dot mr-2"></span>
-            <span className="text-xs text-muted-foreground">{t('dashboard.lastUpdated')}: 1m</span>
+    <div className="space-y-6">
+      <Card className="neumorphic-card">
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-mintGreen" />
+              {t('dashboard.facilityOverview')}
+            </CardTitle>
+            <Select value={selectedArea} onValueChange={setSelectedArea}>
+              <SelectTrigger className="w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {facilityAreas.map((area) => (
+                  <SelectItem key={area.value} value={area.value}>
+                    <div className="flex items-center gap-2">
+                      <area.icon className="h-4 w-4" />
+                      {area.label}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="relative h-[320px]">
-        <canvas 
-          ref={canvasRef} 
-          className="w-full h-full"
-        ></canvas>
-        
-        <TooltipProvider>
-          {facilityData.map((zone) => (
-            <Tooltip key={zone.id}>
-              <TooltipTrigger asChild>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Temperature Card */}
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <Thermometer className="h-5 w-5 text-orange-500" />
+                <Badge variant={currentData.temperature.includes('32') ? 'destructive' : 'default'}>
+                  {currentData.temperature.includes('32') ? 'High' : 'Normal'}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">Temperature</p>
+              <p className="text-2xl font-bold text-orange-600">{currentData.temperature}</p>
+            </div>
+
+            {/* Humidity Card */}
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <Droplets className="h-5 w-5 text-blue-500" />
+                <Badge variant="default">Normal</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">Humidity</p>
+              <p className="text-2xl font-bold text-blue-600">{currentData.humidity}</p>
+            </div>
+
+            {/* Occupancy Card */}
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <Users className="h-5 w-5 text-purple-500" />
+                <Badge variant="default">Active</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">Occupancy</p>
+              <p className="text-2xl font-bold text-purple-600">{currentData.occupancy}</p>
+            </div>
+
+            {/* Status Card */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <Zap className="h-5 w-5 text-green-500" />
+                <Badge variant={currentData.status === 'Normal' ? 'default' : 'destructive'}>
+                  {currentData.status}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">System Status</p>
+              <p className="text-lg font-bold text-green-600">{currentData.status}</p>
+            </div>
+
+            {/* Sensors Card */}
+            <div className="bg-gradient-to-br from-mintGreen/10 to-mintGreen/20 p-4 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <Wifi className="h-5 w-5 text-mintGreen" />
+                <Badge variant="default">Online</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">Active Sensors</p>
+              <p className="text-2xl font-bold text-mintGreen">{currentData.sensors}</p>
+            </div>
+
+            {/* Alerts Card */}
+            <div className="bg-gradient-to-br from-gray-50 to-slate-50 p-4 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <MapPin className="h-5 w-5 text-gray-500" />
+                <Badge variant={currentData.alerts > 0 ? 'destructive' : 'default'}>
+                  {currentData.alerts > 0 ? `${currentData.alerts} Alert${currentData.alerts > 1 ? 's' : ''}` : 'All Clear'}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">Active Alerts</p>
+              <p className="text-2xl font-bold text-gray-600">{currentData.alerts}</p>
+            </div>
+          </div>
+
+          {/* Facility Layout */}
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-4">Facility Layout</h3>
+            <div className="bg-gradient-to-br from-gray-100 to-gray-200 p-8 rounded-lg">
+              <div className="grid grid-cols-4 gap-4 h-64">
+                {/* Kitchen */}
                 <div 
-                  style={{
-                    position: 'absolute',
-                    left: `${zone.x * 100}%`,
-                    top: `${zone.y * 100}%`,
-                    width: `${zone.width * 100}%`,
-                    height: `${zone.height * 100}%`,
-                  }}
-                  className="cursor-pointer"
+                  className={`bg-orange-200 rounded-lg p-4 cursor-pointer transition-all ${
+                    selectedArea === 'kitchen' ? 'ring-2 ring-orange-500 bg-orange-300' : 'hover:bg-orange-300'
+                  }`}
+                  onClick={() => setSelectedArea('kitchen')}
                 >
-                  {/* Invisible overlay for tooltip trigger */}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="p-4 w-64">
-                <div className="space-y-2">
-                  <h4 className="font-semibold">{zone.name}</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('facility.temp')}</p>
-                      <p>{zone.temp}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">{t('facility.occupancy')}</p>
-                      <p>{zone.occupants}</p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-muted-foreground">{t('facility.cleaning')}</p>
-                      <p>{zone.lastCleaned}</p>
-                    </div>
+                  <div className="text-center">
+                    <Thermometer className="h-8 w-8 mx-auto mb-2 text-orange-600" />
+                    <p className="text-sm font-medium">Kitchen</p>
+                    <p className="text-xs text-orange-600">32.1°C</p>
                   </div>
                 </div>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </TooltipProvider>
-      </CardContent>
-    </Card>
+
+                {/* Dining Area */}
+                <div 
+                  className={`bg-blue-200 rounded-lg p-4 col-span-2 cursor-pointer transition-all ${
+                    selectedArea === 'dining' ? 'ring-2 ring-blue-500 bg-blue-300' : 'hover:bg-blue-300'
+                  }`}
+                  onClick={() => setSelectedArea('dining')}
+                >
+                  <div className="text-center">
+                    <Users className="h-8 w-8 mx-auto mb-2 text-blue-600" />
+                    <p className="text-sm font-medium">Dining Area</p>
+                    <p className="text-xs text-blue-600">35 people</p>
+                  </div>
+                </div>
+
+                {/* Storage */}
+                <div 
+                  className={`bg-cyan-200 rounded-lg p-4 cursor-pointer transition-all ${
+                    selectedArea === 'storage' ? 'ring-2 ring-cyan-500 bg-cyan-300' : 'hover:bg-cyan-300'
+                  }`}
+                  onClick={() => setSelectedArea('storage')}
+                >
+                  <div className="text-center">
+                    <Droplets className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
+                    <p className="text-sm font-medium">Storage</p>
+                    <p className="text-xs text-cyan-600">55% humidity</p>
+                  </div>
+                </div>
+
+                {/* Hallway */}
+                <div 
+                  className={`bg-mintGreen/40 rounded-lg p-4 col-span-4 cursor-pointer transition-all ${
+                    selectedArea === 'hallway' ? 'ring-2 ring-mintGreen bg-mintGreen/60' : 'hover:bg-mintGreen/60'
+                  }`}
+                  onClick={() => setSelectedArea('hallway')}
+                >
+                  <div className="text-center">
+                    <Wifi className="h-8 w-8 mx-auto mb-2 text-mintGreen" />
+                    <p className="text-sm font-medium">Hallway</p>
+                    <p className="text-xs text-mintGreen">12 people passing</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
