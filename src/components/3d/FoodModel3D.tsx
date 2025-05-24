@@ -99,7 +99,7 @@ const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 
 
   return (
     <div style={containerStyle}>
-      <style jsx>{`
+      <style>{`
         @keyframes rotate360 {
           from { transform: rotateY(0deg) rotateX(15deg); }
           to { transform: rotateY(360deg) rotateX(15deg); }
