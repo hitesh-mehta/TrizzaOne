@@ -156,7 +156,7 @@ export const useIoTData = () => {
 
   // Set up data generation interval
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let intervalId: ReturnType<typeof setInterval>;
 
     if (isRealtime && data.length > 0) {
       intervalId = setInterval(() => {
