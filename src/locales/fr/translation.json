@@ -2,16 +2,38 @@
 {
   "app": {
     "name": "TrizzaOne",
-    "tagline": "Centre de Commande SmartOps"
+    "tagline": "Centre de Commande SmartOps",
+    "welcomeTitle": "Bienvenue dans TrizzaOne",
+    "welcomeDesc": "Votre Centre de Commande d'Opérations Intelligentes"
   },
   "auth": {
     "login": "Connexion",
     "signup": "S'inscrire",
     "email": "Email",
     "password": "Mot de passe",
+    "firstName": "Prénom",
+    "lastName": "Nom",
     "forgotPassword": "Mot de passe oublié?",
     "rememberMe": "Se souvenir de moi",
-    "orContinueWith": "Ou continuer avec"
+    "orContinueWith": "Ou continuer avec",
+    "getStarted": "Commencer",
+    "welcomeBack": "Bon retour",
+    "createAccount": "Créer un compte",
+    "loginDesc": "Entrez vos identifiants pour accéder à votre compte",
+    "signupDesc": "Créez un nouveau compte pour commencer",
+    "processing": "Traitement...",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "noAccount": "Pas de compte?",
+    "createOne": "Créez-en un",
+    "loginSuccessTitle": "Connexion réussie",
+    "loginSuccessDesc": "Bon retour!",
+    "signupSuccessTitle": "Compte créé",
+    "signupSuccessDesc": "Votre compte a été créé avec succès",
+    "loginErrorTitle": "Échec de la connexion",
+    "signupErrorTitle": "Échec de l'inscription",
+    "logoutSuccess": "Déconnexion réussie",
+    "logoutSuccessDesc": "Vous avez été déconnecté",
+    "logoutError": "Échec de la déconnexion"
   },
   "language": {
     "en": "Anglais",
@@ -29,7 +51,9 @@
     "forecast": "Prévisions",
     "sustainability": "Durabilité",
     "feedback": "Commentaires",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "logout": "Déconnexion"
   },
   "dashboard": {
     "overview": "Aperçu des installations",

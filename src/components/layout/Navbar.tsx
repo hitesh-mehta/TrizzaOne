@@ -58,11 +58,14 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
     getUserInfo();
   }, []);
 
-  // Fallback to email initial if name is not available
-  const getInitial = () => {
-    if (firstName) return firstName.charAt(0).toUpperCase();
-    if (userEmail) return userEmail.charAt(0).toUpperCase();
-    return 'T';
+  // Get initials from email (first two letters of email before @)
+  const getEmailInitials = () => {
+    if (!userEmail) return 'T1';
+    const emailPart = userEmail.split('@')[0];
+    if (emailPart.length >= 2) {
+      return emailPart.substring(0, 2).toUpperCase();
+    }
+    return emailPart.charAt(0).toUpperCase() + '1';
   };
   
   // Get display name
@@ -86,8 +89,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
           <DropdownMenuTrigger asChild>
             <Avatar className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity">
               <AvatarImage src="/placeholder.svg" />
-              <AvatarFallback className="bg-mintGreen text-navy">
-                {isLoading ? '...' : getInitial()}
+              <AvatarFallback className="bg-mintGreen text-navy font-semibold">
+                {isLoading ? '...' : getEmailInitials()}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>

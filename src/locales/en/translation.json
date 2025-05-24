@@ -2,16 +2,38 @@
 {
   "app": {
     "name": "TrizzaOne",
-    "tagline": "SmartOps Command Center"
+    "tagline": "SmartOps Command Center",
+    "welcomeTitle": "Welcome to TrizzaOne",
+    "welcomeDesc": "Your Smart Operations Command Center"
   },
   "auth": {
     "login": "Login",
     "signup": "Sign Up",
     "email": "Email",
     "password": "Password",
+    "firstName": "First Name",
+    "lastName": "Last Name",
     "forgotPassword": "Forgot Password?",
     "rememberMe": "Remember Me",
-    "orContinueWith": "Or continue with"
+    "orContinueWith": "Or continue with",
+    "getStarted": "Get Started",
+    "welcomeBack": "Welcome Back",
+    "createAccount": "Create Account",
+    "loginDesc": "Enter your credentials to access your account",
+    "signupDesc": "Create a new account to get started",
+    "processing": "Processing...",
+    "alreadyHaveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "createOne": "Create one",
+    "loginSuccessTitle": "Login Successful",
+    "loginSuccessDesc": "Welcome back!",
+    "signupSuccessTitle": "Account Created",
+    "signupSuccessDesc": "Your account has been created successfully",
+    "loginErrorTitle": "Login Failed",
+    "signupErrorTitle": "Signup Failed",
+    "logoutSuccess": "Logged out successfully",
+    "logoutSuccessDesc": "You have been signed out",
+    "logoutError": "Logout failed"
   },
   "language": {
     "en": "English",
@@ -29,7 +51,9 @@
     "forecast": "Forecast",
     "sustainability": "Sustainability",
     "feedback": "Feedback",
-    "settings": "Settings"
+    "settings": "Settings",
+    "profile": "Profile",
+    "logout": "Logout"
   },
   "dashboard": {
     "overview": "Facility Overview",

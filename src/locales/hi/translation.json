@@ -2,16 +2,38 @@
 {
   "app": {
     "name": "TrizzaOne",
-    "tagline": "स्मार्टऑप्स कमांड सेंटर"
+    "tagline": "स्मार्टऑप्स कमांड सेंटर",
+    "welcomeTitle": "TrizzaOne में आपका स्वागत है",
+    "welcomeDesc": "आपका स्मार्ट ऑपरेशन कमांड सेंटर"
   },
   "auth": {
     "login": "लॉग इन",
     "signup": "साइन अप",
     "email": "ईमेल",
     "password": "पासवर्ड",
+    "firstName": "पहला नाम",
+    "lastName": "अंतिम नाम",
     "forgotPassword": "पासवर्ड भूल गए?",
     "rememberMe": "मुझे याद रखें",
-    "orContinueWith": "या इसके साथ जारी रखें"
+    "orContinueWith": "या इसके साथ जारी रखें",
+    "getStarted": "शुरू करें",
+    "welcomeBack": "वापसी पर स्वागत है",
+    "createAccount": "खाता बनाएं",
+    "loginDesc": "अपने खाते तक पहुंचने के लिए अपने क्रेडेंशियल्स दर्ज करें",
+    "signupDesc": "शुरू करने के लिए एक नया खाता बनाएं",
+    "processing": "प्रोसेसिंग...",
+    "alreadyHaveAccount": "पहले से ही एक खाता है?",
+    "noAccount": "कोई खाता नहीं है?",
+    "createOne": "एक बनाएं",
+    "loginSuccessTitle": "लॉगिन सफल",
+    "loginSuccessDesc": "वापसी पर स्वागत है!",
+    "signupSuccessTitle": "खाता बनाया गया",
+    "signupSuccessDesc": "आपका खाता सफलतापूर्वक बनाया गया है",
+    "loginErrorTitle": "लॉगिन असफल",
+    "signupErrorTitle": "साइनअप असफल",
+    "logoutSuccess": "सफलतापूर्वक लॉग आउट",
+    "logoutSuccessDesc": "आप साइन आउट हो गए हैं",
+    "logoutError": "लॉगआउट असफल"
   },
   "language": {
     "en": "अंग्रेजी",
@@ -29,7 +51,9 @@
     "forecast": "पूर्वानुमान",
     "sustainability": "स्थिरता",
     "feedback": "प्रतिक्रिया",
-    "settings": "सेटिंग्स"
+    "settings": "सेटिंग्स",
+    "profile": "प्रोफ़ाइल",
+    "logout": "लॉग आउट"
   },
   "dashboard": {
     "overview": "सुविधा अवलोकन",

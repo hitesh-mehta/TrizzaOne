@@ -2,16 +2,38 @@
 {
   "app": {
     "name": "TrizzaOne",
-    "tagline": "SmartOps Kommandozentrale"
+    "tagline": "SmartOps Kommandozentrale",
+    "welcomeTitle": "Willkommen bei TrizzaOne",
+    "welcomeDesc": "Ihre Smart Operations Kommandozentrale"
   },
   "auth": {
     "login": "Anmelden",
     "signup": "Registrieren",
-    "email": "E-mail",
+    "email": "E-Mail",
     "password": "Passwort",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
     "forgotPassword": "Passwort vergessen?",
     "rememberMe": "Angemeldet bleiben",
-    "orContinueWith": "Oder fortfahren mit"
+    "orContinueWith": "Oder fortfahren mit",
+    "getStarted": "Loslegen",
+    "welcomeBack": "Willkommen zurück",
+    "createAccount": "Konto erstellen",
+    "loginDesc": "Geben Sie Ihre Anmeldedaten ein, um auf Ihr Konto zuzugreifen",
+    "signupDesc": "Erstellen Sie ein neues Konto, um zu beginnen",
+    "processing": "Verarbeitung...",
+    "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+    "noAccount": "Kein Konto?",
+    "createOne": "Erstellen Sie eines",
+    "loginSuccessTitle": "Anmeldung erfolgreich",
+    "loginSuccessDesc": "Willkommen zurück!",
+    "signupSuccessTitle": "Konto erstellt",
+    "signupSuccessDesc": "Ihr Konto wurde erfolgreich erstellt",
+    "loginErrorTitle": "Anmeldung fehlgeschlagen",
+    "signupErrorTitle": "Registrierung fehlgeschlagen",
+    "logoutSuccess": "Erfolgreich abgemeldet",
+    "logoutSuccessDesc": "Sie wurden abgemeldet",
+    "logoutError": "Abmeldung fehlgeschlagen"
   },
   "language": {
     "en": "Englisch",
@@ -29,7 +51,9 @@
     "forecast": "Prognose",
     "sustainability": "Nachhaltigkeit",
     "feedback": "Feedback",
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "profile": "Profil",
+    "logout": "Abmelden"
   },
   "dashboard": {
     "overview": "Anlagenübersicht",
