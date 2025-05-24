@@ -1,6 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
-import * as THREE from 'three';
+import React from 'react';
 
 interface FoodModel3DProps {
   type: 'pizza' | 'burger' | 'plate' | 'donut';
@@ -9,230 +8,117 @@ interface FoodModel3DProps {
 }
 
 const FoodModel3D: React.FC<FoodModel3DProps> = ({ type, rotate = false, size = 100 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const modelRef = useRef<THREE.Mesh | null>(null);
+  const containerStyle = {
+    width: `${size}px`,
+    height: `${size}px`,
+    perspective: '1000px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  const modelStyle = {
+    transformStyle: 'preserve-3d' as const,
+    animation: rotate ? 'rotate360 4s linear infinite' : 'none',
+    width: '80%',
+    height: '80%',
+    position: 'relative' as const,
+  };
 
-    // Initialize scene
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
+  const renderPizza = () => (
+    <div className="relative w-full h-full">
+      {/* Pizza base */}
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-yellow-200 to-orange-300 shadow-2xl transform rotate-x-12">
+        <div className="absolute inset-2 rounded-full bg-gradient-to-br from-orange-200 to-red-300 opacity-80"></div>
+      </div>
+      {/* Pizza toppings */}
+      <div className="absolute top-1/4 left-1/3 w-3 h-3 rounded-full bg-red-500 shadow-lg transform translate-z-4"></div>
+      <div className="absolute top-1/2 right-1/4 w-2 h-2 rounded-full bg-green-600 shadow-lg transform translate-z-4"></div>
+      <div className="absolute bottom-1/3 left-1/2 w-4 h-4 rounded-full bg-yellow-400 shadow-lg transform translate-z-4"></div>
+      <div className="absolute top-1/3 right-1/3 w-2 h-2 rounded-full bg-red-600 shadow-lg transform translate-z-4"></div>
+    </div>
+  );
 
-    // Initialize camera
-    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-    camera.position.z = 5;
-    cameraRef.current = camera;
+  const renderBurger = () => (
+    <div className="relative w-full h-full flex flex-col items-center justify-center">
+      {/* Top bun */}
+      <div className="w-16 h-8 rounded-t-full bg-gradient-to-b from-orange-300 to-yellow-400 shadow-xl transform rotate-x-15 mb-1"></div>
+      {/* Lettuce */}
+      <div className="w-14 h-2 bg-green-400 rounded shadow-md transform rotate-x-10"></div>
+      {/* Cheese */}
+      <div className="w-15 h-1 bg-yellow-300 rounded shadow-md transform rotate-x-8"></div>
+      {/* Patty */}
+      <div className="w-14 h-3 bg-gradient-to-b from-amber-800 to-amber-900 rounded shadow-xl transform rotate-x-5"></div>
+      {/* Bottom bun */}
+      <div className="w-16 h-6 rounded-b-full bg-gradient-to-t from-orange-400 to-yellow-300 shadow-xl transform rotate-x-3 mt-1"></div>
+    </div>
+  );
 
-    // Initialize renderer
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
-      alpha: true 
-    });
-    renderer.setClearColor(0x000000, 0);
-    renderer.setSize(size, size);
-    containerRef.current.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
+  const renderDonut = () => (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Donut base */}
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-300 to-pink-400 shadow-2xl relative transform rotate-x-15">
+        {/* Donut hole */}
+        <div className="absolute inset-1/3 rounded-full bg-transparent border-8 border-white shadow-inner"></div>
+        {/* Sprinkles */}
+        <div className="absolute top-2 left-4 w-1 h-3 bg-red-500 rounded transform rotate-45"></div>
+        <div className="absolute top-4 right-3 w-1 h-3 bg-blue-500 rounded transform -rotate-30"></div>
+        <div className="absolute bottom-3 left-6 w-1 h-3 bg-green-500 rounded transform rotate-60"></div>
+        <div className="absolute bottom-4 right-5 w-1 h-3 bg-yellow-500 rounded transform -rotate-45"></div>
+        <div className="absolute top-6 left-8 w-1 h-3 bg-purple-500 rounded transform rotate-15"></div>
+      </div>
+    </div>
+  );
 
-    // Add lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
+  const renderPlate = () => (
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Plate */}
+      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 shadow-2xl relative transform rotate-x-20">
+        <div className="absolute inset-1 rounded-full border-2 border-gray-300 bg-gradient-to-br from-white to-gray-100"></div>
+        {/* Food items on plate */}
+        <div className="absolute top-6 left-8 w-4 h-3 bg-gradient-to-br from-amber-600 to-amber-800 rounded shadow-lg transform rotate-x-10"></div>
+        <div className="absolute top-8 right-6 w-3 h-3 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-lg transform translate-z-2"></div>
+        <div className="absolute bottom-6 left-6 w-3 h-4 bg-gradient-to-br from-orange-400 to-orange-600 rounded shadow-lg transform rotate-x-5"></div>
+      </div>
+    </div>
+  );
 
-    const pointLight = new THREE.PointLight(0xffffff, 1);
-    pointLight.position.set(5, 5, 5);
-    scene.add(pointLight);
-
-    // Create food model based on type
-    let geometry: THREE.BufferGeometry;
-    let material: THREE.Material;
-    
+  const renderFood = () => {
     switch (type) {
       case 'pizza':
-        geometry = new THREE.CylinderGeometry(2, 2, 0.2, 32);
-        material = new THREE.MeshStandardMaterial({ 
-          color: 0xE2B87C, 
-          roughness: 0.8,
-          metalness: 0.1
-        });
-        // Add pizza toppings
-        const toppingMaterial = new THREE.MeshStandardMaterial({ 
-          color: 0xD32F2F, 
-          roughness: 0.7 
-        });
-        for (let i = 0; i < 10; i++) {
-          const toppingGeometry = new THREE.SphereGeometry(0.2, 8, 8);
-          const topping = new THREE.Mesh(toppingGeometry, toppingMaterial);
-          const angle = (i / 10) * Math.PI * 2;
-          const radius = Math.random() * 1.2 + 0.3;
-          topping.position.set(
-            Math.cos(angle) * radius,
-            0.2,
-            Math.sin(angle) * radius
-          );
-          topping.scale.y = 0.2;
-          scene.add(topping);
-        }
-        break;
-      
+        return renderPizza();
       case 'burger':
-        // Bottom bun
-        const bottomBun = new THREE.Mesh(
-          new THREE.CylinderGeometry(1.5, 1.3, 0.4, 32),
-          new THREE.MeshStandardMaterial({ color: 0xE9B872, roughness: 0.8 })
-        );
-        scene.add(bottomBun);
-        
-        // Patty
-        const patty = new THREE.Mesh(
-          new THREE.CylinderGeometry(1.4, 1.4, 0.3, 32),
-          new THREE.MeshStandardMaterial({ color: 0x5D4037, roughness: 0.8 })
-        );
-        patty.position.y = 0.35;
-        scene.add(patty);
-        
-        // Cheese
-        const cheese = new THREE.Mesh(
-          new THREE.CylinderGeometry(1.45, 1.45, 0.1, 32),
-          new THREE.MeshStandardMaterial({ color: 0xFFC107, roughness: 0.6 })
-        );
-        cheese.position.y = 0.55;
-        scene.add(cheese);
-        
-        // Top bun
-        const topBun = new THREE.Mesh(
-          new THREE.SphereGeometry(1.5, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
-          new THREE.MeshStandardMaterial({ color: 0xE9B872, roughness: 0.8 })
-        );
-        topBun.position.y = 0.9;
-        scene.add(topBun);
-        break;
-      
+        return renderBurger();
       case 'donut':
-        geometry = new THREE.TorusGeometry(1, 0.5, 16, 32);
-        material = new THREE.MeshStandardMaterial({ 
-          color: 0xF48FB1, 
-          roughness: 0.7,
-          metalness: 0.1 
-        });
-        // Add sprinkles
-        const sprinkleColors = [0x4CAF50, 0x2196F3, 0xFFC107, 0x9C27B0, 0xFF5722];
-        for (let i = 0; i < 30; i++) {
-          const sprinkleGeometry = new THREE.BoxGeometry(0.05, 0.05, 0.2);
-          const sprinkleMaterial = new THREE.MeshStandardMaterial({
-            color: sprinkleColors[Math.floor(Math.random() * sprinkleColors.length)]
-          });
-          const sprinkle = new THREE.Mesh(sprinkleGeometry, sprinkleMaterial);
-          
-          const angle = Math.random() * Math.PI * 2;
-          const radius = 1;
-          const x = Math.cos(angle) * radius;
-          const z = Math.sin(angle) * radius;
-          
-          const radialAngle = Math.random() * Math.PI * 2;
-          const offsetX = Math.cos(radialAngle) * 0.5;
-          const offsetY = Math.sin(radialAngle) * 0.5;
-          
-          sprinkle.position.set(x + offsetX * 0.2, offsetY * 0.2, z + offsetX * 0.2);
-          sprinkle.rotation.set(
-            Math.random() * Math.PI,
-            Math.random() * Math.PI,
-            Math.random() * Math.PI
-          );
-          scene.add(sprinkle);
-        }
-        break;
-        
+        return renderDonut();
       case 'plate':
       default:
-        const plateGeometry = new THREE.CylinderGeometry(2, 2, 0.2, 32);
-        const plateMaterial = new THREE.MeshStandardMaterial({ 
-          color: 0xFAFAFA, 
-          roughness: 0.2,
-          metalness: 0.8 
-        });
-        const plate = new THREE.Mesh(plateGeometry, plateMaterial);
-        scene.add(plate);
-        
-        const rimGeometry = new THREE.TorusGeometry(2, 0.1, 16, 32);
-        const rimMaterial = new THREE.MeshStandardMaterial({ 
-          color: 0xE0E0E0,
-          roughness: 0.2,
-          metalness: 0.8 
-        });
-        const rim = new THREE.Mesh(rimGeometry, rimMaterial);
-        rim.rotation.x = Math.PI / 2;
-        rim.position.y = 0.1;
-        scene.add(rim);
-        
-        const food1 = new THREE.Mesh(
-          new THREE.BoxGeometry(0.8, 0.3, 0.8),
-          new THREE.MeshStandardMaterial({ color: 0x8D6E63 })
-        );
-        food1.position.set(0.5, 0.25, 0);
-        scene.add(food1);
-        
-        const food2 = new THREE.Mesh(
-          new THREE.SphereGeometry(0.3, 16, 16),
-          new THREE.MeshStandardMaterial({ color: 0x4CAF50 })
-        );
-        food2.position.set(-0.5, 0.3, 0.5);
-        scene.add(food2);
-        
-        const food3 = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.3, 0.3, 0.3, 16),
-          new THREE.MeshStandardMaterial({ color: 0xFF9800 })
-        );
-        food3.position.set(-0.3, 0.15, -0.7);
-        scene.add(food3);
-        break;
+        return renderPlate();
     }
-    
-    if (geometry && material && type !== 'burger') {
-      const mesh = new THREE.Mesh(geometry, material);
-      scene.add(mesh);
-      modelRef.current = mesh;
-    }
+  };
 
-    // Animation loop
-    const animate = () => {
-      requestAnimationFrame(animate);
-      
-      if (rotate) {
-        scene.rotation.y += 0.01;
-        
-        if (modelRef.current && ['donut', 'pizza'].includes(type)) {
-          modelRef.current.rotation.x += 0.005;
+  return (
+    <div style={containerStyle}>
+      <style jsx>{`
+        @keyframes rotate360 {
+          from { transform: rotateY(0deg) rotateX(15deg); }
+          to { transform: rotateY(360deg) rotateX(15deg); }
         }
-      }
-      
-      renderer.render(scene, camera);
-    };
-    
-    animate();
-    
-    const handleResize = () => {
-      if (!rendererRef.current || !cameraRef.current) return;
-      
-      rendererRef.current.setSize(size, size);
-      cameraRef.current.aspect = 1;
-      cameraRef.current.updateProjectionMatrix();
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (rendererRef.current && containerRef.current) {
-        containerRef.current.removeChild(rendererRef.current.domElement);
-        rendererRef.current.dispose();
-      }
-    };
-  }, [type, rotate, size]);
-  
-  return <div ref={containerRef} style={{ width: `${size}px`, height: `${size}px` }} />;
+        .rotate-x-3 { transform: rotateX(3deg); }
+        .rotate-x-5 { transform: rotateX(5deg); }
+        .rotate-x-8 { transform: rotateX(8deg); }
+        .rotate-x-10 { transform: rotateX(10deg); }
+        .rotate-x-12 { transform: rotateX(12deg); }
+        .rotate-x-15 { transform: rotateX(15deg); }
+        .rotate-x-20 { transform: rotateX(20deg); }
+        .translate-z-2 { transform: translateZ(2px); }
+        .translate-z-4 { transform: translateZ(4px); }
+      `}</style>
+      <div style={modelStyle}>
+        {renderFood()}
+      </div>
+    </div>
+  );
 };
 
 export default FoodModel3D;
