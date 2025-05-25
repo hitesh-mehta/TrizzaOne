@@ -37,7 +37,14 @@ export const useAnomalyDetection = () => {
         .limit(50);
 
       if (error) throw error;
-      setAnomalies(data || []);
+      
+      // Type cast the data to ensure input_data is properly typed
+      const typedData = (data || []).map(item => ({
+        ...item,
+        input_data: item.input_data as AnomalyDetection['input_data']
+      })) as AnomalyDetection[];
+      
+      setAnomalies(typedData);
     } catch (error) {
       console.error('Error fetching anomalies:', error);
     } finally {
@@ -90,7 +97,10 @@ export const useAnomalyDetection = () => {
         },
         (payload) => {
           console.log('New anomaly detected:', payload);
-          const newAnomaly = payload.new as AnomalyDetection;
+          const newAnomaly = {
+            ...payload.new,
+            input_data: payload.new.input_data as AnomalyDetection['input_data']
+          } as AnomalyDetection;
           
           setAnomalies(prev => [newAnomaly, ...prev.slice(0, 49)]);
           
