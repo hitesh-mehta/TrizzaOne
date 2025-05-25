@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -15,12 +16,12 @@ interface Message {
   timestamp: Date;
 }
 
-interface BototoProps {
+interface BototatoProps {
   isOpen: boolean;
   onToggle: () => void;
 }
 
-const Botato: React.FC<BototoProps> = ({ isOpen, onToggle }) => {
+const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([
@@ -54,14 +55,15 @@ const Botato: React.FC<BototoProps> = ({ isOpen, onToggle }) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentQuery = inputValue;
     setInputValue('');
     setIsLoading(true);
 
     try {
       // Check if user is asking for modifications
-      const modificationKeywords = ['update', 'create', 'delete', 'modify', 'insert', 'remove', 'add', 'change'];
+      const modificationKeywords = ['update', 'create', 'delete', 'modify', 'insert', 'remove', 'add', 'change', 'alter', 'drop'];
       const isModificationRequest = modificationKeywords.some(keyword => 
-        inputValue.toLowerCase().includes(keyword)
+        currentQuery.toLowerCase().includes(keyword)
       );
 
       if (isModificationRequest) {
@@ -75,26 +77,25 @@ const Botato: React.FC<BototoProps> = ({ isOpen, onToggle }) => {
         return;
       }
 
-      const response = await fetch('/api/botato-query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      console.log('Sending query to Botato:', currentQuery);
+
+      // Call the edge function using Supabase client
+      const { data, error } = await supabase.functions.invoke('botato-query', {
+        body: {
+          query: currentQuery,
         },
-        body: JSON.stringify({
-          query: inputValue,
-        }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response');
+      console.log('Botato response:', data, error);
+
+      if (error) {
+        throw new Error(error.message || 'Failed to get response from Botato');
       }
 
-      const data = await response.json();
-      
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: data.response || t('chatbot.error'),
+        content: data?.response || t('chatbot.error'),
         timestamp: new Date()
       };
 
@@ -173,7 +174,7 @@ const Botato: React.FC<BototoProps> = ({ isOpen, onToggle }) => {
                   <div className="flex items-start gap-2">
                     {message.type === 'bot' && <Bot className="h-4 w-4 mt-0.5 text-mintGreen" />}
                     {message.type === 'user' && <User className="h-4 w-4 mt-0.5" />}
-                    <p className="text-sm">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
               </div>
@@ -183,7 +184,11 @@ const Botato: React.FC<BototoProps> = ({ isOpen, onToggle }) => {
                 <div className="bg-muted text-foreground max-w-[80%] rounded-lg p-3">
                   <div className="flex items-center gap-2">
                     <Bot className="h-4 w-4 text-mintGreen" />
-                    <p className="text-sm">{t('chatbot.thinking')}</p>
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-mintGreen rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-mintGreen rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-mintGreen rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
                   </div>
                 </div>
               </div>
