@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -57,7 +58,7 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
       title: t('tour.chatbot.title'),
       description: t('tour.chatbot.description'),
       target: '[data-tour="chatbot"]',
-      position: 'left'
+      position: 'top'
     },
     {
       id: 'complete',
@@ -112,7 +113,6 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
       };
     }
 
-    // For targeted steps, we'll position relative to the target
     const target = document.querySelector(step.target);
     if (!target) {
       return {
@@ -125,35 +125,71 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
     }
 
     const rect = target.getBoundingClientRect();
+    const cardWidth = 320;
+    const cardHeight = 200;
+    
     let top = rect.top;
     let left = rect.left;
+    let transform = '';
 
     switch (step.position) {
       case 'right':
         left = rect.right + 20;
-        top = rect.top;
+        top = rect.top + (rect.height / 2);
+        transform = 'translateY(-50%)';
         break;
       case 'left':
-        left = rect.left - 320;
-        top = rect.top;
+        left = rect.left - cardWidth - 20;
+        top = rect.top + (rect.height / 2);
+        transform = 'translateY(-50%)';
         break;
       case 'top':
-        left = rect.left;
-        top = rect.top - 200;
+        left = rect.left + (rect.width / 2);
+        top = rect.top - cardHeight - 20;
+        transform = 'translateX(-50%)';
         break;
       case 'bottom':
-        left = rect.left;
+        left = rect.left + (rect.width / 2);
         top = rect.bottom + 20;
+        transform = 'translateX(-50%)';
         break;
     }
+
+    // Ensure the card stays within viewport bounds
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    if (left < 20) left = 20;
+    if (left + cardWidth > viewportWidth - 20) left = viewportWidth - cardWidth - 20;
+    if (top < 20) top = 20;
+    if (top + cardHeight > viewportHeight - 20) top = viewportHeight - cardHeight - 20;
 
     return {
       position: 'fixed' as const,
       top: `${top}px`,
       left: `${left}px`,
+      transform,
       zIndex: 1000
     };
   };
+
+  // Add highlight effect to target element
+  useEffect(() => {
+    if (!isStarted) return;
+    
+    const step = tourSteps[currentStep];
+    if (!step.target) return;
+
+    const target = document.querySelector(step.target);
+    if (!target) return;
+
+    // Add highlight class
+    target.classList.add('tour-highlight');
+    
+    return () => {
+      target.classList.remove('tour-highlight');
+    };
+  }, [currentStep, isStarted, tourSteps]);
 
   if (!isOpen) return null;
 
@@ -161,6 +197,17 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
     <>
       {/* Overlay */}
       <div className="fixed inset-0 bg-black/50 z-50" />
+      
+      {/* Highlight styles */}
+      <style>{`
+        .tour-highlight {
+          position: relative;
+          z-index: 60;
+          box-shadow: 0 0 0 4px rgba(76, 204, 163, 0.6), 0 0 20px rgba(76, 204, 163, 0.4);
+          border-radius: 8px;
+          transition: box-shadow 0.3s ease;
+        }
+      `}</style>
       
       {/* Tour Card */}
       <Card 

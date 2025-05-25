@@ -4,27 +4,17 @@ import { useState, useEffect } from 'react';
 export const useTour = () => {
   const [showTour, setShowTour] = useState(false);
 
+  // Remove automatic tour triggering on setup complete
   useEffect(() => {
-    // Check if tour has been completed or skipped
-    const tourCompleted = localStorage.getItem('trizzaone_tour_completed');
-    const tourSkipped = localStorage.getItem('trizzaone_tour_skipped');
-    const setupComplete = localStorage.getItem('trizzaone_setup_complete');
-    
-    console.log('Tour check:', { tourCompleted, tourSkipped, setupComplete });
-    
-    // Show tour only if setup is complete and tour hasn't been completed or skipped
-    if (setupComplete === 'true' && !tourCompleted && !tourSkipped) {
-      // Small delay to ensure the UI is fully loaded
-      setTimeout(() => {
-        console.log('Starting tour...');
-        setShowTour(true);
-      }, 2000); // Increased delay to 2 seconds
-    }
+    console.log('Tour hook initialized - no automatic tour');
   }, []);
 
   const startTour = () => {
     console.log('Manual tour start');
     setShowTour(true);
+    // Reset tour completion status when manually starting
+    localStorage.removeItem('trizzaone_tour_completed');
+    localStorage.removeItem('trizzaone_tour_skipped');
   };
 
   const closeTour = () => {

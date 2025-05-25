@@ -154,6 +154,38 @@
     "noModificationWarning": "I can only fetch data. For modifications, please update the database manually.",
     "welcome": "Hi! I'm Botato. Ask me anything about your restaurant data!"
   },
+  "tour": {
+    "welcome": {
+      "title": "Welcome to TrizzaOne! 🎉",
+      "description": "Let's take a quick tour of your new Smart Operations Command Center."
+    },
+    "dashboard": {
+      "title": "Dashboard 📊",
+      "description": "Here you'll find an overview of your facilities, IoT data, and key statistics."
+    },
+    "predictions": {
+      "title": "AI Predictions 🔮",
+      "description": "Use AI-powered predictions for restaurant dishes and quantity planning."
+    },
+    "sustainability": {
+      "title": "Sustainability 🌱",
+      "description": "Track your sustainability goals and environmental impact."
+    },
+    "chatbot": {
+      "title": "Botato Assistant 🤖",
+      "description": "Your AI assistant helps you with data questions and analysis."
+    },
+    "complete": {
+      "title": "Tour Complete! ✨",
+      "description": "You're all set! Explore TrizzaOne and optimize your operations."
+    },
+    "startTour": "Start Tour",
+    "skip": "Skip",
+    "next": "Next",
+    "previous": "Previous",
+    "finish": "Finish",
+    "needTour": "Need a Tour?"
+  },
   "buttons": {
     "save": "Save",
     "cancel": "Cancel",

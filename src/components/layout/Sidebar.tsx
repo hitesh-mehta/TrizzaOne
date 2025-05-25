@@ -32,11 +32,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       id: 'dashboard',
       label: t('nav.dashboard'),
       icon: LayoutDashboard,
+      tourId: 'dashboard'
     },
     {
       id: 'predictions',
       label: t('predictions.title'),
       icon: BarChart3,
+      tourId: 'predictions'
     },
     {
       id: 'order-history',
@@ -47,6 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       id: 'sustainability',
       label: t('nav.sustainability'),
       icon: Leaf,
+      tourId: 'sustainability'
     },
     {
       id: 'feedback',
@@ -94,6 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <li key={item.id}>
                 <button
                   onClick={() => setActiveItem(item.id)}
+                  data-tour={item.tourId}
                   className={cn(
                     "w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left",
                     isActive 

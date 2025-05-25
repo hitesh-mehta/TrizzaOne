@@ -15,6 +15,7 @@ import Feedback from '@/components/dashboard/Feedback';
 import Footer from '@/components/layout/Footer';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import FoodModel3D from '@/components/3d/FoodModel3D';
 import Predictions from '@/components/dashboard/Predictions';
 import OrderHistory from '@/components/dashboard/OrderHistory';
@@ -22,6 +23,7 @@ import ProfileSettings from '@/components/settings/ProfileSettings';
 import Botato from '@/components/chatbot/Botato';
 import WelcomeTour from '@/components/tour/WelcomeTour';
 import { useTour } from '@/hooks/useTour';
+import { HelpCircle } from 'lucide-react';
 
 // Import language configuration
 import '@/i18n';
@@ -30,7 +32,7 @@ const Index = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { showTour, closeTour, completeTour } = useTour();
+  const { showTour, startTour, closeTour, completeTour } = useTour();
   const [showSplash, setShowSplash] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -194,7 +196,7 @@ const Index = () => {
             
             <div className="flex-1 overflow-auto bg-background">
               <div className="relative min-h-full flex flex-col">
-                {/* 3D animation background - now with lower z-index */}
+                {/* 3D animation background */}
                 <div className="absolute right-10 top-6 opacity-10 -z-20 pointer-events-none">
                   <FoodModel3D 
                     type={activeItem === 'dashboard' ? 'plate' : 
@@ -204,6 +206,20 @@ const Index = () => {
                     rotate={true}
                   />
                 </div>
+                
+                {/* Tour Button */}
+                <div className="fixed bottom-6 left-6 z-50">
+                  <Button
+                    onClick={startTour}
+                    variant="outline"
+                    size="sm"
+                    className="bg-background/80 backdrop-blur-sm border-mintGreen/50 hover:bg-mintGreen/10"
+                  >
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    {t('tour.needTour')}
+                  </Button>
+                </div>
+                
                 <div className="flex-1 relative z-10">
                   {renderActiveContent()}
                 </div>
@@ -213,10 +229,12 @@ const Index = () => {
           </div>
           
           {/* Botato Chatbot */}
-          <Botato 
-            isOpen={chatbotOpen} 
-            onToggle={() => setChatbotOpen(!chatbotOpen)} 
-          />
+          <div data-tour="chatbot">
+            <Botato 
+              isOpen={chatbotOpen} 
+              onToggle={() => setChatbotOpen(!chatbotOpen)} 
+            />
+          </div>
           
           {/* Welcome Tour */}
           <WelcomeTour 
