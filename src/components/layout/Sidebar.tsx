@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'order-history',
-      label: t('orderHistory.title'),
+      label: t('orderHistory'),
       icon: History,
     },
     {
