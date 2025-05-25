@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -12,6 +11,7 @@ import Navbar from '@/components/layout/Navbar';
 import Dashboard from '@/components/dashboard/Dashboard';
 import Sustainability from '@/components/dashboard/Sustainability';
 import Feedback from '@/components/dashboard/Feedback';
+import Footer from '@/components/layout/Footer';
 import { useToast } from "@/components/ui/use-toast";
 import FoodModel3D from '@/components/3d/FoodModel3D';
 import Predictions from '@/components/dashboard/Predictions';
@@ -113,35 +113,38 @@ const Index = () => {
       )}
       
       {!showSplash && !session && (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background via-purple-50/30 to-mintGreen/10 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,107,107,0.1),transparent_50%)]"></div>
-          <div className="absolute -z-10 top-0 left-0 w-full h-full">
-            <div className="absolute top-10 right-40 opacity-60 scale-75 sm:scale-100 animate-float">
-              <FoodModel3D type="burger" rotate={true} size={150} />
+        <div className="min-h-screen flex flex-col">
+          <div className="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-background via-purple-50/30 to-mintGreen/10 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,107,107,0.1),transparent_50%)]"></div>
+            <div className="absolute -z-10 top-0 left-0 w-full h-full pointer-events-none">
+              <div className="absolute top-10 right-40 opacity-60 scale-75 sm:scale-100 animate-float">
+                <FoodModel3D type="burger" rotate={true} size={150} />
+              </div>
+              <div className="absolute bottom-20 left-10 opacity-60 scale-75 sm:scale-100 animate-bounce-slow">
+                <FoodModel3D type="donut" rotate={true} size={130} />
+              </div>
+              <div className="absolute top-1/2 left-1/4 opacity-40 scale-50 animate-pulse">
+                <FoodModel3D type="pizza" rotate={true} size={100} />
+              </div>
             </div>
-            <div className="absolute bottom-20 left-10 opacity-60 scale-75 sm:scale-100 animate-bounce-slow">
-              <FoodModel3D type="donut" rotate={true} size={130} />
-            </div>
-            <div className="absolute top-1/2 left-1/4 opacity-40 scale-50 animate-pulse">
-              <FoodModel3D type="pizza" rotate={true} size={100} />
+            
+            <div className="text-center max-w-md mx-auto glass-card p-8 rounded-xl backdrop-blur-md bg-background/80 border border-mintGreen/30 shadow-2xl transform hover:scale-105 transition-all duration-300 relative z-10">
+              <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-6 shadow-lg animate-pulse">
+                <span className="font-bold text-3xl text-navy">T1</span>
+              </div>
+              <h1 className="text-5xl font-bold mb-4 text-navy animate-fade-in">
+                {t('app.welcomeTitle')}
+              </h1>
+              <p className="mb-8 text-lg text-navy/80 animate-fade-in delay-100">{t('app.welcomeDesc')}</p>
+              <button 
+                onClick={() => navigate('/auth')}
+                className="px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-navy font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-fade-in delay-200"
+              >
+                {t('auth.getStarted')} ✨
+              </button>
             </div>
           </div>
-          
-          <div className="text-center max-w-md mx-auto glass-card p-8 rounded-xl backdrop-blur-md bg-background/70 border border-mintGreen/30 shadow-2xl transform hover:scale-105 transition-all duration-300">
-            <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-6 shadow-lg animate-pulse">
-              <span className="font-bold text-3xl text-navy">T1</span>
-            </div>
-            <h1 className="text-5xl font-bold mb-4 text-gradient bg-gradient-to-r from-navy via-mintGreen to-coral bg-clip-text text-transparent animate-fade-in">
-              {t('app.welcomeTitle')}
-            </h1>
-            <p className="mb-8 text-lg text-foreground/80 animate-fade-in delay-100">{t('app.welcomeDesc')}</p>
-            <button 
-              onClick={() => navigate('/auth')}
-              className="px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-navy font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-fade-in delay-200"
-            >
-              {t('auth.getStarted')} ✨
-            </button>
-          </div>
+          <Footer />
         </div>
       )}
       
@@ -162,8 +165,8 @@ const Index = () => {
             <Navbar onLogout={handleLogout} />
             
             <div className="flex-1 overflow-auto">
-              <div className="relative">
-                <div className="absolute right-10 top-6 opacity-10 z-0">
+              <div className="relative min-h-full flex flex-col">
+                <div className="absolute right-10 top-6 opacity-10 -z-10 pointer-events-none">
                   <FoodModel3D 
                     type={activeItem === 'dashboard' ? 'plate' : 
                           activeItem === 'sustainability' ? 'donut' : 'burger'}
@@ -171,7 +174,10 @@ const Index = () => {
                     rotate={true}
                   />
                 </div>
-                {renderActiveContent()}
+                <div className="flex-1 relative z-10">
+                  {renderActiveContent()}
+                </div>
+                <Footer />
               </div>
             </div>
           </div>
