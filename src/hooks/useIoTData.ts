@@ -156,10 +156,10 @@ export const useIoTData = () => {
 
   // Set up data generation interval
   useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval> | undefined;
+    let intervalId: number | undefined;
 
     if (isRealtime && data.length > 0) {
-      intervalId = setInterval(() => {
+      intervalId = window.setInterval(() => {
         const lastRecord = data[0];
         generateNewDataPoint(lastRecord);
       }, interval * 1000);
@@ -167,7 +167,7 @@ export const useIoTData = () => {
 
     return () => {
       if (intervalId !== undefined) {
-        clearInterval(intervalId);
+        window.clearInterval(intervalId);
       }
     };
   }, [isRealtime, interval, data, generateNewDataPoint]);
