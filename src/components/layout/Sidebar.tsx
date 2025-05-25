@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, 
-  TrendingUp, 
   Leaf, 
   MessageSquare,
   ChevronLeft,
@@ -34,13 +33,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: LayoutDashboard,
     },
     {
-      id: 'forecast',
-      label: t('nav.forecast'),
-      icon: TrendingUp,
-    },
-    {
       id: 'predictions',
-      label: 'AI Predictions',
+      label: t('predictions.title', 'AI Predictions'),
       icon: BarChart3,
     },
     {

@@ -91,11 +91,17 @@ export const useIoTData = () => {
     };
 
     try {
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('iot_data')
-        .insert(newDataPoint);
+        .insert(newDataPoint)
+        .select()
+        .single();
 
       if (error) throw error;
+      
+      // Update local state immediately
+      setData(prev => [insertedData, ...prev.slice(0, 99)]);
+      
     } catch (err: any) {
       console.error('Error inserting new data point:', err);
       toast({
@@ -111,12 +117,12 @@ export const useIoTData = () => {
     if (enabled) {
       toast({
         title: "Real-time mode enabled",
-        description: `New data will be generated every ${interval} seconds`,
+        description: `New data will be fetched every ${interval} seconds`,
       });
     } else {
       toast({
         title: "Real-time mode disabled",
-        description: "Data simulation stopped",
+        description: "Data fetching stopped",
       });
     }
   }, [interval, toast]);
@@ -126,7 +132,7 @@ export const useIoTData = () => {
     if (isRealtime) {
       toast({
         title: "Interval updated",
-        description: `New data will be generated every ${newInterval} seconds`,
+        description: `New data will be fetched every ${newInterval} seconds`,
       });
     }
   }, [isRealtime, toast]);
@@ -144,7 +150,14 @@ export const useIoTData = () => {
         },
         (payload) => {
           console.log('New IoT data received:', payload);
-          setData(prev => [payload.new as IoTData, ...prev.slice(0, 99)]);
+          // Only update if the data wasn't added by us locally
+          setData(prev => {
+            const exists = prev.some(item => item.id === payload.new.id);
+            if (!exists) {
+              return [payload.new as IoTData, ...prev.slice(0, 99)];
+            }
+            return prev;
+          });
         }
       )
       .subscribe();

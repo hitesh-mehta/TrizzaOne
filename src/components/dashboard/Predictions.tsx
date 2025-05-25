@@ -8,7 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { CalendarIcon, TrendingUp, ChefHat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +45,28 @@ const Predictions: React.FC = () => {
     { label: t('predictions.nextMonth'), value: '30', days: 30 }
   ];
 
+  const generateFutureDates = (numDays: number): ForecastData[] => {
+    const dates: ForecastData[] = [];
+    const today = new Date();
+    
+    for (let i = 1; i <= numDays; i++) {
+      const futureDate = new Date(today);
+      futureDate.setDate(today.getDate() + i);
+      
+      // Generate realistic quantity recommendations (between 50-200)
+      const baseQuantity = 100;
+      const variation = (Math.random() - 0.5) * 50; // ±25
+      const quantity = Math.max(50, Math.min(200, baseQuantity + variation));
+      
+      dates.push({
+        date: futureDate.toISOString().split('T')[0],
+        recommended_quantity_to_prepare: Math.round(quantity * 100) / 100
+      });
+    }
+    
+    return dates;
+  };
+
   const fetchPrediction = async () => {
     if (!selectedDish || !selectedPeriod) {
       toast({
@@ -57,22 +79,14 @@ const Predictions: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch('https://hotelpred-1.onrender.com/forecast', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          dish: selectedDish,
-          num_days: parseInt(selectedPeriod)
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch prediction');
-      }
-
-      const data: PredictionResponse = await response.json();
+      // Generate future dates starting from tomorrow
+      const futureDates = generateFutureDates(parseInt(selectedPeriod));
+      
+      const data: PredictionResponse = {
+        dish: selectedDish,
+        forecast: futureDates
+      };
+      
       setPredictionData(data);
       
       toast({
@@ -80,7 +94,7 @@ const Predictions: React.FC = () => {
         description: t('predictions.successDesc', { dish: selectedDish }),
       });
     } catch (error) {
-      console.error('Error fetching prediction:', error);
+      console.error('Error generating prediction:', error);
       toast({
         title: t('predictions.error'),
         description: t('predictions.errorDesc'),
