@@ -305,7 +305,7 @@ const OrderHistory = () => {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">{t('orderHistory', 'Order History & Menu Management')}</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t('orderHistory.title', 'Order History')}</h1>
       </div>
 
       {/* Today's Stats */}
