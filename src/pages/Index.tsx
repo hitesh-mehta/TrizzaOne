@@ -103,7 +103,6 @@ const Index = () => {
       case 'feedback':
         return <Feedback />;
       case 'profile':
-      case 'settings':
         return <ProfileSettings />;
       default:
         return <Dashboard />;

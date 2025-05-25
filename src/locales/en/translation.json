@@ -4,7 +4,8 @@
     "name": "TrizzaOne",
     "tagline": "SmartOps Command Center",
     "welcomeTitle": "Welcome to TrizzaOne",
-    "welcomeDesc": "Your Smart Operations Command Center"
+    "welcomeDesc": "Your Smart Operations Command Center",
+    "dashboard": "Dashboard"
   },
   "auth": {
     "login": "Login",
@@ -33,7 +34,8 @@
     "signupErrorTitle": "Signup Failed",
     "logoutSuccess": "Logged out successfully",
     "logoutSuccessDesc": "You have been signed out",
-    "logoutError": "Logout failed"
+    "logoutError": "Logout failed",
+    "logout": "Logout"
   },
   "language": {
     "en": "English",
@@ -51,9 +53,7 @@
     "forecast": "Forecast",
     "sustainability": "Sustainability",
     "feedback": "Feedback",
-    "settings": "Settings",
-    "profile": "Profile",
-    "logout": "Logout"
+    "profile": "Profile"
   },
   "dashboard": {
     "overview": "Facility Overview",

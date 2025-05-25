@@ -4,7 +4,8 @@
     "name": "TrizzaOne",
     "tagline": "SmartOps Kommandozentrale",
     "welcomeTitle": "Willkommen bei TrizzaOne",
-    "welcomeDesc": "Ihre Smart Operations Kommandozentrale"
+    "welcomeDesc": "Ihre Smart Operations Kommandozentrale",
+    "dashboard": "Dashboard"
   },
   "auth": {
     "login": "Anmelden",
@@ -33,7 +34,8 @@
     "signupErrorTitle": "Registrierung fehlgeschlagen",
     "logoutSuccess": "Erfolgreich abgemeldet",
     "logoutSuccessDesc": "Sie wurden abgemeldet",
-    "logoutError": "Abmeldung fehlgeschlagen"
+    "logoutError": "Abmeldung fehlgeschlagen",
+    "logout": "Abmelden"
   },
   "language": {
     "en": "Englisch",
@@ -51,9 +53,7 @@
     "forecast": "Prognose",
     "sustainability": "Nachhaltigkeit",
     "feedback": "Feedback",
-    "settings": "Einstellungen",
-    "profile": "Profil",
-    "logout": "Abmelden"
+    "profile": "Profil"
   },
   "dashboard": {
     "overview": "Anlagenübersicht",

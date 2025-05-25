@@ -4,7 +4,8 @@
     "name": "TrizzaOne",
     "tagline": "Centre de Commande SmartOps",
     "welcomeTitle": "Bienvenue dans TrizzaOne",
-    "welcomeDesc": "Votre Centre de Commande d'Opérations Intelligentes"
+    "welcomeDesc": "Votre Centre de Commande d'Opérations Intelligentes",
+    "dashboard": "Tableau de bord"
   },
   "auth": {
     "login": "Connexion",
@@ -33,7 +34,8 @@
     "signupErrorTitle": "Échec de l'inscription",
     "logoutSuccess": "Déconnexion réussie",
     "logoutSuccessDesc": "Vous avez été déconnecté",
-    "logoutError": "Échec de la déconnexion"
+    "logoutError": "Échec de la déconnexion",
+    "logout": "Déconnexion"
   },
   "language": {
     "en": "Anglais",
@@ -51,9 +53,7 @@
     "forecast": "Prévisions",
     "sustainability": "Durabilité",
     "feedback": "Commentaires",
-    "settings": "Paramètres",
-    "profile": "Profil",
-    "logout": "Déconnexion"
+    "profile": "Profil"
   },
   "dashboard": {
     "overview": "Aperçu des installations",

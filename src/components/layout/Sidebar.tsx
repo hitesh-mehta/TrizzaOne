@@ -35,12 +35,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'predictions',
-      label: t('predictions.title', 'AI Predictions'),
+      label: t('predictions.title'),
       icon: BarChart3,
     },
     {
       id: 'order-history',
-      label: 'Order History',
+      label: t('orderHistory'),
       icon: History,
     },
     {

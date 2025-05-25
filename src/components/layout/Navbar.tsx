@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bell, Settings, LogOut, User } from 'lucide-react';
+import { Bell, LogOut, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -83,12 +83,6 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
     }
   };
 
-  const handleSettingsClick = () => {
-    if (onNavigate) {
-      onNavigate('settings');
-    }
-  };
-
   return (
     <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
@@ -147,16 +141,12 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer" onClick={handleProfileClick}>
                 <User className="mr-2 h-4 w-4" />
-                <span>{t('nav.profile', 'Profile')}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={handleSettingsClick}>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>{t('nav.settings', 'Settings')}</span>
+                <span>{t('nav.profile')}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer text-red-600" onClick={onLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>{t('auth.logout', 'Logout')}</span>
+                <span>{t('auth.logout')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
