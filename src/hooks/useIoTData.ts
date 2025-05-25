@@ -62,14 +62,14 @@ export const useIoTData = () => {
     const co2_level = Math.max(300, Math.min(1000, lastRecord.co2_level + (Math.random() - 0.5) * lastRecord.co2_level * 0.1)); // ±5%
     const light_level = Math.max(0, Math.min(2000, lastRecord.light_level + (Math.random() - 0.5) * lastRecord.light_level * 0.3)); // ±15%
     const occupancy_count = Math.max(0, Math.min(50, Math.round(lastRecord.occupancy_count + (Math.random() - 0.5) * lastRecord.occupancy_count * 0.5))); // ±25%
-    const motion_detected = occupancy_count === 0 ? 'no' : (Math.random() < 0.99 ? 'yes' : 'no'); // 99% yes if occupancy > 0
-    const power_status = Math.random() < 0.9 ? 'on' : 'off'; // 90% on
+    const motion_detected = occupancy_count === 0 ? 'no' as const : (Math.random() < 0.99 ? 'yes' as const : 'no' as const); // 99% yes if occupancy > 0
+    const power_status = Math.random() < 0.9 ? 'on' as const : 'off' as const; // 90% on
     const energy_consumed_kwh = Math.max(0, lastRecord.energy_consumed_kwh + (Math.random() - 0.5) * lastRecord.energy_consumed_kwh * 0.2); // ±10%
     const battery_backup_level = Math.max(0, Math.min(100, lastRecord.battery_backup_level + (Math.random() - 0.5) * lastRecord.battery_backup_level * 0.2)); // ±10%
     const cleaning_status = cleaningStatuses[Math.floor(Math.random() * cleaningStatuses.length)];
-    const air_purifier_status = Math.random() < 0.8 ? 'on' : 'off'; // 80% on
-    const fire_alarm_triggered = Math.random() < 0.01 ? 'yes' : 'no'; // 99% no
-    const gas_leak_detected = Math.random() < 0.01 ? 'yes' : 'no'; // 99% no
+    const air_purifier_status = Math.random() < 0.8 ? 'on' as const : 'off' as const; // 80% on
+    const fire_alarm_triggered = Math.random() < 0.01 ? 'yes' as const : 'no' as const; // 99% no
+    const gas_leak_detected = Math.random() < 0.01 ? 'yes' as const : 'no' as const; // 99% no
 
     const newDataPoint = {
       zone: zones[Math.floor(Math.random() * zones.length)],
@@ -93,7 +93,7 @@ export const useIoTData = () => {
     try {
       const { error } = await supabase
         .from('iot_data')
-        .insert([newDataPoint]);
+        .insert(newDataPoint);
 
       if (error) throw error;
     } catch (err: any) {
@@ -156,7 +156,7 @@ export const useIoTData = () => {
 
   // Set up data generation interval
   useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval>;
+    let intervalId: ReturnType<typeof setInterval> | undefined;
 
     if (isRealtime && data.length > 0) {
       intervalId = setInterval(() => {
@@ -166,7 +166,7 @@ export const useIoTData = () => {
     }
 
     return () => {
-      if (intervalId) {
+      if (intervalId !== undefined) {
         clearInterval(intervalId);
       }
     };
