@@ -18,12 +18,14 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ isInNavbar = false 
     { code: 'fr', name: 'Français' },
   ];
 
-  // Set default language to English if no language is set
+  // Set default language to English if no language is set and ensure proper initialization
   useEffect(() => {
     const savedLanguage = localStorage.getItem('trizzaone_language');
-    if (!savedLanguage) {
+    if (!savedLanguage || !languages.find(lang => lang.code === savedLanguage)) {
       i18n.changeLanguage('en');
       localStorage.setItem('trizzaone_language', 'en');
+    } else {
+      i18n.changeLanguage(savedLanguage);
     }
   }, [i18n]);
 
@@ -38,7 +40,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ isInNavbar = false 
   };
 
   return isInNavbar ? (
-    <Select value={i18n.language} onValueChange={handleLanguageChange}>
+    <Select value={i18n.language || 'en'} onValueChange={handleLanguageChange}>
       <SelectTrigger className="w-10 h-10 p-0 justify-center bg-transparent border-none">
         <Globe className="h-5 w-5" />
       </SelectTrigger>
@@ -53,7 +55,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ isInNavbar = false 
   ) : (
     <div className="w-full max-w-xs">
       <p className="text-sm font-medium mb-2">{t('language.select')}</p>
-      <Select value={i18n.language} onValueChange={handleLanguageChange}>
+      <Select value={i18n.language || 'en'} onValueChange={handleLanguageChange}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder={getCurrentLanguageName()} />
         </SelectTrigger>
