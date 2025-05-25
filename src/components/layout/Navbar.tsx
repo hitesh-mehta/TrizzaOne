@@ -20,9 +20,10 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface NavbarProps {
   onLogout: () => void;
+  onNavigate?: (item: string) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
+const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
   const { t } = useTranslation();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
@@ -74,6 +75,18 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
            user?.user_metadata?.name || 
            user?.email?.split('@')[0] || 
            'User';
+  };
+
+  const handleProfileClick = () => {
+    if (onNavigate) {
+      onNavigate('profile');
+    }
+  };
+
+  const handleSettingsClick = () => {
+    if (onNavigate) {
+      onNavigate('settings');
+    }
   };
 
   return (
@@ -132,11 +145,11 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer" onClick={handleProfileClick}>
                 <User className="mr-2 h-4 w-4" />
                 <span>{t('nav.profile', 'Profile')}</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
+              <DropdownMenuItem className="cursor-pointer" onClick={handleSettingsClick}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>{t('nav.settings', 'Settings')}</span>
               </DropdownMenuItem>

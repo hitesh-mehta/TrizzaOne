@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -14,9 +13,11 @@ import Sustainability from '@/components/dashboard/Sustainability';
 import Feedback from '@/components/dashboard/Feedback';
 import Footer from '@/components/layout/Footer';
 import { useToast } from "@/components/ui/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
 import FoodModel3D from '@/components/3d/FoodModel3D';
 import Predictions from '@/components/dashboard/Predictions';
 import OrderHistory from '@/components/dashboard/OrderHistory';
+import ProfileSettings from '@/components/settings/ProfileSettings';
 
 // Import language configuration
 import '@/i18n';
@@ -82,6 +83,11 @@ const Index = () => {
     setSetupComplete(true);
     localStorage.setItem('trizzaone_setup_complete', 'true');
   };
+
+  // Handle navigation from navbar
+  const handleNavbarNavigation = (item: string) => {
+    setActiveItem(item);
+  };
   
   // Render active content based on selected sidebar item
   const renderActiveContent = () => {
@@ -96,6 +102,9 @@ const Index = () => {
         return <Sustainability />;
       case 'feedback':
         return <Feedback />;
+      case 'profile':
+      case 'settings':
+        return <ProfileSettings />;
       default:
         return <Dashboard />;
     }
@@ -104,7 +113,7 @@ const Index = () => {
   // If still loading auth state, show a simple spinner
   if (isLoading && !showSplash) {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-12 w-12 rounded-full border-4 border-t-transparent border-mintGreen animate-spin"></div>
       </div>
     );
@@ -117,36 +126,46 @@ const Index = () => {
       )}
       
       {!showSplash && !session && (
-        <div className="min-h-screen flex flex-col">
-          <div className="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-background via-purple-50/30 to-mintGreen/10 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,107,107,0.1),transparent_50%)]"></div>
-            <div className="absolute -z-10 top-0 left-0 w-full h-full pointer-events-none">
-              <div className="absolute top-10 right-40 opacity-60 scale-75 sm:scale-100 animate-float -z-10">
-                <FoodModel3D type="burger" rotate={true} size={150} />
+        <div className="min-h-screen flex flex-col bg-background">
+          <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 bg-gradient-to-br from-mintGreen/5 via-background to-coral/5"></div>
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+              <div className="absolute top-20 right-32 opacity-30 scale-75 animate-float -z-10">
+                <FoodModel3D type="burger" rotate={true} size={120} />
               </div>
-              <div className="absolute bottom-20 left-10 opacity-60 scale-75 sm:scale-100 animate-bounce-slow -z-10">
-                <FoodModel3D type="donut" rotate={true} size={130} />
+              <div className="absolute bottom-32 left-16 opacity-30 scale-75 animate-bounce-slow -z-10">
+                <FoodModel3D type="donut" rotate={true} size={100} />
               </div>
-              <div className="absolute top-1/2 left-1/4 opacity-40 scale-50 animate-pulse -z-10">
-                <FoodModel3D type="pizza" rotate={true} size={100} />
+              <div className="absolute top-1/2 left-1/4 opacity-20 scale-50 animate-pulse -z-10">
+                <FoodModel3D type="pizza" rotate={true} size={80} />
               </div>
             </div>
             
-            <div className="text-center max-w-md mx-auto glass-card p-8 rounded-xl backdrop-blur-md bg-background/90 border border-mintGreen/30 shadow-2xl transform hover:scale-105 transition-all duration-300 relative z-10">
-              <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-6 shadow-lg animate-pulse">
-                <span className="font-bold text-3xl text-white">T1</span>
-              </div>
-              <h1 className="text-5xl font-bold mb-4 text-foreground animate-fade-in">
-                {t('app.welcomeTitle')}
-              </h1>
-              <p className="mb-8 text-lg text-muted-foreground animate-fade-in delay-100 font-medium">{t('app.welcomeDesc')}</p>
-              <button 
-                onClick={() => navigate('/auth')}
-                className="px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-white font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-fade-in delay-200"
-              >
-                {t('auth.getStarted')} ✨
-              </button>
-            </div>
+            <Card className="w-full max-w-lg mx-auto backdrop-blur-md bg-background/95 border-mintGreen/20 shadow-2xl relative z-10">
+              <CardContent className="p-8 text-center">
+                <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-6 shadow-lg">
+                  <span className="font-bold text-2xl text-white">T1</span>
+                </div>
+                <h1 className="text-4xl font-bold mb-4 text-foreground bg-gradient-to-r from-mintGreen to-coral bg-clip-text text-transparent">
+                  {t('app.welcomeTitle')}
+                </h1>
+                <p className="mb-8 text-lg text-muted-foreground font-medium">
+                  {t('app.welcomeDesc')}
+                </p>
+                <button 
+                  onClick={() => navigate('/auth')}
+                  className="w-full px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-none outline-none focus:ring-2 focus:ring-mintGreen/50"
+                >
+                  {t('auth.getStarted')} ✨
+                </button>
+                <div className="mt-6 flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+                  <span>🏢 {t('facility.kitchen')}</span>
+                  <span>📊 {t('nav.dashboard')}</span>
+                  <span>🌱 {t('nav.sustainability')}</span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
           <Footer />
         </div>
@@ -157,7 +176,7 @@ const Index = () => {
       )}
       
       {!showSplash && session && setupComplete && (
-        <div className="flex h-screen overflow-hidden">
+        <div className="flex h-screen overflow-hidden bg-background">
           <Sidebar 
             collapsed={sidebarCollapsed} 
             setCollapsed={setSidebarCollapsed}
@@ -166,9 +185,9 @@ const Index = () => {
           />
           
           <div className="flex flex-col flex-1 overflow-hidden">
-            <Navbar onLogout={handleLogout} />
+            <Navbar onLogout={handleLogout} onNavigate={handleNavbarNavigation} />
             
-            <div className="flex-1 overflow-auto">
+            <div className="flex-1 overflow-auto bg-background">
               <div className="relative min-h-full flex flex-col">
                 {/* 3D animation background - now with lower z-index */}
                 <div className="absolute right-10 top-6 opacity-10 -z-20 pointer-events-none">

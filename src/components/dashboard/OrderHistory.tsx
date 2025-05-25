@@ -40,6 +40,7 @@ const OrderHistory = () => {
   const [isAddingDish, setIsAddingDish] = useState(false);
   const [loading, setLoading] = useState(true);
   const [ratingPeriod, setRatingPeriod] = useState<TimePeriod>('daily');
+  const [chartKey, setChartKey] = useState(0); // Force chart re-render
 
   useEffect(() => {
     fetchData();
@@ -77,9 +78,10 @@ const OrderHistory = () => {
 
       setDishes(dishesResponse.data || []);
       setFoodHistory(historyResponse.data || []);
+      setChartKey(prev => prev + 1); // Force chart re-render
     } catch (error: any) {
       toast({
-        title: "Error fetching data",
+        title: t('error', 'Error fetching data'),
         description: error.message,
         variant: "destructive",
       });
@@ -91,8 +93,8 @@ const OrderHistory = () => {
   const handleAddDish = async () => {
     if (!newDish.dish_name.trim() || newDish.dish_price <= 0) {
       toast({
-        title: "Invalid input",
-        description: "Please enter a valid dish name and price",
+        title: t('error', 'Invalid input'),
+        description: t('selectBothFields', 'Please enter a valid dish name and price'),
         variant: "destructive",
       });
       return;
@@ -106,8 +108,8 @@ const OrderHistory = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Dish added successfully",
+        title: t('success', 'Success'),
+        description: t('dishAdded', 'Dish added successfully'),
       });
 
       setNewDish({ dish_name: '', dish_price: 0 });
@@ -115,7 +117,7 @@ const OrderHistory = () => {
       fetchData();
     } catch (error: any) {
       toast({
-        title: "Error adding dish",
+        title: t('error', 'Error adding dish'),
         description: error.message,
         variant: "destructive",
       });
@@ -125,8 +127,8 @@ const OrderHistory = () => {
   const handleUpdateDish = async () => {
     if (!editingDish || !editingDish.dish_name.trim() || editingDish.dish_price <= 0) {
       toast({
-        title: "Invalid input",
-        description: "Please enter a valid dish name and price",
+        title: t('error', 'Invalid input'),
+        description: t('selectBothFields', 'Please enter a valid dish name and price'),
         variant: "destructive",
       });
       return;
@@ -141,15 +143,15 @@ const OrderHistory = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Dish updated successfully",
+        title: t('success', 'Success'),
+        description: t('dishUpdated', 'Dish updated successfully'),
       });
 
       setEditingDish(null);
       fetchData();
     } catch (error: any) {
       toast({
-        title: "Error updating dish",
+        title: t('error', 'Error updating dish'),
         description: error.message,
         variant: "destructive",
       });
@@ -166,14 +168,14 @@ const OrderHistory = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Dish deleted successfully",
+        title: t('success', 'Success'),
+        description: t('dishDeleted', 'Dish deleted successfully'),
       });
 
       fetchData();
     } catch (error: any) {
       toast({
-        title: "Error deleting dish",
+        title: t('error', 'Error deleting dish'),
         description: error.message,
         variant: "destructive",
       });
@@ -303,29 +305,29 @@ const OrderHistory = () => {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Order History & Menu Management</h1>
+        <h1 className="text-3xl font-bold text-foreground">{t('orderHistory', 'Order History & Menu Management')}</h1>
       </div>
 
       {/* Today's Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-r from-mintGreen/10 to-mintGreen/5 border-mintGreen/20">
           <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Most Popular Today</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('mostPopularToday', 'Most Popular Today')}</CardTitle>
             <TrendingUp className="h-4 w-4 ml-auto text-mintGreen" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-mintGreen">
-              {mostPopular ? mostPopular.name : 'No orders today'}
+              {mostPopular ? mostPopular.name : t('noOrdersToday', 'No orders today')}
             </div>
             <p className="text-xs text-muted-foreground">
-              {mostPopular ? `${mostPopular.quantity} servings` : ''}
+              {mostPopular ? `${mostPopular.quantity} ${t('servings', 'servings')}` : ''}
             </p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-r from-coral/10 to-coral/5 border-coral/20">
           <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Least Popular Today</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('leastPopularToday', 'Least Popular Today')}</CardTitle>
             <TrendingDown className="h-4 w-4 ml-auto text-coral" />
           </CardHeader>
           <CardContent>
@@ -333,19 +335,19 @@ const OrderHistory = () => {
               {leastPopular && leastPopular !== mostPopular ? leastPopular.name : 'N/A'}
             </div>
             <p className="text-xs text-muted-foreground">
-              {leastPopular && leastPopular !== mostPopular ? `${leastPopular.quantity} servings` : ''}
+              {leastPopular && leastPopular !== mostPopular ? `${leastPopular.quantity} ${t('servings', 'servings')}` : ''}
             </p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-r from-yellow-400/10 to-yellow-400/5 border-yellow-400/20">
           <CardHeader className="flex flex-row items-center space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Avg Rating</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('todayAvgRating', "Today's Avg Rating")}</CardTitle>
             <Star className="h-4 w-4 ml-auto text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">
-              {todayAvgRating > 0 ? `${todayAvgRating}/5` : 'No ratings'}
+              {todayAvgRating > 0 ? `${todayAvgRating}/5` : t('noRatings', 'No ratings')}
             </div>
             <div className="flex items-center mt-1">
               {Array.from({ length: 5 }, (_, i) => (
@@ -372,9 +374,9 @@ const OrderHistory = () => {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <BarChart className="h-5 w-5" />
-                Rating Trends
+                {t('ratingTrends', 'Rating Trends')}
               </CardTitle>
-              <CardDescription>Average ratings over time</CardDescription>
+              <CardDescription>{t('avgRatingsOverTime', 'Average ratings over time')}</CardDescription>
             </div>
             <Select value={ratingPeriod} onValueChange={(value: TimePeriod) => setRatingPeriod(value)}>
               <SelectTrigger className="w-32">
@@ -384,32 +386,32 @@ const OrderHistory = () => {
                 <SelectItem value="hourly">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    Hourly
+                    {t('hourly', 'Hourly')}
                   </div>
                 </SelectItem>
                 <SelectItem value="daily">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    Daily
+                    {t('daily', 'Daily')}
                   </div>
                 </SelectItem>
-                <SelectItem value="weekly">Weekly</SelectItem>
+                <SelectItem value="weekly">{t('weekly', 'Weekly')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={300} key={`rating-${chartKey}`}>
             <AreaChart data={ratingData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="period" />
               <YAxis domain={[0, 5]} />
               <Tooltip 
                 formatter={(value: any, name: string) => [
-                  `${value} stars`, 
-                  'Average Rating'
+                  `${value} ${t('stars', 'stars')}`, 
+                  t('avgRating', 'Average Rating')
                 ]}
-                labelFormatter={(label) => `Period: ${label}`}
+                labelFormatter={(label) => `${t('period', 'Period')}: ${label}`}
               />
               <Area 
                 type="monotone" 
@@ -428,11 +430,11 @@ const OrderHistory = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Today's Order Popularity</CardTitle>
-              <CardDescription>Quantity consumed by dish</CardDescription>
+              <CardTitle>{t('todayOrderPopularity', "Today's Order Popularity")}</CardTitle>
+              <CardDescription>{t('quantityConsumedByDish', 'Quantity consumed by dish')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={300} key={`bar-${chartKey}`}>
                 <RechartsBar data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
@@ -446,11 +448,11 @@ const OrderHistory = () => {
 
           <Card>
             <CardHeader>
-              <CardTitle>Order Distribution</CardTitle>
-              <CardDescription>Today's orders by percentage</CardDescription>
+              <CardTitle>{t('orderDistribution', 'Order Distribution')}</CardTitle>
+              <CardDescription>{t('todayOrdersByPercentage', "Today's orders by percentage")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={300} key={`pie-${chartKey}`}>
                 <PieChart>
                   <Pie
                     data={chartData}
@@ -479,12 +481,12 @@ const OrderHistory = () => {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Menu Management</CardTitle>
-              <CardDescription>Manage your dishes and prices</CardDescription>
+              <CardTitle>{t('menuManagement', 'Menu Management')}</CardTitle>
+              <CardDescription>{t('manageDishesAndPrices', 'Manage your dishes and prices')}</CardDescription>
             </div>
             <Button onClick={() => setIsAddingDish(true)} className="bg-mintGreen hover:bg-mintGreen/90">
               <Plus className="h-4 w-4 mr-2" />
-              Add Dish
+              {t('addDish', 'Add Dish')}
             </Button>
           </div>
         </CardHeader>
@@ -493,32 +495,32 @@ const OrderHistory = () => {
             <div className="mb-4 p-4 border rounded-lg bg-muted/50">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <Label htmlFor="newDishName">Dish Name</Label>
+                  <Label htmlFor="newDishName">{t('dishName', 'Dish Name')}</Label>
                   <Input
                     id="newDishName"
                     value={newDish.dish_name}
                     onChange={(e) => setNewDish({ ...newDish, dish_name: e.target.value })}
-                    placeholder="Enter dish name"
+                    placeholder={t('enterDishName', 'Enter dish name')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="newDishPrice">Price</Label>
+                  <Label htmlFor="newDishPrice">{t('price', 'Price')}</Label>
                   <Input
                     id="newDishPrice"
                     type="number"
                     step="0.01"
                     value={newDish.dish_price}
                     onChange={(e) => setNewDish({ ...newDish, dish_price: parseFloat(e.target.value) || 0 })}
-                    placeholder="Enter price"
+                    placeholder={t('enterPrice', 'Enter price')}
                   />
                 </div>
               </div>
               <div className="flex space-x-2">
                 <Button onClick={handleAddDish} className="bg-mintGreen hover:bg-mintGreen/90">
-                  Add Dish
+                  {t('addDish', 'Add Dish')}
                 </Button>
                 <Button variant="outline" onClick={() => setIsAddingDish(false)}>
-                  Cancel
+                  {t('buttons.cancel', 'Cancel')}
                 </Button>
               </div>
             </div>
@@ -527,9 +529,9 @@ const OrderHistory = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Dish Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t('dishName', 'Dish Name')}</TableHead>
+                <TableHead>{t('price', 'Price')}</TableHead>
+                <TableHead>{t('actions', 'Actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -554,7 +556,7 @@ const OrderHistory = () => {
                         onChange={(e) => setEditingDish({ ...editingDish, dish_price: parseFloat(e.target.value) || 0 })}
                       />
                     ) : (
-                      `$${dish.dish_price.toFixed(2)}`
+                      `₹${dish.dish_price.toFixed(2)}`
                     )}
                   </TableCell>
                   <TableCell>
@@ -562,10 +564,10 @@ const OrderHistory = () => {
                       {editingDish?.dish_id === dish.dish_id ? (
                         <>
                           <Button size="sm" onClick={handleUpdateDish} className="bg-mintGreen hover:bg-mintGreen/90">
-                            Save
+                            {t('buttons.save', 'Save')}
                           </Button>
                           <Button size="sm" variant="outline" onClick={() => setEditingDish(null)}>
-                            Cancel
+                            {t('buttons.cancel', 'Cancel')}
                           </Button>
                         </>
                       ) : (
@@ -595,18 +597,18 @@ const OrderHistory = () => {
       {/* Order History Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Order History</CardTitle>
-          <CardDescription>Latest food orders and consumption data</CardDescription>
+          <CardTitle>{t('recentOrderHistory', 'Recent Order History')}</CardTitle>
+          <CardDescription>{t('latestFoodOrdersData', 'Latest food orders and consumption data')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Dish Name</TableHead>
-                <TableHead>Quantity Consumed</TableHead>
-                <TableHead>Order Price</TableHead>
-                <TableHead>Rating</TableHead>
-                <TableHead>Timestamp</TableHead>
+                <TableHead>{t('dishName', 'Dish Name')}</TableHead>
+                <TableHead>{t('quantityConsumed', 'Quantity Consumed')}</TableHead>
+                <TableHead>{t('orderPrice', 'Order Price')}</TableHead>
+                <TableHead>{t('rating', 'Rating')}</TableHead>
+                <TableHead>{t('timestamp', 'Timestamp')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -614,7 +616,7 @@ const OrderHistory = () => {
                 <TableRow key={index}>
                   <TableCell className="font-medium">{item.dish_name}</TableCell>
                   <TableCell>{item.quantity_consumed || 'N/A'}</TableCell>
-                  <TableCell>{item.order_price ? `$${item.order_price}` : 'N/A'}</TableCell>
+                  <TableCell>{item.order_price ? `₹${item.order_price}` : 'N/A'}</TableCell>
                   <TableCell>
                     {item.food_rating ? (
                       <div className="flex items-center gap-1">
