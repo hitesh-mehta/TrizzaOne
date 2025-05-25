@@ -7,16 +7,19 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Star, TrendingUp, MessageSquare, Users, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface Feedback {
-  id: string;
-  name: string;
-  email: string;
-  category: string;
-  rating: number;
-  comment: string;
-  timestamp: string;
+  Timestamp: string;
+  Name: string;
+  Email: string;
+  "Ontime Service": string;
+  "Cleanliness": string;
+  "Comfortability": string;
+  "Staff Response": string;
+  "Overall": string;
+  "Phone number": string;
+  "Suggestions ": string;
 }
 
 const ITEMS_PER_PAGE = 5;
@@ -57,56 +60,68 @@ const Feedback: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Transform the new API format to match our existing structure
+  const transformedFeedbacks = feedbacks.map((feedback) => ({
+    id: feedback.Timestamp,
+    name: feedback.Name,
+    email: feedback.Email,
+    category: 'general',
+    rating: parseFloat(feedback.Overall) || 0,
+    comment: feedback["Suggestions "] || 'No additional comments',
+    timestamp: feedback.Timestamp,
+    ontimeService: parseFloat(feedback["Ontime Service"]) || 0,
+    cleanliness: parseFloat(feedback.Cleanliness) || 0,
+    comfortability: parseFloat(feedback.Comfortability) || 0,
+    staffResponse: parseFloat(feedback["Staff Response"]) || 0,
+    phone: feedback["Phone number"]
+  }));
+
   // Calculate statistics
   const stats = {
-    totalFeedbacks: feedbacks.length,
-    averageRating: feedbacks.length > 0 ? (feedbacks.reduce((sum, f) => sum + f.rating, 0) / feedbacks.length).toFixed(1) : '0',
-    categories: feedbacks.reduce((acc, f) => {
-      acc[f.category] = (acc[f.category] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>),
-    recentFeedbacks: feedbacks.slice(0, 10),
+    totalFeedbacks: transformedFeedbacks.length,
+    averageRating: transformedFeedbacks.length > 0 ? (transformedFeedbacks.reduce((sum, f) => sum + f.rating, 0) / transformedFeedbacks.length).toFixed(1) : '0',
+    averageOntimeService: transformedFeedbacks.length > 0 ? (transformedFeedbacks.reduce((sum, f) => sum + f.ontimeService, 0) / transformedFeedbacks.length).toFixed(1) : '0',
+    averageCleanliness: transformedFeedbacks.length > 0 ? (transformedFeedbacks.reduce((sum, f) => sum + f.cleanliness, 0) / transformedFeedbacks.length).toFixed(1) : '0',
+    averageComfortability: transformedFeedbacks.length > 0 ? (transformedFeedbacks.reduce((sum, f) => sum + f.comfortability, 0) / transformedFeedbacks.length).toFixed(1) : '0',
+    averageStaffResponse: transformedFeedbacks.length > 0 ? (transformedFeedbacks.reduce((sum, f) => sum + f.staffResponse, 0) / transformedFeedbacks.length).toFixed(1) : '0',
   };
 
   // Pagination
-  const totalPages = Math.ceil(feedbacks.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(transformedFeedbacks.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentFeedbacks = feedbacks.slice(startIndex, endIndex);
+  const currentFeedbacks = transformedFeedbacks.slice(startIndex, endIndex);
 
-  // Chart data
-  const categoryData = Object.entries(stats.categories).map(([name, value]) => ({
-    name,
-    value,
-  }));
+  // Chart data for different metrics
+  const metricsData = [
+    { name: 'Ontime Service', value: parseFloat(stats.averageOntimeService) },
+    { name: 'Cleanliness', value: parseFloat(stats.averageCleanliness) },
+    { name: 'Comfortability', value: parseFloat(stats.averageComfortability) },
+    { name: 'Staff Response', value: parseFloat(stats.averageStaffResponse) },
+  ];
 
-  const ratingDistribution = Array.from({ length: 10 }, (_, i) => {
+  const ratingDistribution = Array.from({ length: 5 }, (_, i) => {
     const rating = i + 1;
-    const count = feedbacks.filter(f => f.rating === rating).length;
+    const count = transformedFeedbacks.filter(f => Math.round(f.rating) === rating).length;
     return { rating, count };
   });
 
   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6'];
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      'food': 'bg-green-100 text-green-800',
-      'cleanliness': 'bg-blue-100 text-blue-800',
-      'ac': 'bg-yellow-100 text-yellow-800',
-      'wait': 'bg-red-100 text-red-800',
-      'other': 'bg-purple-100 text-purple-800',
-    };
-    return colors[category] || 'bg-gray-100 text-gray-800';
-  };
-
   const formatDate = (timestamp: string) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    try {
+      // Handle the MM/DD/YYYY HH:MM:SS format from SheetDB
+      const date = new Date(timestamp);
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return timestamp;
+    }
   };
 
   if (loading) {
@@ -138,7 +153,7 @@ const Feedback: React.FC = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card className="neumorphic-card">
           <CardContent className="p-6">
             <div className="flex items-center space-x-2">
@@ -156,8 +171,8 @@ const Feedback: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Star className="h-8 w-8 text-yellow-500" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Average Rating</p>
-                <p className="text-2xl font-bold">{stats.averageRating}/10</p>
+                <p className="text-sm font-medium text-muted-foreground">Overall Rating</p>
+                <p className="text-2xl font-bold">{stats.averageRating}/5</p>
               </div>
             </div>
           </CardContent>
@@ -168,10 +183,8 @@ const Feedback: React.FC = () => {
             <div className="flex items-center space-x-2">
               <TrendingUp className="h-8 w-8 text-blue-500" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Most Common</p>
-                <p className="text-2xl font-bold">
-                  {Object.entries(stats.categories).sort(([,a], [,b]) => b - a)[0]?.[0] || 'N/A'}
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Ontime Service</p>
+                <p className="text-2xl font-bold">{stats.averageOntimeService}/5</p>
               </div>
             </div>
           </CardContent>
@@ -182,8 +195,20 @@ const Feedback: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Users className="h-8 w-8 text-purple-500" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Categories</p>
-                <p className="text-2xl font-bold">{Object.keys(stats.categories).length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Cleanliness</p>
+                <p className="text-2xl font-bold">{stats.averageCleanliness}/5</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="neumorphic-card">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-2">
+              <Star className="h-8 w-8 text-green-500" />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Staff Response</p>
+                <p className="text-2xl font-bold">{stats.averageStaffResponse}/5</p>
               </div>
             </div>
           </CardContent>
@@ -201,34 +226,24 @@ const Feedback: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="neumorphic-card">
               <CardHeader>
-                <CardTitle>Feedback Categories</CardTitle>
+                <CardTitle>Service Metrics</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
+                  <BarChart data={metricsData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis domain={[0, 5]} />
                     <Tooltip />
-                  </PieChart>
+                    <Bar dataKey="value" fill="#10B981" />
+                  </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
             <Card className="neumorphic-card">
               <CardHeader>
-                <CardTitle>Rating Distribution</CardTitle>
+                <CardTitle>Overall Rating Distribution</CardTitle>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -237,7 +252,7 @@ const Feedback: React.FC = () => {
                     <XAxis dataKey="rating" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="count" fill="#10B981" />
+                    <Bar dataKey="count" fill="#3B82F6" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -250,19 +265,16 @@ const Feedback: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {stats.recentFeedbacks.slice(0, 5).map((feedback) => (
+                {transformedFeedbacks.slice(0, 5).map((feedback) => (
                   <div key={feedback.id} className="border-l-4 border-mintGreen pl-4 py-2">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-2">
                         <span className="font-medium">{feedback.name}</span>
-                        <Badge className={getCategoryColor(feedback.category)}>
-                          {feedback.category}
-                        </Badge>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="flex items-center">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="ml-1 text-sm">{feedback.rating}/10</span>
+                          <span className="ml-1 text-sm">{feedback.rating}/5</span>
                         </div>
                         <span className="text-xs text-muted-foreground">
                           {formatDate(feedback.timestamp)}
@@ -290,23 +302,43 @@ const Feedback: React.FC = () => {
                       <div className="flex items-center space-x-3">
                         <div>
                           <p className="font-medium">{feedback.name}</p>
-                          <p className="text-sm text-muted-foreground">{feedback.email}</p>
+                          <p className="text-sm text-muted-foreground">{feedback.email || 'No email provided'}</p>
+                          {feedback.phone && (
+                            <p className="text-sm text-muted-foreground">Phone: {feedback.phone}</p>
+                          )}
                         </div>
-                        <Badge className={getCategoryColor(feedback.category)}>
-                          {feedback.category}
-                        </Badge>
                       </div>
                       <div className="flex items-center space-x-2">
                         <div className="flex items-center">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="ml-1 font-medium">{feedback.rating}/10</span>
+                          <span className="ml-1 font-medium">{feedback.rating}/5</span>
                         </div>
                         <span className="text-sm text-muted-foreground">
                           {formatDate(feedback.timestamp)}
                         </span>
                       </div>
                     </div>
-                    <p className="text-sm">{feedback.comment}</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                      <div className="text-xs">
+                        <span className="font-medium">Ontime: </span>
+                        <span>{feedback.ontimeService}/5</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Cleanliness: </span>
+                        <span>{feedback.cleanliness}/5</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Comfort: </span>
+                        <span>{feedback.comfortability}/5</span>
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-medium">Staff: </span>
+                        <span>{feedback.staffResponse}/5</span>
+                      </div>
+                    </div>
+                    {feedback.comment && (
+                      <p className="text-sm">{feedback.comment}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -315,7 +347,7 @@ const Feedback: React.FC = () => {
               {totalPages > 1 && (
                 <div className="flex items-center justify-between mt-6">
                   <p className="text-sm text-muted-foreground">
-                    Showing {startIndex + 1} to {Math.min(endIndex, feedbacks.length)} of {feedbacks.length} feedbacks
+                    Showing {startIndex + 1} to {Math.min(endIndex, transformedFeedbacks.length)} of {transformedFeedbacks.length} feedbacks
                   </p>
                   <div className="flex items-center space-x-2">
                     <Button
@@ -350,14 +382,14 @@ const Feedback: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="neumorphic-card">
               <CardHeader>
-                <CardTitle>Category Breakdown</CardTitle>
+                <CardTitle>Metrics Breakdown</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(stats.categories).map(([category, count]) => (
-                    <div key={category} className="flex items-center justify-between">
-                      <Badge className={getCategoryColor(category)}>{category}</Badge>
-                      <span className="font-medium">{count} feedbacks</span>
+                  {metricsData.map((metric) => (
+                    <div key={metric.name} className="flex items-center justify-between">
+                      <span>{metric.name}:</span>
+                      <span className="font-bold">{metric.value.toFixed(1)}/5</span>
                     </div>
                   ))}
                 </div>
@@ -371,21 +403,21 @@ const Feedback: React.FC = () => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span>Average Rating:</span>
-                    <span className="font-bold">{stats.averageRating}/10</span>
+                    <span>Average Overall Rating:</span>
+                    <span className="font-bold">{stats.averageRating}/5</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Highest Rating:</span>
-                    <span className="font-bold">{Math.max(...feedbacks.map(f => f.rating))}/10</span>
+                    <span className="font-bold">{Math.max(...transformedFeedbacks.map(f => f.rating))}/5</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Lowest Rating:</span>
-                    <span className="font-bold">{Math.min(...feedbacks.map(f => f.rating))}/10</span>
+                    <span className="font-bold">{Math.min(...transformedFeedbacks.map(f => f.rating))}/5</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Ratings ≥ 8:</span>
+                    <span>Ratings ≥ 4:</span>
                     <span className="font-bold text-green-600">
-                      {feedbacks.filter(f => f.rating >= 8).length} ({((feedbacks.filter(f => f.rating >= 8).length / feedbacks.length) * 100).toFixed(1)}%)
+                      {transformedFeedbacks.filter(f => f.rating >= 4).length} ({((transformedFeedbacks.filter(f => f.rating >= 4).length / transformedFeedbacks.length) * 100).toFixed(1)}%)
                     </span>
                   </div>
                 </div>

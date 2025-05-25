@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -12,12 +13,13 @@ import Dashboard from '@/components/dashboard/Dashboard';
 import Sustainability from '@/components/dashboard/Sustainability';
 import Feedback from '@/components/dashboard/Feedback';
 import Footer from '@/components/layout/Footer';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import FoodModel3D from '@/components/3d/FoodModel3D';
 import Predictions from '@/components/dashboard/Predictions';
 import OrderHistory from '@/components/dashboard/OrderHistory';
 import ProfileSettings from '@/components/settings/ProfileSettings';
+import Botato from '@/components/chatbot/Botato';
 
 // Import language configuration
 import '@/i18n';
@@ -32,6 +34,7 @@ const Index = () => {
   const [setupComplete, setSetupComplete] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeItem, setActiveItem] = useState('dashboard');
+  const [chatbotOpen, setChatbotOpen] = useState(false);
 
   // Check for authentication and setup status
   useEffect(() => {
@@ -205,6 +208,12 @@ const Index = () => {
               </div>
             </div>
           </div>
+          
+          {/* Botato Chatbot */}
+          <Botato 
+            isOpen={chatbotOpen} 
+            onToggle={() => setChatbotOpen(!chatbotOpen)} 
+          />
         </div>
       )}
     </ThemeProvider>
