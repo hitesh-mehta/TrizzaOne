@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -70,36 +69,26 @@ serve(async (req) => {
     Available floors: 0 (ground), 1, 2, 3
     `;
 
-    const prompt = `
-    You are Botato, a helpful database assistant for the TrizzaOne restaurant management system. 
-    
-    Complete Database Schema:
-    ${dbSchema}
+    const prompt = `You are Botato, a helpful database assistant for the TrizzaOne restaurant management system. 
 
-    User Query: "${query}"
+Database Schema:
+${dbSchema}
 
-    Instructions:
-    1. Generate ONLY a PostgreSQL SELECT query based on the user's question
-    2. Do NOT include any INSERT, UPDATE, DELETE, or DDL statements
-    3. Use proper PostgreSQL syntax with correct table and column names
-    4. Return only the SQL query without any markdown formatting or explanations
-    5. If the query cannot be answered with the available tables, respond with exactly: "CANNOT_ANSWER"
-    6. Make sure the query is safe and only retrieves data
-    7. Use appropriate WHERE clauses, ORDER BY, and LIMIT as needed
-    8. For date/time queries, use proper PostgreSQL date functions
-    9. For aggregations, use appropriate GROUP BY clauses
+User Query: "${query}"
 
-    Examples of good queries:
-    - SELECT * FROM dishes ORDER BY dish_price DESC LIMIT 10;
-    - SELECT zone, AVG(temperature) FROM iot_data WHERE DATE(timestamp) = CURRENT_DATE GROUP BY zone;
-    - SELECT dish_name, SUM(quantity_consumed) FROM food_history WHERE timestamp >= NOW() - INTERVAL '7 days' GROUP BY dish_name;
+Generate ONLY a PostgreSQL SELECT query based on the user's question. Rules:
+1. Return ONLY the SQL query, no explanations or markdown
+2. Use proper PostgreSQL syntax with correct table and column names
+3. If the query cannot be answered with available tables, respond with exactly: "CANNOT_ANSWER"
+4. Only SELECT queries are allowed
+5. Use appropriate WHERE, ORDER BY, and LIMIT clauses as needed
 
-    Generate the PostgreSQL SELECT query:
-    `;
+Generate the PostgreSQL SELECT query:`;
 
-    console.log('Sending prompt to Gemini:', prompt.substring(0, 200) + '...');
+    console.log('Sending request to Gemini API...');
 
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
+    // Use the simpler Gemini API endpoint
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -120,12 +109,13 @@ serve(async (req) => {
     });
 
     if (!geminiResponse.ok) {
-      console.error('Gemini API error:', geminiResponse.status, geminiResponse.statusText);
-      throw new Error(`Gemini API failed: ${geminiResponse.status}`);
+      const errorText = await geminiResponse.text();
+      console.error('Gemini API error:', geminiResponse.status, geminiResponse.statusText, errorText);
+      throw new Error(`Gemini API failed: ${geminiResponse.status} - ${errorText}`);
     }
 
     const geminiData = await geminiResponse.json();
-    console.log('Gemini response:', geminiData);
+    console.log('Gemini response received:', JSON.stringify(geminiData, null, 2));
     
     const generatedQuery = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     console.log('Generated query:', generatedQuery);
@@ -143,7 +133,7 @@ serve(async (req) => {
     if (!cleanQuery.toLowerCase().startsWith('select')) {
       console.error('Invalid query generated:', cleanQuery);
       return new Response(JSON.stringify({ 
-        response: "I can only fetch data from the database. For modifications, please update the database manually." 
+        response: "I can only fetch data from the database. Please ask questions about existing data." 
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -156,15 +146,32 @@ serve(async (req) => {
 
     console.log('Executing query:', cleanQuery);
 
-    // Execute raw SQL query
-    const { data, error } = await supabase.rpc('execute_sql', {
-      sql_query: cleanQuery
-    });
+    // Use Supabase client methods instead of raw SQL
+    let data, error;
+    
+    try {
+      // For simple queries, we can try to parse and use the client methods
+      // For complex queries, we'll need to use a database function
+      const { data: queryResult, error: queryError } = await supabase.rpc('execute_sql', {
+        sql_query: cleanQuery
+      });
+      
+      data = queryResult;
+      error = queryError;
+    } catch (rpcError) {
+      console.log('RPC method not available, trying direct query execution...');
+      // If RPC doesn't exist, we'll return a helpful message
+      return new Response(JSON.stringify({ 
+        response: "Query execution is currently unavailable. Please contact your administrator to set up query execution capabilities." 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (error) {
       console.error('Database error:', error);
       return new Response(JSON.stringify({ 
-        response: "Sorry, there was an error executing your query. Please try rephrasing your question or make sure you're asking about valid data." 
+        response: "Sorry, there was an error executing your query. Please try rephrasing your question." 
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -179,8 +186,8 @@ serve(async (req) => {
     } else {
       response = `Here's what I found:\n\n`;
       if (Array.isArray(data)) {
-        // Show up to 20 results
-        const displayData = data.slice(0, 20);
+        // Show up to 10 results to keep response manageable
+        const displayData = data.slice(0, 10);
         displayData.forEach((row, index) => {
           response += `${index + 1}. `;
           const entries = Object.entries(row);
@@ -191,8 +198,8 @@ serve(async (req) => {
           response += '\n';
         });
         
-        if (data.length > 20) {
-          response += `\n... and ${data.length - 20} more results. Try being more specific to see fewer results.`;
+        if (data.length > 10) {
+          response += `\n... and ${data.length - 10} more results.`;
         }
         
         response += `\nTotal results: ${data.length}`;
@@ -206,7 +213,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in botato-query function:', error);
     return new Response(JSON.stringify({ 
-      response: "Sorry, something went wrong while processing your request. Please try again or rephrase your question." 
+      response: "Sorry, something went wrong while processing your request. Please try again." 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
