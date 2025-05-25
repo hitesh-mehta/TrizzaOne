@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import ThemeToggle from '../settings/ThemeToggle';
 import LanguageSelector from '../settings/LanguageSelector';
+import { useNotifications } from '@/hooks/useNotifications';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -25,6 +26,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
   const { t } = useTranslation();
+  const { notifications, notificationCount } = useNotifications();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
 
@@ -94,12 +96,37 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
         
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs bg-coral">
-              3
-            </Badge>
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {notificationCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs bg-coral">
+                    {notificationCount}
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80 bg-background/95 backdrop-blur-sm border-mintGreen/20" align="end">
+              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {notifications.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground text-sm">
+                  No new notifications
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-4 space-y-1">
+                    <div className="font-semibold text-sm">{notification.title}</div>
+                    <div className="text-xs text-muted-foreground">{notification.message}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {notification.timestamp.toLocaleTimeString()}
+                    </div>
+                  </DropdownMenuItem>
+                ))
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           
           {/* Language Selector */}
           <LanguageSelector isInNavbar={true} />

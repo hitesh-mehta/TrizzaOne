@@ -67,34 +67,36 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
   const formatBotResponse = (response: string, data?: any) => {
     // Check if response contains structured data
     if (data && Array.isArray(data)) {
-      let formattedResponse = response;
+      let formattedContent = response;
       
       // Add a summary of the data
-      formattedResponse += `\n\n📊 **Data Summary:**\n`;
-      formattedResponse += `• Found ${data.length} records\n`;
+      formattedContent += `\n\n📊 **Data Summary:**\n`;
+      formattedContent += `• Found ${data.length} records\n`;
       
       if (data.length > 0) {
         const sampleRecord = data[0];
         const keys = Object.keys(sampleRecord);
-        formattedResponse += `• Fields: ${keys.join(', ')}\n`;
+        formattedContent += `• Fields: ${keys.join(', ')}\n`;
         
         // Show top 3 records in a formatted way
         const displayRecords = data.slice(0, 3);
-        formattedResponse += `\n📋 **Sample Records:**\n`;
+        formattedContent += `\n📋 **Sample Records:**\n`;
         
         displayRecords.forEach((record, index) => {
-          formattedResponse += `\n**Record ${index + 1}:**\n`;
+          formattedContent += `\n**Record ${index + 1}:**\n`;
           Object.entries(record).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
-              formattedResponse += `• ${key}: ${value}\n`;
+              formattedContent += `• ${key}: ${value}\n`;
             }
           });
         });
         
         if (data.length > 3) {
-          formattedResponse += `\n... and ${data.length - 3} more records.`;
+          formattedContent += `\n... and ${data.length - 3} more records.`;
         }
       }
+      
+      return formattedContent;
     }
     
     return response;

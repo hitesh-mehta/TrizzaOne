@@ -49,7 +49,7 @@
     "dark": "डार्क मोड"
   },
   "nav": {
-    "dashboard": "डैशबोर्ड",
+    "dashboard": "TrizzaOne",
     "forecast": "पूर्वानुमान",
     "sustainability": "स्थिरता",
     "feedback": "प्रतिक्रिया",
@@ -64,6 +64,41 @@
     "sustainability": "स्थिरता स्कोर",
     "today": "आज",
     "lastUpdated": "आखरी अपडेट"
+  },
+  "iot": {
+    "temperature": "तापमान",
+    "humidity": "नमी",
+    "co2Level": "CO₂ स्तर",
+    "lightLevel": "प्रकाश स्तर",
+    "occupancy": "व्यस्तता",
+    "energyUsage": "ऊर्जा उपयोग",
+    "batteryLevel": "बैटरी स्तर",
+    "systemStatus": "सिस्टम स्थिति",
+    "average": "औसत",
+    "zone": "क्षेत्र",
+    "total": "कुल",
+    "floor": "मंजिल",
+    "normal": "सामान्य",
+    "alerts": "अलर्ट",
+    "powerStatus": "पावर स्थिति",
+    "airPurifier": "एयर प्यूरिफायर",
+    "motionDetected": "गति का पता लगाया गया",
+    "cleaningStatus": "सफाई की स्थिति",
+    "fireAlarm": "आग अलार्म",
+    "gasLeak": "गैस रिसाव",
+    "lastCleaned": "आखिरी सफाई",
+    "triggered": "सक्रिय",
+    "detected": "पता चला",
+    "never": "कभी नहीं",
+    "on": "चालू",
+    "off": "बंद",
+    "yes": "हाँ",
+    "no": "नहीं",
+    "done": "पूर्ण",
+    "inprogress": "प्रगति में",
+    "pending": "लंबित",
+    "systemStatusOverview": "सिस्टम स्थिति अवलोकन",
+    "safetyAlerts": "सुरक्षा अलर्ट"
   },
   "facility": {
     "kitchen": "रसोई",
@@ -108,7 +143,7 @@
     "emptyState": "AI-संचालित मात्रा पूर्वानुमान उत्पन्न करने के लिए एक व्यंजन और भविष्यवाणी अवधि चुनें"
   },
   "orderHistory": {
-    "title": "ऑर्डर इतिहास और मेनू प्रबंधन",
+    "title": "ऑर्डर इतिहास",
     "subtitle": "ऑर्डर और मेनू आइटम प्रबंधित करें",
     "mostPopularToday": "आज सबसे लोकप्रिय",
     "leastPopularToday": "आज कम लोकप्रिय",
@@ -193,5 +228,11 @@
     "export": "निर्यात",
     "view": "विवरण देखें",
     "submit": "सबमिट"
+  },
+  "notifications": {
+    "newMostPopular": "नया सबसे लोकप्रिय व्यंजन",
+    "dishIsNowMostPopular": "{{dish}} आज का सबसे लोकप्रिय व्यंजन है!",
+    "newOrder": "नया ऑर्डर",
+    "orderReceived": "{{dish}} के लिए नया ऑर्डर प्राप्त"
   }
 }

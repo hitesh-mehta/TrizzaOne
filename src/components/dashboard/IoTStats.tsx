@@ -50,65 +50,65 @@ const IoTStats: React.FC<IoTStatsProps> = ({ data }) => {
 
   const stats = [
     {
-      title: 'Temperature',
+      title: t('iot.temperature'),
       value: `${Number(latestData.temperature).toFixed(1)}°C`,
-      average: `Avg: ${avgTemp.toFixed(1)}°C`,
+      average: `${t('iot.average')}: ${avgTemp.toFixed(1)}°C`,
       icon: Thermometer,
       color: Number(latestData.temperature) > 30 ? 'text-red-500' : 'text-blue-500',
       bgColor: Number(latestData.temperature) > 30 ? 'bg-red-500/10' : 'bg-blue-500/10',
     },
     {
-      title: 'Humidity',
+      title: t('iot.humidity'),
       value: `${Number(latestData.humidity).toFixed(1)}%`,
-      average: `Avg: ${avgHumidity.toFixed(1)}%`,
+      average: `${t('iot.average')}: ${avgHumidity.toFixed(1)}%`,
       icon: Droplets,
       color: 'text-cyan-500',
       bgColor: 'bg-cyan-500/10',
     },
     {
-      title: 'CO₂ Level',
+      title: t('iot.co2Level'),
       value: `${Number(latestData.co2_level).toFixed(0)} ppm`,
-      average: `Avg: ${avgCO2.toFixed(0)} ppm`,
+      average: `${t('iot.average')}: ${avgCO2.toFixed(0)} ppm`,
       icon: Wind,
       color: Number(latestData.co2_level) > 450 ? 'text-orange-500' : 'text-green-500',
       bgColor: Number(latestData.co2_level) > 450 ? 'bg-orange-500/10' : 'bg-green-500/10',
     },
     {
-      title: 'Light Level',
+      title: t('iot.lightLevel'),
       value: `${Number(latestData.light_level).toFixed(0)} lux`,
-      average: `Zone: ${latestData.zone}`,
+      average: `${t('iot.zone')}: ${latestData.zone}`,
       icon: Lightbulb,
       color: 'text-yellow-500',
       bgColor: 'bg-yellow-500/10',
     },
     {
-      title: 'Occupancy',
+      title: t('iot.occupancy'),
       value: `${latestData.occupancy_count}`,
-      average: `Total: ${totalOccupancy}`,
+      average: `${t('iot.total')}: ${totalOccupancy}`,
       icon: Users,
       color: 'text-purple-500',
       bgColor: 'bg-purple-500/10',
     },
     {
-      title: 'Energy Usage',
+      title: t('iot.energyUsage'),
       value: `${Number(latestData.energy_consumed_kwh).toFixed(1)} kWh`,
-      average: `Avg: ${avgEnergyConsumption.toFixed(1)} kWh`,
+      average: `${t('iot.average')}: ${avgEnergyConsumption.toFixed(1)} kWh`,
       icon: Zap,
       color: 'text-mintGreen',
       bgColor: 'bg-mintGreen/10',
     },
     {
-      title: 'Battery Level',
+      title: t('iot.batteryLevel'),
       value: `${Number(latestData.battery_backup_level).toFixed(1)}%`,
-      average: `Avg: ${avgBatteryLevel.toFixed(1)}%`,
+      average: `${t('iot.average')}: ${avgBatteryLevel.toFixed(1)}%`,
       icon: Battery,
       color: Number(latestData.battery_backup_level) < 20 ? 'text-red-500' : 'text-green-500',
       bgColor: Number(latestData.battery_backup_level) < 20 ? 'bg-red-500/10' : 'bg-green-500/10',
     },
     {
-      title: 'System Status',
-      value: alertCount === 0 ? 'Normal' : `${alertCount} Alerts`,
-      average: `Floor: ${latestData.floor}`,
+      title: t('iot.systemStatus'),
+      value: alertCount === 0 ? t('iot.normal') : `${alertCount} ${t('iot.alerts')}`,
+      average: `${t('iot.floor')}: ${latestData.floor}`,
       icon: alertCount === 0 ? CheckCircle : AlertTriangle,
       color: alertCount === 0 ? 'text-green-500' : 'text-red-500',
       bgColor: alertCount === 0 ? 'bg-green-500/10' : 'bg-red-500/10',
@@ -143,36 +143,37 @@ const IoTStats: React.FC<IoTStatsProps> = ({ data }) => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
-              System Status Overview
+              {t('iot.systemStatusOverview')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <p className="text-sm font-medium">Power Status</p>
+                <p className="text-sm font-medium">{t('iot.powerStatus')}</p>
                 <Badge variant={latestData.power_status === 'on' ? 'default' : 'destructive'}>
-                  {latestData.power_status.toUpperCase()}
+                  {latestData.power_status === 'on' ? t('iot.on') : t('iot.off')}
                 </Badge>
               </div>
               <div className="space-y-2">
-                <p className="text-sm font-medium">Air Purifier</p>
+                <p className="text-sm font-medium">{t('iot.airPurifier')}</p>
                 <Badge variant={latestData.air_purifier_status === 'on' ? 'default' : 'secondary'}>
-                  {latestData.air_purifier_status.toUpperCase()}
+                  {latestData.air_purifier_status === 'on' ? t('iot.on') : t('iot.off')}
                 </Badge>
               </div>
               <div className="space-y-2">
-                <p className="text-sm font-medium">Motion Detected</p>
+                <p className="text-sm font-medium">{t('iot.motionDetected')}</p>
                 <Badge variant={latestData.motion_detected === 'yes' ? 'default' : 'secondary'}>
-                  {latestData.motion_detected.toUpperCase()}
+                  {latestData.motion_detected === 'yes' ? t('iot.yes') : t('iot.no')}
                 </Badge>
               </div>
               <div className="space-y-2">
-                <p className="text-sm font-medium">Cleaning Status</p>
+                <p className="text-sm font-medium">{t('iot.cleaningStatus')}</p>
                 <Badge variant={
                   latestData.cleaning_status === 'done' ? 'default' : 
                   latestData.cleaning_status === 'inprogress' ? 'secondary' : 'outline'
                 }>
-                  {latestData.cleaning_status.toUpperCase()}
+                  {latestData.cleaning_status === 'done' ? t('iot.done') : 
+                   latestData.cleaning_status === 'inprogress' ? t('iot.inprogress') : t('iot.pending')}
                 </Badge>
               </div>
             </div>
@@ -183,30 +184,30 @@ const IoTStats: React.FC<IoTStatsProps> = ({ data }) => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-500" />
-              Safety Alerts
+              {t('iot.safetyAlerts')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-sm">Fire Alarm</span>
+                <span className="text-sm">{t('iot.fireAlarm')}</span>
                 <Badge variant={latestData.fire_alarm_triggered === 'yes' ? 'destructive' : 'default'}>
-                  {latestData.fire_alarm_triggered === 'yes' ? 'TRIGGERED' : 'NORMAL'}
+                  {latestData.fire_alarm_triggered === 'yes' ? t('iot.triggered') : t('iot.normal')}
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Gas Leak</span>
+                <span className="text-sm">{t('iot.gasLeak')}</span>
                 <Badge variant={latestData.gas_leak_detected === 'yes' ? 'destructive' : 'default'}>
-                  {latestData.gas_leak_detected === 'yes' ? 'DETECTED' : 'NORMAL'}
+                  {latestData.gas_leak_detected === 'yes' ? t('iot.detected') : t('iot.normal')}
                 </Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm">Last Cleaned</span>
+                <span className="text-sm">{t('iot.lastCleaned')}</span>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   {latestData.last_cleaned_timestamp 
                     ? new Date(latestData.last_cleaned_timestamp).toLocaleString()
-                    : 'Never'
+                    : t('iot.never')
                   }
                 </div>
               </div>

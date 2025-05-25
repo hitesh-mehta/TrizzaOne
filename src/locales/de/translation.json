@@ -49,7 +49,7 @@
     "dark": "Dunkler Modus"
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "TrizzaOne",
     "forecast": "Prognose",
     "sustainability": "Nachhaltigkeit",
     "feedback": "Feedback",
@@ -64,6 +64,41 @@
     "sustainability": "Nachhaltigkeitswert",
     "today": "Heute",
     "lastUpdated": "Zuletzt aktualisiert"
+  },
+  "iot": {
+    "temperature": "Temperatur",
+    "humidity": "Luftfeuchtigkeit",
+    "co2Level": "CO₂-Niveau",
+    "lightLevel": "Lichtstärke",
+    "occupancy": "Belegung",
+    "energyUsage": "Energieverbrauch",
+    "batteryLevel": "Batteriestand",
+    "systemStatus": "Systemstatus",
+    "average": "Durchschn.",
+    "zone": "Zone",
+    "total": "Gesamt",
+    "floor": "Etage",
+    "normal": "Normal",
+    "alerts": "Warnungen",
+    "powerStatus": "Stromstatus",
+    "airPurifier": "Luftreiniger",
+    "motionDetected": "Bewegung erkannt",
+    "cleaningStatus": "Reinigungsstatus",
+    "fireAlarm": "Feueralarm",
+    "gasLeak": "Gasleck",
+    "lastCleaned": "Zuletzt gereinigt",
+    "triggered": "AUSGELÖST",
+    "detected": "ERKANNT",
+    "never": "Nie",
+    "on": "EIN",
+    "off": "AUS",
+    "yes": "JA",
+    "no": "NEIN",
+    "done": "FERTIG",
+    "inprogress": "IN BEARBEITUNG",
+    "pending": "AUSSTEHEND",
+    "systemStatusOverview": "Systemstatus-Übersicht",
+    "safetyAlerts": "Sicherheitswarnungen"
   },
   "facility": {
     "kitchen": "Küche",
@@ -108,7 +143,7 @@
     "emptyState": "Wählen Sie ein Gericht und einen Vorhersagezeitraum, um KI-gestützte Mengenprognosen zu erstellen"
   },
   "orderHistory": {
-    "title": "Bestellhistorie & Menüverwaltung",
+    "title": "Bestellhistorie",
     "subtitle": "Bestellungen und Menüpunkte verwalten",
     "mostPopularToday": "Beliebteste heute",
     "leastPopularToday": "Wenigste beliebt heute",
@@ -193,5 +228,11 @@
     "export": "Exportieren",
     "view": "Details anzeigen",
     "submit": "Absenden"
+  },
+  "notifications": {
+    "newMostPopular": "Neues beliebtestes Gericht",
+    "dishIsNowMostPopular": "{{dish}} ist jetzt das beliebteste Gericht heute!",
+    "newOrder": "Neue Bestellung",
+    "orderReceived": "Neue Bestellung für {{dish}} erhalten"
   }
 }

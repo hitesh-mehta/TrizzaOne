@@ -49,7 +49,7 @@
     "dark": "Dark Mode"
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "TrizzaOne",
     "forecast": "Forecast",
     "sustainability": "Sustainability",
     "feedback": "Feedback",
@@ -64,6 +64,41 @@
     "sustainability": "Sustainability Score",
     "today": "Today",
     "lastUpdated": "Last Updated"
+  },
+  "iot": {
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "co2Level": "CO₂ Level",
+    "lightLevel": "Light Level",
+    "occupancy": "Occupancy",
+    "energyUsage": "Energy Usage",
+    "batteryLevel": "Battery Level",
+    "systemStatus": "System Status",
+    "average": "Avg",
+    "zone": "Zone",
+    "total": "Total",
+    "floor": "Floor",
+    "normal": "Normal",
+    "alerts": "Alerts",
+    "powerStatus": "Power Status",
+    "airPurifier": "Air Purifier",
+    "motionDetected": "Motion Detected",
+    "cleaningStatus": "Cleaning Status",
+    "fireAlarm": "Fire Alarm",
+    "gasLeak": "Gas Leak",
+    "lastCleaned": "Last Cleaned",
+    "triggered": "TRIGGERED",
+    "detected": "DETECTED",
+    "never": "Never",
+    "on": "ON",
+    "off": "OFF",
+    "yes": "YES",
+    "no": "NO",
+    "done": "DONE",
+    "inprogress": "IN PROGRESS",
+    "pending": "PENDING",
+    "systemStatusOverview": "System Status Overview",
+    "safetyAlerts": "Safety Alerts"
   },
   "facility": {
     "kitchen": "Kitchen",
@@ -108,7 +143,7 @@
     "emptyState": "Select a dish and prediction period to generate AI-powered quantity forecasts"
   },
   "orderHistory": {
-    "title": "Order History & Menu Management",
+    "title": "Order History",
     "subtitle": "Manage orders and menu items",
     "mostPopularToday": "Most Popular Today",
     "leastPopularToday": "Least Popular Today",
@@ -193,5 +228,11 @@
     "export": "Export",
     "view": "View Details",
     "submit": "Submit"
+  },
+  "notifications": {
+    "newMostPopular": "New Most Popular Dish",
+    "dishIsNowMostPopular": "{{dish}} is now the most popular dish today!",
+    "newOrder": "New Order",
+    "orderReceived": "New order received for {{dish}}"
   }
 }

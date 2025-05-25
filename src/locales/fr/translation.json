@@ -49,7 +49,7 @@
     "dark": "Mode sombre"
   },
   "nav": {
-    "dashboard": "Tableau de bord",
+    "dashboard": "TrizzaOne",
     "forecast": "Prévisions",
     "sustainability": "Durabilité",
     "feedback": "Commentaires",
@@ -64,6 +64,41 @@
     "sustainability": "Score de durabilité",
     "today": "Aujourd'hui",
     "lastUpdated": "Dernière mise à jour"
+  },
+  "iot": {
+    "temperature": "Température",
+    "humidity": "Humidité",
+    "co2Level": "Niveau CO₂",
+    "lightLevel": "Niveau de lumière",
+    "occupancy": "Occupation",
+    "energyUsage": "Utilisation d'énergie",
+    "batteryLevel": "Niveau de batterie",
+    "systemStatus": "État du système",
+    "average": "Moy.",
+    "zone": "Zone",
+    "total": "Total",
+    "floor": "Étage",
+    "normal": "Normal",
+    "alerts": "Alertes",
+    "powerStatus": "État d'alimentation",
+    "airPurifier": "Purificateur d'air",
+    "motionDetected": "Mouvement détecté",
+    "cleaningStatus": "État du nettoyage",
+    "fireAlarm": "Alarme incendie",
+    "gasLeak": "Fuite de gaz",
+    "lastCleaned": "Dernier nettoyage",
+    "triggered": "DÉCLENCHÉ",
+    "detected": "DÉTECTÉ",
+    "never": "Jamais",
+    "on": "MARCHE",
+    "off": "ARRÊT",
+    "yes": "OUI",
+    "no": "NON",
+    "done": "TERMINÉ",
+    "inprogress": "EN COURS",
+    "pending": "EN ATTENTE",
+    "systemStatusOverview": "Aperçu de l'état du système",
+    "safetyAlerts": "Alertes de sécurité"
   },
   "facility": {
     "kitchen": "Cuisine",
@@ -108,7 +143,7 @@
     "emptyState": "Sélectionnez un plat et une période de prédiction pour générer des prévisions de quantité alimentées par l'IA"
   },
   "orderHistory": {
-    "title": "Historique des commandes et gestion du menu",
+    "title": "Historique des commandes",
     "subtitle": "Gérer les commandes et les éléments de menu",
     "mostPopularToday": "Plus populaire aujourd'hui",
     "leastPopularToday": "Moins populaire aujourd'hui",
@@ -193,5 +228,11 @@
     "export": "Exporter",
     "view": "Voir les détails",
     "submit": "Soumettre"
+  },
+  "notifications": {
+    "newMostPopular": "Nouveau plat le plus populaire",
+    "dishIsNowMostPopular": "{{dish}} est maintenant le plat le plus populaire aujourd'hui!",
+    "newOrder": "Nouvelle commande",
+    "orderReceived": "Nouvelle commande reçue pour {{dish}}"
   }
 }
