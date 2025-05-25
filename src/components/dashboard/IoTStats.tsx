@@ -3,28 +3,19 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Thermometer, Droplets, Zap, Users, Activity, Shield } from 'lucide-react';
-
-interface IoTData {
-  id: string;
-  zone: string;
-  floor: number;
-  temperature: number;
-  humidity: number;
-  co2_level: number;
-  light_level: number;
-  occupancy_count: number;
-  motion_detected: boolean;
-  power_status: boolean;
-  energy_consumed_kwh: number;
-  battery_backup_level: number;
-  cleaning_status: string;
-  last_cleaned_timestamp: string | null;
-  fire_alarm_triggered: boolean;
-  gas_leak_detected: boolean;
-  air_purifier_status: boolean;
-  timestamp: string;
-}
+import { IoTData } from '@/hooks/useIoTData';
+import { 
+  Thermometer, 
+  Droplets, 
+  Wind, 
+  Lightbulb, 
+  Users, 
+  Zap, 
+  Battery, 
+  AlertTriangle,
+  CheckCircle,
+  Clock
+} from 'lucide-react';
 
 interface IoTStatsProps {
   data: IoTData[];
@@ -33,193 +24,195 @@ interface IoTStatsProps {
 const IoTStats: React.FC<IoTStatsProps> = ({ data }) => {
   const { t } = useTranslation();
 
-  if (!data || data.length === 0) {
+  if (data.length === 0) {
     return (
-      <Card className="neumorphic-card">
-        <CardContent className="p-6">
-          <div className="text-center text-muted-foreground">
-            No IoT data available
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center p-8">
+        <p className="text-muted-foreground">No IoT data available</p>
+      </div>
     );
   }
 
-  // Calculate averages from all data points
-  const avgTemp = (data.reduce((sum, item) => sum + item.temperature, 0) / data.length).toFixed(1);
-  const avgHumidity = (data.reduce((sum, item) => sum + item.humidity, 0) / data.length).toFixed(1);
-  const totalOccupancy = data.reduce((sum, item) => sum + item.occupancy_count, 0);
-  const avgCO2 = (data.reduce((sum, item) => sum + item.co2_level, 0) / data.length).toFixed(0);
-  const avgEnergy = (data.reduce((sum, item) => sum + item.energy_consumed_kwh, 0) / data.length).toFixed(2);
-
-  // Get latest data for status indicators
   const latestData = data[0];
+  const avgTemp = data.slice(0, 10).reduce((sum, d) => sum + Number(d.temperature), 0) / Math.min(data.length, 10);
+  const avgHumidity = data.slice(0, 10).reduce((sum, d) => sum + Number(d.humidity), 0) / Math.min(data.length, 10);
+  const avgCO2 = data.slice(0, 10).reduce((sum, d) => sum + Number(d.co2_level), 0) / Math.min(data.length, 10);
+  const totalOccupancy = data.slice(0, 10).reduce((sum, d) => sum + d.occupancy_count, 0);
+  const avgEnergyConsumption = data.slice(0, 10).reduce((sum, d) => sum + Number(d.energy_consumed_kwh), 0) / Math.min(data.length, 10);
+  const avgBatteryLevel = data.slice(0, 10).reduce((sum, d) => sum + Number(d.battery_backup_level), 0) / Math.min(data.length, 10);
 
-  // Group data by zone for facility overview
-  const zoneData = data.reduce((acc, item) => {
-    if (!acc[item.zone]) {
-      acc[item.zone] = [];
-    }
-    acc[item.zone].push(item);
-    return acc;
-  }, {} as Record<string, IoTData[]>);
+  const alertCount = data.slice(0, 10).filter(d => 
+    d.fire_alarm_triggered === 'yes' || 
+    d.gas_leak_detected === 'yes' || 
+    Number(d.battery_backup_level) < 20 ||
+    Number(d.temperature) > 35 ||
+    d.power_status === 'off'
+  ).length;
 
-  const getStatusColor = (value: number, thresholds: { good: number; warning: number }) => {
-    if (value <= thresholds.good) return 'text-green-500';
-    if (value <= thresholds.warning) return 'text-yellow-500';
-    return 'text-red-500';
-  };
-
-  const getCleaningStatusTranslation = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'clean':
-        return t('facility.cleaning') + ': Clean';
-      case 'dirty':
-        return t('facility.cleaning') + ': Dirty';
-      case 'in_progress':
-        return t('facility.cleaning') + ': In Progress';
-      default:
-        return t('facility.cleaning') + ': ' + status;
-    }
-  };
+  const stats = [
+    {
+      title: 'Temperature',
+      value: `${Number(latestData.temperature).toFixed(1)}°C`,
+      average: `Avg: ${avgTemp.toFixed(1)}°C`,
+      icon: Thermometer,
+      color: Number(latestData.temperature) > 30 ? 'text-red-500' : 'text-blue-500',
+      bgColor: Number(latestData.temperature) > 30 ? 'bg-red-500/10' : 'bg-blue-500/10',
+    },
+    {
+      title: 'Humidity',
+      value: `${Number(latestData.humidity).toFixed(1)}%`,
+      average: `Avg: ${avgHumidity.toFixed(1)}%`,
+      icon: Droplets,
+      color: 'text-cyan-500',
+      bgColor: 'bg-cyan-500/10',
+    },
+    {
+      title: 'CO₂ Level',
+      value: `${Number(latestData.co2_level).toFixed(0)} ppm`,
+      average: `Avg: ${avgCO2.toFixed(0)} ppm`,
+      icon: Wind,
+      color: Number(latestData.co2_level) > 450 ? 'text-orange-500' : 'text-green-500',
+      bgColor: Number(latestData.co2_level) > 450 ? 'bg-orange-500/10' : 'bg-green-500/10',
+    },
+    {
+      title: 'Light Level',
+      value: `${Number(latestData.light_level).toFixed(0)} lux`,
+      average: `Zone: ${latestData.zone}`,
+      icon: Lightbulb,
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-500/10',
+    },
+    {
+      title: 'Occupancy',
+      value: `${latestData.occupancy_count}`,
+      average: `Total: ${totalOccupancy}`,
+      icon: Users,
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/10',
+    },
+    {
+      title: 'Energy Usage',
+      value: `${Number(latestData.energy_consumed_kwh).toFixed(1)} kWh`,
+      average: `Avg: ${avgEnergyConsumption.toFixed(1)} kWh`,
+      icon: Zap,
+      color: 'text-mintGreen',
+      bgColor: 'bg-mintGreen/10',
+    },
+    {
+      title: 'Battery Level',
+      value: `${Number(latestData.battery_backup_level).toFixed(1)}%`,
+      average: `Avg: ${avgBatteryLevel.toFixed(1)}%`,
+      icon: Battery,
+      color: Number(latestData.battery_backup_level) < 20 ? 'text-red-500' : 'text-green-500',
+      bgColor: Number(latestData.battery_backup_level) < 20 ? 'bg-red-500/10' : 'bg-green-500/10',
+    },
+    {
+      title: 'System Status',
+      value: alertCount === 0 ? 'Normal' : `${alertCount} Alerts`,
+      average: `Floor: ${latestData.floor}`,
+      icon: alertCount === 0 ? CheckCircle : AlertTriangle,
+      color: alertCount === 0 ? 'text-green-500' : 'text-red-500',
+      bgColor: alertCount === 0 ? 'bg-green-500/10' : 'bg-red-500/10',
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Overall Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        <Card className="neumorphic-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Thermometer className="h-5 w-5 text-coral" />
-              <div>
-                <p className="text-xs text-muted-foreground">{t('facility.temp')}</p>
-                <p className={`text-lg font-semibold ${getStatusColor(parseFloat(avgTemp), { good: 24, warning: 28 })}`}>
-                  {avgTemp}°C
-                </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat, index) => (
+          <Card key={index} className="neumorphic-card">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-start">
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                  <div className="space-y-1">
+                    <h3 className="text-2xl font-bold">{stat.value}</h3>
+                    <p className="text-xs text-muted-foreground">{stat.average}</p>
+                  </div>
+                </div>
+                <div className={`${stat.bgColor} p-3 rounded-full`}>
+                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="neumorphic-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Droplets className="h-5 w-5 text-blue-500" />
-              <div>
-                <p className="text-xs text-muted-foreground">Humidity</p>
-                <p className={`text-lg font-semibold ${getStatusColor(parseFloat(avgHumidity), { good: 60, warning: 80 })}`}>
-                  {avgHumidity}%
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="neumorphic-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-mintGreen" />
-              <div>
-                <p className="text-xs text-muted-foreground">{t('facility.occupancy')}</p>
-                <p className="text-lg font-semibold text-mintGreen">{totalOccupancy}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="neumorphic-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Activity className="h-5 w-5 text-purple-500" />
-              <div>
-                <p className="text-xs text-muted-foreground">CO₂</p>
-                <p className={`text-lg font-semibold ${getStatusColor(parseFloat(avgCO2), { good: 800, warning: 1200 })}`}>
-                  {avgCO2} ppm
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="neumorphic-card">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2">
-              <Zap className="h-5 w-5 text-yellow-500" />
-              <div>
-                <p className="text-xs text-muted-foreground">Energy</p>
-                <p className="text-lg font-semibold text-yellow-600">{avgEnergy} kWh</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Zone Details */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Object.entries(zoneData).map(([zone, zoneItems]) => {
-          const zoneAvgTemp = (zoneItems.reduce((sum, item) => sum + item.temperature, 0) / zoneItems.length).toFixed(1);
-          const zoneOccupancy = zoneItems.reduce((sum, item) => sum + item.occupancy_count, 0);
-          const latestZoneData = zoneItems[0];
-          
-          const getZoneTranslation = (zoneName: string) => {
-            switch (zoneName.toLowerCase()) {
-              case 'kitchen':
-                return t('facility.kitchen');
-              case 'dining':
-              case 'dining_area':
-                return t('facility.dining');
-              case 'pantry':
-                return t('facility.pantry');
-              default:
-                return zoneName;
-            }
-          };
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="neumorphic-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              System Status Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Power Status</p>
+                <Badge variant={latestData.power_status === 'on' ? 'default' : 'destructive'}>
+                  {latestData.power_status.toUpperCase()}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Air Purifier</p>
+                <Badge variant={latestData.air_purifier_status === 'on' ? 'default' : 'secondary'}>
+                  {latestData.air_purifier_status.toUpperCase()}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Motion Detected</p>
+                <Badge variant={latestData.motion_detected === 'yes' ? 'default' : 'secondary'}>
+                  {latestData.motion_detected.toUpperCase()}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Cleaning Status</p>
+                <Badge variant={
+                  latestData.cleaning_status === 'done' ? 'default' : 
+                  latestData.cleaning_status === 'inprogress' ? 'secondary' : 'outline'
+                }>
+                  {latestData.cleaning_status.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          return (
-            <Card key={zone} className="neumorphic-card">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{getZoneTranslation(zone)}</CardTitle>
-                  <Badge variant={latestZoneData.power_status ? "default" : "destructive"}>
-                    {latestZoneData.power_status ? 'Active' : 'Inactive'}
-                  </Badge>
+        <Card className="neumorphic-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-500" />
+              Safety Alerts
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Fire Alarm</span>
+                <Badge variant={latestData.fire_alarm_triggered === 'yes' ? 'destructive' : 'default'}>
+                  {latestData.fire_alarm_triggered === 'yes' ? 'TRIGGERED' : 'NORMAL'}
+                </Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Gas Leak</span>
+                <Badge variant={latestData.gas_leak_detected === 'yes' ? 'destructive' : 'default'}>
+                  {latestData.gas_leak_detected === 'yes' ? 'DETECTED' : 'NORMAL'}
+                </Badge>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Last Cleaned</span>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  {latestData.last_cleaned_timestamp 
+                    ? new Date(latestData.last_cleaned_timestamp).toLocaleString()
+                    : 'Never'
+                  }
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">{t('facility.temp')}:</span>
-                    <span className="ml-1 font-medium">{zoneAvgTemp}°C</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">{t('facility.occupancy')}:</span>
-                    <span className="ml-1 font-medium">{zoneOccupancy}</span>
-                  </div>
-                </div>
-                
-                <div className="text-sm">
-                  <span className="text-muted-foreground">{getCleaningStatusTranslation(latestZoneData.cleaning_status)}</span>
-                </div>
-
-                {/* Status Indicators */}
-                <div className="flex space-x-2">
-                  {latestZoneData.motion_detected && (
-                    <Badge variant="outline" className="text-xs">Motion</Badge>
-                  )}
-                  {latestZoneData.air_purifier_status && (
-                    <Badge variant="outline" className="text-xs">
-                      <Shield className="h-3 w-3 mr-1" />
-                      Air Purifier
-                    </Badge>
-                  )}
-                  {(latestZoneData.fire_alarm_triggered || latestZoneData.gas_leak_detected) && (
-                    <Badge variant="destructive" className="text-xs">Alert</Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
