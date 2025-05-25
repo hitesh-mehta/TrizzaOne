@@ -77,18 +77,29 @@ ${dbSchema}
 
 User Query: "${query}"
 
-Generate ONLY a PostgreSQL SELECT query based on the user's question. Rules:
-1. Return ONLY the SQL query, no explanations or markdown
-2. Use proper PostgreSQL syntax with correct table and column names
-3. If the query cannot be answered with available tables, respond with exactly: "CANNOT_ANSWER"
-4. Only SELECT queries are allowed
-5. Use appropriate WHERE, ORDER BY, and LIMIT clauses as needed
+Based on the user's question, determine what data they want and respond with ONLY a JSON object in this exact format:
+{
+  "table": "table_name",
+  "action": "select|count|average",
+  "columns": ["column1", "column2"],
+  "filters": {
+    "column_name": "value",
+    "date_filter": "today|yesterday|this_week"
+  },
+  "limit": 10
+}
 
-Generate the PostgreSQL SELECT query:`;
+Rules:
+1. Only use tables: dishes, food_history, iot_data, profiles
+2. Only use SELECT operations (no INSERT, UPDATE, DELETE)
+3. For date filters, use "today", "yesterday", or "this_week"
+4. If the query cannot be answered, respond with: {"error": "CANNOT_ANSWER"}
+5. Return ONLY the JSON object, no explanations
+
+Generate the JSON:`;
 
     console.log('Sending request to Gemini API...');
 
-    // Use the simpler Gemini API endpoint with gemini-1.5-pro model
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
@@ -118,10 +129,33 @@ Generate the PostgreSQL SELECT query:`;
     const geminiData = await geminiResponse.json();
     console.log('Gemini response received:', JSON.stringify(geminiData, null, 2));
     
-    const generatedQuery = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    console.log('Generated query:', generatedQuery);
+    const generatedResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    console.log('Generated response:', generatedResponse);
 
-    if (!generatedQuery || generatedQuery === 'CANNOT_ANSWER') {
+    if (!generatedResponse) {
+      return new Response(JSON.stringify({ 
+        response: "Sorry, I couldn't process your request. Please try rephrasing your question." 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Parse the JSON response
+    let queryConfig;
+    try {
+      const cleanResponse = generatedResponse.replace(/```json\n?|\n?```|```/g, '').trim();
+      queryConfig = JSON.parse(cleanResponse);
+      console.log('Parsed query config:', queryConfig);
+    } catch (parseError) {
+      console.error('Failed to parse Gemini response:', parseError);
+      return new Response(JSON.stringify({ 
+        response: "Sorry, I couldn't understand your request. Please try asking in a different way." 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (queryConfig.error === 'CANNOT_ANSWER') {
       return new Response(JSON.stringify({ 
         response: "Sorry, I cannot find that information in the available data. Please try asking about dishes, food history, IoT sensors, or user profiles." 
       }), {
@@ -129,45 +163,63 @@ Generate the PostgreSQL SELECT query:`;
       });
     }
 
-    // Clean the query and validate it's a SELECT statement
-    const cleanQuery = generatedQuery.replace(/```sql\n?|\n?```|```/g, '').trim();
-    if (!cleanQuery.toLowerCase().startsWith('select')) {
-      console.error('Invalid query generated:', cleanQuery);
-      return new Response(JSON.stringify({ 
-        response: "I can only fetch data from the database. Please ask questions about existing data." 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Execute the query using Supabase
+    // Execute the query using Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log('Executing query:', cleanQuery);
+    console.log('Executing query with config:', queryConfig);
 
-    // Use Supabase client methods instead of raw SQL
-    let data, error;
-    
-    try {
-      // For simple queries, we can try to parse and use the client methods
-      // For complex queries, we'll need to use a database function
-      const { data: queryResult, error: queryError } = await supabase.rpc('execute_sql', {
-        sql_query: cleanQuery
-      });
-      
-      data = queryResult;
-      error = queryError;
-    } catch (rpcError) {
-      console.log('RPC method not available, trying direct query execution...');
-      // If RPC doesn't exist, we'll return a helpful message
-      return new Response(JSON.stringify({ 
-        response: "Query execution is currently unavailable. Please contact your administrator to set up query execution capabilities." 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    let supabaseQuery = supabase.from(queryConfig.table);
+
+    // Apply action
+    if (queryConfig.action === 'count') {
+      supabaseQuery = supabaseQuery.select('*', { count: 'exact', head: true });
+    } else if (queryConfig.action === 'average' && queryConfig.columns?.length > 0) {
+      // For average, we'll select the column and calculate average on frontend
+      supabaseQuery = supabaseQuery.select(queryConfig.columns.join(','));
+    } else {
+      // Default select
+      const columns = queryConfig.columns && queryConfig.columns.length > 0 
+        ? queryConfig.columns.join(',') 
+        : '*';
+      supabaseQuery = supabaseQuery.select(columns);
     }
+
+    // Apply filters
+    if (queryConfig.filters) {
+      for (const [column, value] of Object.entries(queryConfig.filters)) {
+        if (column === 'date_filter' && value) {
+          const today = new Date();
+          let dateFilter;
+          
+          if (value === 'today') {
+            dateFilter = today.toISOString().split('T')[0];
+            supabaseQuery = supabaseQuery.gte('timestamp', `${dateFilter}T00:00:00`)
+                                       .lt('timestamp', `${dateFilter}T23:59:59`);
+          } else if (value === 'yesterday') {
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            dateFilter = yesterday.toISOString().split('T')[0];
+            supabaseQuery = supabaseQuery.gte('timestamp', `${dateFilter}T00:00:00`)
+                                       .lt('timestamp', `${dateFilter}T23:59:59`);
+          } else if (value === 'this_week') {
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            supabaseQuery = supabaseQuery.gte('timestamp', weekStart.toISOString());
+          }
+        } else if (value && column !== 'date_filter') {
+          supabaseQuery = supabaseQuery.eq(column, value);
+        }
+      }
+    }
+
+    // Apply limit
+    if (queryConfig.limit && queryConfig.action !== 'count') {
+      supabaseQuery = supabaseQuery.limit(queryConfig.limit);
+    }
+
+    const { data, error, count } = await supabaseQuery;
 
     if (error) {
       console.error('Database error:', error);
@@ -178,33 +230,42 @@ Generate the PostgreSQL SELECT query:`;
       });
     }
 
-    console.log('Query result:', data);
+    console.log('Query result:', { data, count });
 
     // Format the response
     let response = "";
-    if (!data || data.length === 0) {
+    
+    if (queryConfig.action === 'count') {
+      response = `Found ${count || 0} records.`;
+    } else if (queryConfig.action === 'average' && data && data.length > 0 && queryConfig.columns?.length > 0) {
+      const column = queryConfig.columns[0];
+      const values = data.map(row => parseFloat(row[column])).filter(val => !isNaN(val));
+      if (values.length > 0) {
+        const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+        response = `The average ${column} is ${average.toFixed(2)}.`;
+      } else {
+        response = `No valid data found for calculating average of ${column}.`;
+      }
+    } else if (!data || data.length === 0) {
       response = "No data found for your query. Try asking about different time periods or check if the data exists.";
     } else {
       response = `Here's what I found:\n\n`;
-      if (Array.isArray(data)) {
-        // Show up to 10 results to keep response manageable
-        const displayData = data.slice(0, 10);
-        displayData.forEach((row, index) => {
-          response += `${index + 1}. `;
-          const entries = Object.entries(row);
-          entries.forEach(([key, value], entryIndex) => {
-            if (entryIndex > 0) response += ", ";
-            response += `${key}: ${value}`;
-          });
-          response += '\n';
+      const displayData = data.slice(0, 10);
+      displayData.forEach((row, index) => {
+        response += `${index + 1}. `;
+        const entries = Object.entries(row);
+        entries.forEach(([key, value], entryIndex) => {
+          if (entryIndex > 0) response += ", ";
+          response += `${key}: ${value}`;
         });
-        
-        if (data.length > 10) {
-          response += `\n... and ${data.length - 10} more results.`;
-        }
-        
-        response += `\nTotal results: ${data.length}`;
+        response += '\n';
+      });
+      
+      if (data.length > 10) {
+        response += `\n... and ${data.length - 10} more results.`;
       }
+      
+      response += `\nTotal results: ${data.length}`;
     }
 
     return new Response(JSON.stringify({ response }), {

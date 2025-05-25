@@ -140,8 +140,8 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 w-96 h-96 shadow-2xl z-50 flex flex-col">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className="fixed bottom-4 right-4 w-96 h-[500px] shadow-2xl z-50 flex flex-col">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 flex-shrink-0">
         <CardTitle className="text-lg flex items-center gap-2">
           <Bot className="h-5 w-5 text-mintGreen" />
           {t('chatbot.title')}
@@ -156,8 +156,8 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
         </Button>
       </CardHeader>
       
-      <CardContent className="flex-1 flex flex-col p-4 pt-0">
-        <ScrollArea className="flex-1 mb-4">
+      <CardContent className="flex-1 flex flex-col p-4 pt-0 min-h-0">
+        <ScrollArea className="flex-1 mb-4 pr-4">
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -197,7 +197,7 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
           </div>
         </ScrollArea>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
