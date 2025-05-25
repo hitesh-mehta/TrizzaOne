@@ -30,13 +30,17 @@ export const useAnomalyDetection = () => {
 
   const fetchAnomalies = async () => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('anomaly_detections')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching anomalies:', error);
+        throw error;
+      }
       
       // Type cast the data to ensure input_data is properly typed
       const typedData = (data || []).map(item => ({
@@ -47,6 +51,7 @@ export const useAnomalyDetection = () => {
       setAnomalies(typedData);
     } catch (error) {
       console.error('Error fetching anomalies:', error);
+      setAnomalies([]);
     } finally {
       setIsLoading(false);
     }
