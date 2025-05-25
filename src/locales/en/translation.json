@@ -109,6 +109,7 @@
   },
   "orderHistory": {
     "title": "Order History & Menu Management",
+    "subtitle": "Manage orders and menu items",
     "mostPopularToday": "Most Popular Today",
     "leastPopularToday": "Least Popular Today",
     "todayAvgRating": "Today's Avg Rating",

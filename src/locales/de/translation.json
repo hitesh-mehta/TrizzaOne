@@ -109,6 +109,7 @@
   },
   "orderHistory": {
     "title": "Bestellhistorie & Menüverwaltung",
+    "subtitle": "Bestellungen und Menüpunkte verwalten",
     "mostPopularToday": "Beliebteste heute",
     "leastPopularToday": "Wenigste beliebt heute",
     "todayAvgRating": "Heutige Durchschnittsbewertung",

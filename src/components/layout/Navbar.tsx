@@ -88,7 +88,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h2 className="text-xl font-semibold text-foreground">
-            {t('app.dashboard', 'Dashboard')}
+            {t('app.name')}
           </h2>
         </div>
         

@@ -126,7 +126,7 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
 
     const rect = target.getBoundingClientRect();
     const cardWidth = 320;
-    const cardHeight = 200;
+    const cardHeight = 250;
     
     let top = rect.top;
     let left = rect.left;
@@ -137,25 +137,42 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
         left = rect.right + 20;
         top = rect.top + (rect.height / 2);
         transform = 'translateY(-50%)';
+        // Ensure it doesn't go off screen
+        if (left + cardWidth > window.innerWidth - 20) {
+          left = rect.left - cardWidth - 20;
+          transform = 'translateY(-50%)';
+        }
         break;
       case 'left':
         left = rect.left - cardWidth - 20;
         top = rect.top + (rect.height / 2);
         transform = 'translateY(-50%)';
+        if (left < 20) {
+          left = rect.right + 20;
+          transform = 'translateY(-50%)';
+        }
         break;
       case 'top':
         left = rect.left + (rect.width / 2);
         top = rect.top - cardHeight - 20;
         transform = 'translateX(-50%)';
+        if (top < 20) {
+          top = rect.bottom + 20;
+          transform = 'translateX(-50%)';
+        }
         break;
       case 'bottom':
         left = rect.left + (rect.width / 2);
         top = rect.bottom + 20;
         transform = 'translateX(-50%)';
+        if (top + cardHeight > window.innerHeight - 20) {
+          top = rect.top - cardHeight - 20;
+          transform = 'translateX(-50%)';
+        }
         break;
     }
 
-    // Ensure the card stays within viewport bounds
+    // Final boundary checks
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     

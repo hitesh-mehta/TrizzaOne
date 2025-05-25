@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react';
+import { MessageCircle, X, Send, Bot, User, Copy, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -14,6 +14,7 @@ interface Message {
   type: 'user' | 'bot';
   content: string;
   timestamp: Date;
+  data?: any;
 }
 
 interface BototatoProps {
@@ -34,6 +35,7 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -43,6 +45,60 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const copyToClipboard = async (content: string, messageId: string) => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+      toast({
+        title: "Copied!",
+        description: "Response copied to clipboard",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy to clipboard",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const formatBotResponse = (response: string, data?: any) => {
+    // Check if response contains structured data
+    if (data && Array.isArray(data)) {
+      let formattedResponse = response;
+      
+      // Add a summary of the data
+      formattedResponse += `\n\n📊 **Data Summary:**\n`;
+      formattedResponse += `• Found ${data.length} records\n`;
+      
+      if (data.length > 0) {
+        const sampleRecord = data[0];
+        const keys = Object.keys(sampleRecord);
+        formattedResponse += `• Fields: ${keys.join(', ')}\n`;
+        
+        // Show top 3 records in a formatted way
+        const displayRecords = data.slice(0, 3);
+        formattedResponse += `\n📋 **Sample Records:**\n`;
+        
+        displayRecords.forEach((record, index) => {
+          formattedResponse += `\n**Record ${index + 1}:**\n`;
+          Object.entries(record).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+              formattedResponse += `• ${key}: ${value}\n`;
+            }
+          });
+        });
+        
+        if (data.length > 3) {
+          formattedResponse += `\n... and ${data.length - 3} more records.`;
+        }
+      }
+    }
+    
+    return response;
+  };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -92,11 +148,15 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
         throw new Error(error.message || 'Failed to get response from Botato');
       }
 
+      // Format the response for better presentation
+      const formattedContent = formatBotResponse(data?.response || t('chatbot.error'), data?.data);
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: data?.response || t('chatbot.error'),
-        timestamp: new Date()
+        content: formattedContent,
+        timestamp: new Date(),
+        data: data?.data
       };
 
       setMessages(prev => [...prev, botMessage]);
@@ -165,23 +225,41 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
                 className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
+                  className={`max-w-[85%] rounded-lg p-3 ${
                     message.type === 'user'
                       ? 'bg-mintGreen text-white'
-                      : 'bg-muted text-foreground'
+                      : 'bg-muted text-foreground border'
                   }`}
                 >
                   <div className="flex items-start gap-2">
-                    {message.type === 'bot' && <Bot className="h-4 w-4 mt-0.5 text-mintGreen" />}
-                    {message.type === 'user' && <User className="h-4 w-4 mt-0.5" />}
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    {message.type === 'bot' && <Bot className="h-4 w-4 mt-0.5 text-mintGreen flex-shrink-0" />}
+                    {message.type === 'user' && <User className="h-4 w-4 mt-0.5 flex-shrink-0" />}
+                    <div className="flex-1">
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                      {message.type === 'bot' && (
+                        <div className="flex justify-end mt-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(message.content, message.id)}
+                            className="h-6 px-2 text-xs"
+                          >
+                            {copiedMessageId === message.id ? (
+                              <CheckCircle className="h-3 w-3" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-muted text-foreground max-w-[80%] rounded-lg p-3">
+                <div className="bg-muted text-foreground max-w-[85%] rounded-lg p-3 border">
                   <div className="flex items-center gap-2">
                     <Bot className="h-4 w-4 text-mintGreen" />
                     <div className="flex space-x-1">

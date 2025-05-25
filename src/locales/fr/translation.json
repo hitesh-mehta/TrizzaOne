@@ -109,6 +109,7 @@
   },
   "orderHistory": {
     "title": "Historique des commandes et gestion du menu",
+    "subtitle": "Gérer les commandes et les éléments de menu",
     "mostPopularToday": "Plus populaire aujourd'hui",
     "leastPopularToday": "Moins populaire aujourd'hui",
     "todayAvgRating": "Note moyenne d'aujourd'hui",

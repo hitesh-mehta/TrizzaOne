@@ -4,7 +4,8 @@
     "name": "TrizzaOne",
     "tagline": "स्मार्टऑप्स कमांड सेंटर",
     "welcomeTitle": "TrizzaOne में आपका स्वागत है",
-    "welcomeDesc": "आपका स्मार्ट ऑपरेशन कमांड सेंटर"
+    "welcomeDesc": "आपका स्मार्ट ऑपरेशन कमांड सेंटर",
+    "dashboard": "डैशबोर्ड"
   },
   "auth": {
     "login": "लॉग इन",
@@ -33,7 +34,8 @@
     "signupErrorTitle": "साइनअप असफल",
     "logoutSuccess": "सफलतापूर्वक लॉग आउट",
     "logoutSuccessDesc": "आप साइन आउट हो गए हैं",
-    "logoutError": "लॉगआउट असफल"
+    "logoutError": "लॉगआउट असफल",
+    "logout": "लॉग आउट"
   },
   "language": {
     "en": "अंग्रेजी",
@@ -51,9 +53,7 @@
     "forecast": "पूर्वानुमान",
     "sustainability": "स्थिरता",
     "feedback": "प्रतिक्रिया",
-    "settings": "सेटिंग्स",
-    "profile": "प्रोफ़ाइल",
-    "logout": "लॉग आउट"
+    "profile": "प्रोफ़ाइल"
   },
   "dashboard": {
     "overview": "सुविधा अवलोकन",
@@ -106,6 +106,54 @@
     "units": "इकाइयां",
     "calendarDesc": "हाइलाइट की गई तारीखें {{dish}} के लिए भविष्यवाणी अवधि दिखाती हैं",
     "emptyState": "AI-संचालित मात्रा पूर्वानुमान उत्पन्न करने के लिए एक व्यंजन और भविष्यवाणी अवधि चुनें"
+  },
+  "orderHistory": {
+    "title": "ऑर्डर इतिहास और मेनू प्रबंधन",
+    "subtitle": "ऑर्डर और मेनू आइटम प्रबंधित करें",
+    "mostPopularToday": "आज सबसे लोकप्रिय",
+    "leastPopularToday": "आज कम लोकप्रिय",
+    "todayAvgRating": "आज की औसत रेटिंग",
+    "noOrdersToday": "आज कोई ऑर्डर नहीं",
+    "servings": "सर्विंग्स",
+    "noRatings": "कोई रेटिंग नहीं",
+    "ratingTrends": "रेटिंग ट्रेंड्स",
+    "avgRatingsOverTime": "समय के साथ औसत रेटिंग",
+    "hourly": "घंटेवार",
+    "daily": "दैनिक",
+    "weekly": "साप्ताहिक",
+    "period": "अवधि",
+    "stars": "सितारे",
+    "avgRating": "औसत रेटिंग",
+    "todayOrderPopularity": "आज की ऑर्डर लोकप्रियता",
+    "quantityConsumedByDish": "डिश के अनुसार खपत मात्रा",
+    "orderDistribution": "ऑर्डर वितरण",
+    "todayOrdersByPercentage": "प्रतिशत के अनुसार आज के ऑर्डर",
+    "menuManagement": "मेनू प्रबंधन",
+    "manageDishesAndPrices": "अपने व्यंजन और मूल्य प्रबंधित करें",
+    "addDish": "डिश जोड़ें",
+    "dishName": "डिश का नाम",
+    "price": "कीमत",
+    "actions": "कार्य",
+    "enterDishName": "डिश का नाम दर्ज करें",
+    "enterPrice": "कीमत दर्ज करें",
+    "recentOrderHistory": "हाल की ऑर्डर हिस्ट्री",
+    "latestFoodOrdersData": "नवीनतम भोजन ऑर्डर और उपभोग डेटा",
+    "quantityConsumed": "उपभोग की गई मात्रा",
+    "orderPrice": "ऑर्डर मूल्य",
+    "rating": "रेटिंग",
+    "timestamp": "समयचिह्न",
+    "dishAdded": "डिश सफलतापूर्वक जोड़ी गई",
+    "dishUpdated": "डिश सफलतापूर्वक अपडेट की गई",
+    "dishDeleted": "डिश सफलतापूर्वक हटाई गई"
+  },
+  "chatbot": {
+    "title": "Botato - आपका डेटा सहायक",
+    "placeholder": "अपने डेटा के बारे में कुछ भी पूछें...",
+    "send": "भेजें",
+    "thinking": "सोच रहा है...",
+    "error": "कुछ गलत हुआ। कृपया पुनः प्रयास करें।",
+    "noModificationWarning": "मैं केवल डेटा प्राप्त कर सकता हूं। संशोधन के लिए, कृपया डेटाबेस को मैन्युअल रूप से अपडेट करें।",
+    "welcome": "नमस्ते! मैं Botato हूं। अपने रेस्टोरेंट डेटा के बारे में कुछ भी पूछें!"
   },
   "tour": {
     "welcome": {
