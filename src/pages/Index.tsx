@@ -16,6 +16,7 @@ import Footer from '@/components/layout/Footer';
 import { useToast } from "@/components/ui/use-toast";
 import FoodModel3D from '@/components/3d/FoodModel3D';
 import Predictions from '@/components/dashboard/Predictions';
+import OrderHistory from '@/components/dashboard/OrderHistory';
 
 // Import language configuration
 import '@/i18n';
@@ -89,6 +90,8 @@ const Index = () => {
         return <Dashboard />;
       case 'predictions':
         return <Predictions />;
+      case 'order-history':
+        return <OrderHistory />;
       case 'sustainability':
         return <Sustainability />;
       case 'feedback':
@@ -171,7 +174,8 @@ const Index = () => {
                 <div className="absolute right-10 top-6 opacity-10 -z-20 pointer-events-none">
                   <FoodModel3D 
                     type={activeItem === 'dashboard' ? 'plate' : 
-                          activeItem === 'sustainability' ? 'donut' : 'burger'}
+                          activeItem === 'sustainability' ? 'donut' : 
+                          activeItem === 'order-history' ? 'burger' : 'burger'}
                     size={200}
                     rotate={true}
                   />

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Globe } from 'lucide-react';
@@ -17,6 +17,15 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({ isInNavbar = false 
     { code: 'de', name: 'Deutsch' },
     { code: 'fr', name: 'Français' },
   ];
+
+  // Set default language to English if no language is set
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('trizzaone_language');
+    if (!savedLanguage) {
+      i18n.changeLanguage('en');
+      localStorage.setItem('trizzaone_language', 'en');
+    }
+  }, [i18n]);
 
   const handleLanguageChange = (value: string) => {
     i18n.changeLanguage(value);

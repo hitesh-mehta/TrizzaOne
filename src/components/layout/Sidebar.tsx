@@ -8,7 +8,8 @@ import {
   MessageSquare,
   ChevronLeft,
   ChevronRight,
-  BarChart3
+  BarChart3,
+  History
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -36,6 +37,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       id: 'predictions',
       label: t('predictions.title', 'AI Predictions'),
       icon: BarChart3,
+    },
+    {
+      id: 'order-history',
+      label: 'Order History',
+      icon: History,
     },
     {
       id: 'sustainability',
