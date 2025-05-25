@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,6 +61,10 @@ const FacilityMap: React.FC = () => {
   };
 
   const currentData = mockData[selectedArea as keyof typeof mockData];
+
+  const handleAreaClick = (areaValue: string) => {
+    setSelectedArea(areaValue);
+  };
 
   return (
     <div className="space-y-6">
@@ -164,60 +167,60 @@ const FacilityMap: React.FC = () => {
             <div className="bg-gradient-to-br from-gray-100 to-gray-200 p-8 rounded-lg">
               <div className="grid grid-cols-4 gap-4 h-64">
                 {/* Kitchen */}
-                <div 
-                  className={`bg-orange-200 rounded-lg p-4 cursor-pointer transition-all ${
-                    selectedArea === 'kitchen' ? 'ring-2 ring-orange-500 bg-orange-300' : 'hover:bg-orange-300'
+                <button 
+                  className={`bg-orange-200 rounded-lg p-4 cursor-pointer transition-all hover:bg-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                    selectedArea === 'kitchen' ? 'ring-2 ring-orange-500 bg-orange-300 shadow-lg' : ''
                   }`}
-                  onClick={() => setSelectedArea('kitchen')}
+                  onClick={() => handleAreaClick('kitchen')}
                 >
                   <div className="text-center">
                     <Thermometer className="h-8 w-8 mx-auto mb-2 text-orange-600" />
                     <p className="text-sm font-medium">Kitchen</p>
                     <p className="text-xs text-orange-600">32.1°C</p>
                   </div>
-                </div>
+                </button>
 
                 {/* Dining Area */}
-                <div 
-                  className={`bg-blue-200 rounded-lg p-4 col-span-2 cursor-pointer transition-all ${
-                    selectedArea === 'dining' ? 'ring-2 ring-blue-500 bg-blue-300' : 'hover:bg-blue-300'
+                <button 
+                  className={`bg-blue-200 rounded-lg p-4 col-span-2 cursor-pointer transition-all hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    selectedArea === 'dining' ? 'ring-2 ring-blue-500 bg-blue-300 shadow-lg' : ''
                   }`}
-                  onClick={() => setSelectedArea('dining')}
+                  onClick={() => handleAreaClick('dining')}
                 >
                   <div className="text-center">
                     <Users className="h-8 w-8 mx-auto mb-2 text-blue-600" />
                     <p className="text-sm font-medium">Dining Area</p>
                     <p className="text-xs text-blue-600">35 people</p>
                   </div>
-                </div>
+                </button>
 
                 {/* Storage */}
-                <div 
-                  className={`bg-cyan-200 rounded-lg p-4 cursor-pointer transition-all ${
-                    selectedArea === 'storage' ? 'ring-2 ring-cyan-500 bg-cyan-300' : 'hover:bg-cyan-300'
+                <button 
+                  className={`bg-cyan-200 rounded-lg p-4 cursor-pointer transition-all hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                    selectedArea === 'storage' ? 'ring-2 ring-cyan-500 bg-cyan-300 shadow-lg' : ''
                   }`}
-                  onClick={() => setSelectedArea('storage')}
+                  onClick={() => handleAreaClick('storage')}
                 >
                   <div className="text-center">
                     <Droplets className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
                     <p className="text-sm font-medium">Storage</p>
                     <p className="text-xs text-cyan-600">55% humidity</p>
                   </div>
-                </div>
+                </button>
 
                 {/* Hallway */}
-                <div 
-                  className={`bg-mintGreen/40 rounded-lg p-4 col-span-4 cursor-pointer transition-all ${
-                    selectedArea === 'hallway' ? 'ring-2 ring-mintGreen bg-mintGreen/60' : 'hover:bg-mintGreen/60'
+                <button 
+                  className={`bg-mintGreen/40 rounded-lg p-4 col-span-4 cursor-pointer transition-all hover:bg-mintGreen/60 focus:outline-none focus:ring-2 focus:ring-mintGreen ${
+                    selectedArea === 'hallway' ? 'ring-2 ring-mintGreen bg-mintGreen/60 shadow-lg' : ''
                   }`}
-                  onClick={() => setSelectedArea('hallway')}
+                  onClick={() => handleAreaClick('hallway')}
                 >
                   <div className="text-center">
                     <Wifi className="h-8 w-8 mx-auto mb-2 text-mintGreen" />
                     <p className="text-sm font-medium">Hallway</p>
                     <p className="text-xs text-mintGreen">12 people passing</p>
                   </div>
-                </div>
+                </button>
               </div>
             </div>
           </div>
