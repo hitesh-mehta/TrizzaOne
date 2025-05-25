@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,9 +16,10 @@ interface WelcomeTourProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
+  onSkip?: () => void;
 }
 
-const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete }) => {
+const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, onSkip }) => {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const [isStarted, setIsStarted] = useState(false);
@@ -87,8 +87,12 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete }
   };
 
   const handleSkip = () => {
-    onClose();
-    localStorage.setItem('trizzaone_tour_skipped', 'true');
+    if (onSkip) {
+      onSkip();
+    } else {
+      onClose();
+      localStorage.setItem('trizzaone_tour_skipped', 'true');
+    }
   };
 
   const handleComplete = () => {
@@ -170,7 +174,7 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete }
           <Button
             variant="ghost"
             size="sm"
-            onClick={onClose}
+            onClick={handleSkip}
             className="h-8 w-8 p-0"
           >
             <X className="h-4 w-4" />

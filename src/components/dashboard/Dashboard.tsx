@@ -8,8 +8,9 @@ import StatCards from './StatCards';
 import IoTStats from './IoTStats';
 import IoTCharts from './IoTCharts';
 import RealtimeControls from './RealtimeControls';
+import AnomalyViewer from './AnomalyViewer';
 import { useIoTData } from '@/hooks/useIoTData';
-import { Activity, BarChart3, Map, TrendingUp } from 'lucide-react';
+import { Activity, BarChart3, Map, TrendingUp, AlertTriangle } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -34,7 +35,7 @@ const Dashboard: React.FC = () => {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 relative z-10">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
             Overview
@@ -46,6 +47,10 @@ const Dashboard: React.FC = () => {
           <TabsTrigger value="charts" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Analytics
+          </TabsTrigger>
+          <TabsTrigger value="anomalies" className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4" />
+            Anomalies
           </TabsTrigger>
           <TabsTrigger value="facility" className="flex items-center gap-2">
             <Map className="h-4 w-4" />
@@ -126,6 +131,10 @@ const Dashboard: React.FC = () => {
           ) : (
             <IoTCharts data={iotData} />
           )}
+        </TabsContent>
+
+        <TabsContent value="anomalies" className="space-y-6 relative z-10">
+          <AnomalyViewer />
         </TabsContent>
 
         <TabsContent value="facility" className="space-y-6 relative z-30">

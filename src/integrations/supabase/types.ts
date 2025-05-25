@@ -9,6 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      anomaly_detections: {
+        Row: {
+          anomaly_probability: number
+          api_timestamp: string
+          created_at: string
+          id: string
+          input_data: Json
+          iot_data_id: string
+          normal_probability: number
+          prediction: string
+          risk_level: string
+          zone: string
+        }
+        Insert: {
+          anomaly_probability: number
+          api_timestamp: string
+          created_at?: string
+          id?: string
+          input_data: Json
+          iot_data_id: string
+          normal_probability: number
+          prediction: string
+          risk_level: string
+          zone: string
+        }
+        Update: {
+          anomaly_probability?: number
+          api_timestamp?: string
+          created_at?: string
+          id?: string
+          input_data?: Json
+          iot_data_id?: string
+          normal_probability?: number
+          prediction?: string
+          risk_level?: string
+          zone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anomaly_detections_iot_data_id_fkey"
+            columns: ["iot_data_id"]
+            isOneToOne: false
+            referencedRelation: "iot_data"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dishes: {
         Row: {
           dish_id: number

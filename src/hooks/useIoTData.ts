@@ -1,7 +1,7 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAnomalyDetection } from './useAnomalyDetection';
 
 export interface IoTData {
   id: string;
@@ -32,6 +32,7 @@ export const useIoTData = () => {
   const [interval, setInterval] = useState<5 | 30 | 60 | 300>(30); // seconds
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { callAnomalyDetection } = useAnomalyDetection();
 
   const fetchData = useCallback(async () => {
     try {
@@ -102,6 +103,9 @@ export const useIoTData = () => {
       // Update local state immediately
       setData(prev => [insertedData, ...prev.slice(0, 99)]);
       
+      // Trigger anomaly detection for the new data
+      await callAnomalyDetection(insertedData);
+      
     } catch (err: any) {
       console.error('Error inserting new data point:', err);
       toast({
@@ -110,7 +114,7 @@ export const useIoTData = () => {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, [toast, callAnomalyDetection]);
 
   const toggleRealtime = useCallback((enabled: boolean) => {
     setIsRealtime(enabled);
@@ -148,13 +152,17 @@ export const useIoTData = () => {
           schema: 'public',
           table: 'iot_data'
         },
-        (payload) => {
+        async (payload) => {
           console.log('New IoT data received:', payload);
+          const newData = payload.new as IoTData;
+          
           // Only update if the data wasn't added by us locally
           setData(prev => {
-            const exists = prev.some(item => item.id === payload.new.id);
+            const exists = prev.some(item => item.id === newData.id);
             if (!exists) {
-              return [payload.new as IoTData, ...prev.slice(0, 99)];
+              // Trigger anomaly detection for external data
+              callAnomalyDetection(newData);
+              return [newData, ...prev.slice(0, 99)];
             }
             return prev;
           });
@@ -165,7 +173,7 @@ export const useIoTData = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [callAnomalyDetection]);
 
   // Set up data generation interval
   useEffect(() => {
