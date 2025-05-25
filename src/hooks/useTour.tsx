@@ -14,11 +14,11 @@ export const useTour = () => {
     
     // Show tour only if setup is complete and tour hasn't been completed or skipped
     if (setupComplete === 'true' && !tourCompleted && !tourSkipped) {
-      // Small delay to ensure the UI is fully loaded
+      // Delay to ensure the UI is fully loaded and sidebar is rendered
       setTimeout(() => {
         console.log('Starting tour...');
         setShowTour(true);
-      }, 2000); // Increased delay to 2 seconds
+      }, 3000); // Increased delay to 3 seconds to ensure sidebar is rendered
     }
   }, []);
 

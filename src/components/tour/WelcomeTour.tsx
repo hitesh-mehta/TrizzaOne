@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -87,21 +88,25 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
   };
 
   const handleSkip = () => {
+    console.log('Tour skipped');
+    localStorage.setItem('trizzaone_tour_skipped', 'true');
     if (onSkip) {
       onSkip();
     } else {
       onClose();
-      localStorage.setItem('trizzaone_tour_skipped', 'true');
     }
   };
 
   const handleComplete = () => {
-    onComplete();
+    console.log('Tour completed');
     localStorage.setItem('trizzaone_tour_completed', 'true');
+    onComplete();
   };
 
   const getStepPosition = () => {
     const step = tourSteps[currentStep];
+    
+    // For center positioned steps or when no target is specified
     if (!step.target || step.position === 'center') {
       return {
         position: 'fixed' as const,
@@ -112,9 +117,10 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
       };
     }
 
-    // For targeted steps, we'll position relative to the target
+    // Try to find the target element
     const target = document.querySelector(step.target);
     if (!target) {
+      console.log(`Target not found: ${step.target}, using center position`);
       return {
         position: 'fixed' as const,
         top: '50%',
@@ -125,46 +131,97 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
     }
 
     const rect = target.getBoundingClientRect();
+    const cardWidth = 320;
+    const cardHeight = 250;
+    
     let top = rect.top;
     let left = rect.left;
+    let transform = 'none';
 
     switch (step.position) {
       case 'right':
         left = rect.right + 20;
-        top = rect.top;
+        top = rect.top + (rect.height / 2);
+        transform = 'translateY(-50%)';
+        // Ensure it doesn't go off screen
+        if (left + cardWidth > window.innerWidth) {
+          left = rect.left - cardWidth - 20;
+          transform = 'translateY(-50%)';
+        }
         break;
       case 'left':
-        left = rect.left - 320;
-        top = rect.top;
+        left = rect.left - cardWidth - 20;
+        top = rect.top + (rect.height / 2);
+        transform = 'translateY(-50%)';
+        // Ensure it doesn't go off screen
+        if (left < 0) {
+          left = rect.right + 20;
+          transform = 'translateY(-50%)';
+        }
         break;
       case 'top':
-        left = rect.left;
-        top = rect.top - 200;
+        left = rect.left + (rect.width / 2);
+        top = rect.top - cardHeight - 20;
+        transform = 'translateX(-50%)';
+        // Ensure it doesn't go off screen
+        if (top < 0) {
+          top = rect.bottom + 20;
+          transform = 'translateX(-50%)';
+        }
         break;
       case 'bottom':
-        left = rect.left;
+        left = rect.left + (rect.width / 2);
         top = rect.bottom + 20;
+        transform = 'translateX(-50%)';
+        // Ensure it doesn't go off screen
+        if (top + cardHeight > window.innerHeight) {
+          top = rect.top - cardHeight - 20;
+          transform = 'translateX(-50%)';
+        }
         break;
     }
+
+    // Final boundary checks
+    if (left < 10) left = 10;
+    if (left + cardWidth > window.innerWidth - 10) left = window.innerWidth - cardWidth - 10;
+    if (top < 10) top = 10;
+    if (top + cardHeight > window.innerHeight - 10) top = window.innerHeight - cardHeight - 10;
 
     return {
       position: 'fixed' as const,
       top: `${top}px`,
       left: `${left}px`,
+      transform,
       zIndex: 1000
     };
   };
+
+  // Add spotlight effect for targeted elements
+  useEffect(() => {
+    if (!isStarted || !isOpen) return;
+
+    const step = tourSteps[currentStep];
+    if (step.target) {
+      const target = document.querySelector(step.target);
+      if (target) {
+        target.classList.add('tour-spotlight');
+        return () => {
+          target.classList.remove('tour-spotlight');
+        };
+      }
+    }
+  }, [currentStep, isStarted, isOpen, tourSteps]);
 
   if (!isOpen) return null;
 
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/50 z-50" />
+      <div className="fixed inset-0 bg-black/50 z-[999]" onClick={handleSkip} />
       
       {/* Tour Card */}
       <Card 
-        className="w-80 shadow-2xl border-mintGreen/20 bg-background/95 backdrop-blur-md"
+        className="w-80 shadow-2xl border-mintGreen/20 bg-background/95 backdrop-blur-md z-[1000]"
         style={getStepPosition()}
       >
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -246,6 +303,16 @@ const WelcomeTour: React.FC<WelcomeTourProps> = ({ isOpen, onClose, onComplete, 
           )}
         </CardContent>
       </Card>
+
+      {/* Add custom CSS for spotlight effect */}
+      <style jsx>{`
+        .tour-spotlight {
+          position: relative;
+          z-index: 1001;
+          box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+          border-radius: 8px;
+        }
+      `}</style>
     </>
   );
 };
