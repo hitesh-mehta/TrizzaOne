@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,8 +63,8 @@ const FacilityMap: React.FC = () => {
   const currentData = mockData[selectedArea as keyof typeof mockData];
 
   return (
-    <div className="space-y-6">
-      <Card className="neumorphic-card">
+    <div className="space-y-6 relative z-20">
+      <Card className="neumorphic-card relative z-20">
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2">
@@ -73,10 +72,10 @@ const FacilityMap: React.FC = () => {
               {t('dashboard.facilityOverview')}
             </CardTitle>
             <Select value={selectedArea} onValueChange={setSelectedArea}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48 relative z-30">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="relative z-40">
                 {facilityAreas.map((area) => (
                   <SelectItem key={area.value} value={area.value}>
                     <div className="flex items-center gap-2">
@@ -89,7 +88,7 @@ const FacilityMap: React.FC = () => {
             </Select>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-20">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Temperature Card */}
             <div className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-lg border">
@@ -158,15 +157,15 @@ const FacilityMap: React.FC = () => {
             </div>
           </div>
 
-          {/* Facility Layout */}
-          <div className="mt-8">
+          {/* Facility Layout with proper z-index */}
+          <div className="mt-8 relative z-20">
             <h3 className="text-lg font-semibold mb-4">Facility Layout</h3>
-            <div className="bg-gradient-to-br from-gray-100 to-gray-200 p-8 rounded-lg">
-              <div className="grid grid-cols-4 gap-4 h-64">
+            <div className="bg-gradient-to-br from-gray-100 to-gray-200 p-8 rounded-lg relative z-20">
+              <div className="grid grid-cols-4 gap-4 h-64 relative z-20">
                 {/* Kitchen */}
                 <button 
                   type="button"
-                  className={`bg-orange-200 rounded-lg p-4 cursor-pointer transition-all hover:bg-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
+                  className={`bg-orange-200 rounded-lg p-4 cursor-pointer transition-all hover:bg-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 relative z-30 ${
                     selectedArea === 'kitchen' ? 'ring-2 ring-orange-500 bg-orange-300 shadow-lg' : ''
                   }`}
                   onClick={() => setSelectedArea('kitchen')}
@@ -181,7 +180,7 @@ const FacilityMap: React.FC = () => {
                 {/* Dining Area */}
                 <button 
                   type="button"
-                  className={`bg-blue-200 rounded-lg p-4 col-span-2 cursor-pointer transition-all hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`bg-blue-200 rounded-lg p-4 col-span-2 cursor-pointer transition-all hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 relative z-30 ${
                     selectedArea === 'dining' ? 'ring-2 ring-blue-500 bg-blue-300 shadow-lg' : ''
                   }`}
                   onClick={() => setSelectedArea('dining')}
@@ -196,7 +195,7 @@ const FacilityMap: React.FC = () => {
                 {/* Storage */}
                 <button 
                   type="button"
-                  className={`bg-cyan-200 rounded-lg p-4 cursor-pointer transition-all hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
+                  className={`bg-cyan-200 rounded-lg p-4 cursor-pointer transition-all hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 relative z-30 ${
                     selectedArea === 'storage' ? 'ring-2 ring-cyan-500 bg-cyan-300 shadow-lg' : ''
                   }`}
                   onClick={() => setSelectedArea('storage')}
@@ -211,7 +210,7 @@ const FacilityMap: React.FC = () => {
                 {/* Hallway */}
                 <button 
                   type="button"
-                  className={`bg-mintGreen/40 rounded-lg p-4 col-span-4 cursor-pointer transition-all hover:bg-mintGreen/60 focus:outline-none focus:ring-2 focus:ring-mintGreen ${
+                  className={`bg-mintGreen/40 rounded-lg p-4 col-span-4 cursor-pointer transition-all hover:bg-mintGreen/60 focus:outline-none focus:ring-2 focus:ring-mintGreen relative z-30 ${
                     selectedArea === 'hallway' ? 'ring-2 ring-mintGreen bg-mintGreen/60 shadow-lg' : ''
                   }`}
                   onClick={() => setSelectedArea('hallway')}

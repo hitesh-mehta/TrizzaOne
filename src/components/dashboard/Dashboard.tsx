@@ -27,13 +27,13 @@ const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 relative z-10">
       <div>
         <h2 className="text-3xl font-bold mb-2">{t('nav.dashboard')}</h2>
         <p className="text-muted-foreground">{t('dashboard.quickStats')}</p>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 relative z-10">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
@@ -53,10 +53,10 @@ const Dashboard: React.FC = () => {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent value="overview" className="space-y-6 relative z-10">
           <StatCards />
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
             <div className="lg:col-span-2">
               {iotLoading ? (
                 <Card className="neumorphic-card">
@@ -93,7 +93,7 @@ const Dashboard: React.FC = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="iot-stats" className="space-y-6">
+        <TabsContent value="iot-stats" className="space-y-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-3">
               {iotLoading ? (
@@ -118,7 +118,7 @@ const Dashboard: React.FC = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="charts" className="space-y-6">
+        <TabsContent value="charts" className="space-y-6 relative z-10">
           {iotLoading ? (
             <div className="flex items-center justify-center h-40">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mintGreen"></div>
@@ -128,7 +128,7 @@ const Dashboard: React.FC = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="facility" className="space-y-6">
+        <TabsContent value="facility" className="space-y-6 relative z-20">
           <FacilityMap />
         </TabsContent>
       </Tabs>

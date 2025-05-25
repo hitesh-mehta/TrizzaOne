@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -117,28 +118,28 @@ const Index = () => {
           <div className="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-background via-purple-50/30 to-mintGreen/10 relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,107,107,0.1),transparent_50%)]"></div>
             <div className="absolute -z-10 top-0 left-0 w-full h-full pointer-events-none">
-              <div className="absolute top-10 right-40 opacity-60 scale-75 sm:scale-100 animate-float">
+              <div className="absolute top-10 right-40 opacity-60 scale-75 sm:scale-100 animate-float -z-10">
                 <FoodModel3D type="burger" rotate={true} size={150} />
               </div>
-              <div className="absolute bottom-20 left-10 opacity-60 scale-75 sm:scale-100 animate-bounce-slow">
+              <div className="absolute bottom-20 left-10 opacity-60 scale-75 sm:scale-100 animate-bounce-slow -z-10">
                 <FoodModel3D type="donut" rotate={true} size={130} />
               </div>
-              <div className="absolute top-1/2 left-1/4 opacity-40 scale-50 animate-pulse">
+              <div className="absolute top-1/2 left-1/4 opacity-40 scale-50 animate-pulse -z-10">
                 <FoodModel3D type="pizza" rotate={true} size={100} />
               </div>
             </div>
             
-            <div className="text-center max-w-md mx-auto glass-card p-8 rounded-xl backdrop-blur-md bg-background/80 border border-mintGreen/30 shadow-2xl transform hover:scale-105 transition-all duration-300 relative z-10">
+            <div className="text-center max-w-md mx-auto glass-card p-8 rounded-xl backdrop-blur-md bg-background/90 border border-mintGreen/30 shadow-2xl transform hover:scale-105 transition-all duration-300 relative z-10">
               <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-6 shadow-lg animate-pulse">
-                <span className="font-bold text-3xl text-navy">T1</span>
+                <span className="font-bold text-3xl text-white">T1</span>
               </div>
               <h1 className="text-5xl font-bold mb-4 text-navy animate-fade-in">
                 {t('app.welcomeTitle')}
               </h1>
-              <p className="mb-8 text-lg text-navy/80 animate-fade-in delay-100">{t('app.welcomeDesc')}</p>
+              <p className="mb-8 text-lg text-navy/90 animate-fade-in delay-100 font-medium">{t('app.welcomeDesc')}</p>
               <button 
                 onClick={() => navigate('/auth')}
-                className="px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-navy font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-fade-in delay-200"
+                className="px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-white font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-fade-in delay-200"
               >
                 {t('auth.getStarted')} ✨
               </button>
