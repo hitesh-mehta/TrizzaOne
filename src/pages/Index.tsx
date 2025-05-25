@@ -20,6 +20,8 @@ import Predictions from '@/components/dashboard/Predictions';
 import OrderHistory from '@/components/dashboard/OrderHistory';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import Botato from '@/components/chatbot/Botato';
+import WelcomeTour from '@/components/tour/WelcomeTour';
+import { useTour } from '@/hooks/useTour';
 
 // Import language configuration
 import '@/i18n';
@@ -28,6 +30,7 @@ const Index = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { showTour, closeTour, completeTour } = useTour();
   const [showSplash, setShowSplash] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -213,6 +216,13 @@ const Index = () => {
           <Botato 
             isOpen={chatbotOpen} 
             onToggle={() => setChatbotOpen(!chatbotOpen)} 
+          />
+          
+          {/* Welcome Tour */}
+          <WelcomeTour 
+            isOpen={showTour}
+            onClose={closeTour}
+            onComplete={completeTour}
           />
         </div>
       )}

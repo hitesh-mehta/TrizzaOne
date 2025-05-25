@@ -143,6 +143,37 @@
   "dishAdded": "Gericht erfolgreich hinzugefügt",
   "dishUpdated": "Gericht erfolgreich aktualisiert",
   "dishDeleted": "Gericht erfolgreich gelöscht",
+  "tour": {
+    "welcome": {
+      "title": "Willkommen bei TrizzaOne! 🎉",
+      "description": "Lassen Sie uns eine kurze Tour durch Ihre neue Smart Operations Kommandozentrale machen."
+    },
+    "dashboard": {
+      "title": "Dashboard 📊",
+      "description": "Hier finden Sie eine Übersicht über Ihre Anlagen, IoT-Daten und wichtige Statistiken."
+    },
+    "predictions": {
+      "title": "KI-Vorhersagen 🔮",
+      "description": "Nutzen Sie KI-gestützte Vorhersagen für Restaurantgerichte und Mengenplanung."
+    },
+    "sustainability": {
+      "title": "Nachhaltigkeit 🌱",
+      "description": "Verfolgen Sie Ihre Nachhaltigkeitsziele und Umweltauswirkungen."
+    },
+    "chatbot": {
+      "title": "Botato Assistent 🤖",
+      "description": "Ihr KI-Assistent hilft Ihnen bei Fragen zu Daten und Analysen."
+    },
+    "complete": {
+      "title": "Tour abgeschlossen! ✨",
+      "description": "Sie sind bereit! Erkunden Sie TrizzaOne und optimieren Sie Ihre Betriebsabläufe."
+    },
+    "startTour": "Tour starten",
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "finish": "Fertig"
+  },
   "buttons": {
     "save": "Speichern",
     "cancel": "Abbrechen",
