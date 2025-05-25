@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -21,7 +22,6 @@ import ProfileSettings from '@/components/settings/ProfileSettings';
 import Botato from '@/components/chatbot/Botato';
 import WelcomeTour from '@/components/tour/WelcomeTour';
 import { useTour } from '@/hooks/useTour';
-import { MessageCircle } from 'lucide-react';
 
 // Import language configuration
 import '@/i18n';
@@ -30,7 +30,7 @@ const Index = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { showTour, closeTour, completeTour, skipTour } = useTour();
+  const { showTour, closeTour, completeTour } = useTour();
   const [showSplash, setShowSplash] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -212,27 +212,17 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Botato Chatbot with tour attribute */}
+          {/* Botato Chatbot */}
           <Botato 
             isOpen={chatbotOpen} 
             onToggle={() => setChatbotOpen(!chatbotOpen)} 
           />
-          
-          {/* Floating chatbot button for tour targeting */}
-          <button
-            data-tour="chatbot"
-            onClick={() => setChatbotOpen(!chatbotOpen)}
-            className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-mintGreen to-coral rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-40"
-          >
-            <MessageCircle className="h-6 w-6 text-white" />
-          </button>
           
           {/* Welcome Tour */}
           <WelcomeTour 
             isOpen={showTour}
             onClose={closeTour}
             onComplete={completeTour}
-            onSkip={skipTour}
           />
         </div>
       )}

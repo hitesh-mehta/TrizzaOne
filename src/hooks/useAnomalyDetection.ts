@@ -37,14 +37,7 @@ export const useAnomalyDetection = () => {
         .limit(50);
 
       if (error) throw error;
-      
-      // Transform the data to match our interface
-      const transformedData: AnomalyDetection[] = (data || []).map(item => ({
-        ...item,
-        input_data: item.input_data as AnomalyDetection['input_data']
-      }));
-      
-      setAnomalies(transformedData);
+      setAnomalies(data || []);
     } catch (error) {
       console.error('Error fetching anomalies:', error);
     } finally {
@@ -97,10 +90,7 @@ export const useAnomalyDetection = () => {
         },
         (payload) => {
           console.log('New anomaly detected:', payload);
-          const newAnomaly = {
-            ...payload.new,
-            input_data: payload.new.input_data as AnomalyDetection['input_data']
-          } as AnomalyDetection;
+          const newAnomaly = payload.new as AnomalyDetection;
           
           setAnomalies(prev => [newAnomaly, ...prev.slice(0, 49)]);
           
