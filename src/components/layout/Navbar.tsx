@@ -67,8 +67,18 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
     getUserInfo();
   }, []);
 
-  // Get initials from email (first two letters of email before @)
-  const getEmailInitials = () => {
+  // Get initials from first and last name
+  const getNameInitials = () => {
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    if (firstName) {
+      return firstName.substring(0, 2).toUpperCase();
+    }
+    if (lastName) {
+      return lastName.substring(0, 2).toUpperCase();
+    }
+    // Fallback to email initials if no name is set
     if (!userEmail) return 'T1';
     const emailPart = userEmail.split('@')[0];
     if (emailPart.length >= 2) {
@@ -144,7 +154,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
             <Avatar className="h-10 w-10 cursor-pointer hover:opacity-80 transition-opacity">
               <AvatarImage src="/placeholder.svg" />
               <AvatarFallback className="bg-mintGreen text-white font-semibold">
-                {isLoading ? '...' : getEmailInitials()}
+                {isLoading ? '...' : getNameInitials()}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
