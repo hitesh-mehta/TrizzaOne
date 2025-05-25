@@ -19,7 +19,7 @@ serve(async (req) => {
     
     const geminiApiKey = 'AIzaSyBGK_9Tpv2PorkIfIBrmOvNAtLTqkH5Meg';
     
-    // Complete database schema information
+    // Enhanced database schema information
     const dbSchema = `
     Database Schema for TrizzaOne Restaurant Management System:
 
@@ -77,8 +77,20 @@ ${dbSchema}
 
 User Query: "${query}"
 
-Based on the user's question, determine what data they want and respond with ONLY a JSON object in this exact format:
+Analyze the user's question and determine what information they want. Based on the query, respond with ONLY a JSON object in this exact format:
+
+For queries about popularity, most/least consumed items, or food waste:
 {
+  "analysis_type": "aggregated",
+  "table": "food_history",
+  "operation": "most_popular|least_popular|most_consumed|least_consumed|food_waste|sales_summary",
+  "time_filter": "today|yesterday|this_week|all_time",
+  "limit": 10
+}
+
+For simple data retrieval:
+{
+  "analysis_type": "simple",
   "table": "table_name",
   "action": "select|count|average",
   "columns": ["column1", "column2"],
@@ -89,10 +101,19 @@ Based on the user's question, determine what data they want and respond with ONL
   "limit": 10
 }
 
+For unsupported queries:
+{"error": "CANNOT_ANSWER"}
+
+Examples:
+- "most popular dish today" → analysis_type: "aggregated", operation: "most_popular", time_filter: "today"
+- "least popular dish" → analysis_type: "aggregated", operation: "least_popular", time_filter: "all_time"
+- "food wasted today" → analysis_type: "aggregated", operation: "food_waste", time_filter: "today"
+- "most consumed item" → analysis_type: "aggregated", operation: "most_consumed", time_filter: "all_time"
+
 Rules:
 1. Only use tables: dishes, food_history, iot_data, profiles
 2. Only use SELECT operations (no INSERT, UPDATE, DELETE)
-3. For date filters, use "today", "yesterday", or "this_week"
+3. For date filters, use "today", "yesterday", "this_week", or "all_time"
 4. If the query cannot be answered, respond with: {"error": "CANNOT_ANSWER"}
 5. Return ONLY the JSON object, no explanations
 
@@ -170,105 +191,22 @@ Generate the JSON:`;
 
     console.log('Executing query with config:', queryConfig);
 
-    let supabaseQuery = supabase.from(queryConfig.table);
-
-    // Apply action
-    if (queryConfig.action === 'count') {
-      supabaseQuery = supabaseQuery.select('*', { count: 'exact', head: true });
-    } else if (queryConfig.action === 'average' && queryConfig.columns?.length > 0) {
-      // For average, we'll select the column and calculate average on frontend
-      supabaseQuery = supabaseQuery.select(queryConfig.columns.join(','));
-    } else {
-      // Default select
-      const columns = queryConfig.columns && queryConfig.columns.length > 0 
-        ? queryConfig.columns.join(',') 
-        : '*';
-      supabaseQuery = supabaseQuery.select(columns);
-    }
-
-    // Apply filters
-    if (queryConfig.filters) {
-      for (const [column, value] of Object.entries(queryConfig.filters)) {
-        if (column === 'date_filter' && value) {
-          const today = new Date();
-          let dateFilter;
-          
-          if (value === 'today') {
-            dateFilter = today.toISOString().split('T')[0];
-            supabaseQuery = supabaseQuery.gte('timestamp', `${dateFilter}T00:00:00`)
-                                       .lt('timestamp', `${dateFilter}T23:59:59`);
-          } else if (value === 'yesterday') {
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            dateFilter = yesterday.toISOString().split('T')[0];
-            supabaseQuery = supabaseQuery.gte('timestamp', `${dateFilter}T00:00:00`)
-                                       .lt('timestamp', `${dateFilter}T23:59:59`);
-          } else if (value === 'this_week') {
-            const weekStart = new Date(today);
-            weekStart.setDate(today.getDate() - today.getDay());
-            supabaseQuery = supabaseQuery.gte('timestamp', weekStart.toISOString());
-          }
-        } else if (value && column !== 'date_filter') {
-          supabaseQuery = supabaseQuery.eq(column, value);
-        }
-      }
-    }
-
-    // Apply limit
-    if (queryConfig.limit && queryConfig.action !== 'count') {
-      supabaseQuery = supabaseQuery.limit(queryConfig.limit);
-    }
-
-    const { data, error, count } = await supabaseQuery;
-
-    if (error) {
-      console.error('Database error:', error);
-      return new Response(JSON.stringify({ 
-        response: "Sorry, there was an error executing your query. Please try rephrasing your question." 
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    console.log('Query result:', { data, count });
-
-    // Format the response
     let response = "";
-    
-    if (queryConfig.action === 'count') {
-      response = `Found ${count || 0} records.`;
-    } else if (queryConfig.action === 'average' && data && data.length > 0 && queryConfig.columns?.length > 0) {
-      const column = queryConfig.columns[0];
-      const values = data.map(row => parseFloat(row[column])).filter(val => !isNaN(val));
-      if (values.length > 0) {
-        const average = values.reduce((sum, val) => sum + val, 0) / values.length;
-        response = `The average ${column} is ${average.toFixed(2)}.`;
-      } else {
-        response = `No valid data found for calculating average of ${column}.`;
-      }
-    } else if (!data || data.length === 0) {
-      response = "No data found for your query. Try asking about different time periods or check if the data exists.";
+    let data = null;
+
+    if (queryConfig.analysis_type === 'aggregated') {
+      // Handle aggregated queries for food analysis
+      const result = await handleAggregatedQuery(supabase, queryConfig);
+      response = result.response;
+      data = result.data;
     } else {
-      response = `Here's what I found:\n\n`;
-      const displayData = data.slice(0, 10);
-      displayData.forEach((row, index) => {
-        response += `${index + 1}. `;
-        const entries = Object.entries(row);
-        entries.forEach(([key, value], entryIndex) => {
-          if (entryIndex > 0) response += ", ";
-          response += `${key}: ${value}`;
-        });
-        response += '\n';
-      });
-      
-      if (data.length > 10) {
-        response += `\n... and ${data.length - 10} more results.`;
-      }
-      
-      response += `\nTotal results: ${data.length}`;
+      // Handle simple queries
+      const result = await handleSimpleQuery(supabase, queryConfig);
+      response = result.response;
+      data = result.data;
     }
 
-    return new Response(JSON.stringify({ response }), {
+    return new Response(JSON.stringify({ response, data }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
@@ -282,3 +220,204 @@ Generate the JSON:`;
     });
   }
 });
+
+async function handleAggregatedQuery(supabase: any, config: any) {
+  const { operation, time_filter, limit = 10 } = config;
+  
+  // Build time filter
+  let timeFilter = '';
+  const today = new Date();
+  
+  if (time_filter === 'today') {
+    const todayStr = today.toISOString().split('T')[0];
+    timeFilter = `timestamp >= '${todayStr}T00:00:00' AND timestamp < '${todayStr}T23:59:59'`;
+  } else if (time_filter === 'yesterday') {
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    timeFilter = `timestamp >= '${yesterdayStr}T00:00:00' AND timestamp < '${yesterdayStr}T23:59:59'`;
+  } else if (time_filter === 'this_week') {
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    timeFilter = `timestamp >= '${weekStart.toISOString()}'`;
+  }
+
+  let supabaseQuery = supabase.from('food_history').select('dish_name, quantity_consumed, quantity_prepared');
+  
+  if (timeFilter) {
+    const parts = timeFilter.split(' AND ');
+    if (parts.length === 2) {
+      const startTime = parts[0].split("'")[1];
+      const endTime = parts[1].split("'")[1];
+      supabaseQuery = supabaseQuery.gte('timestamp', startTime).lt('timestamp', endTime);
+    } else {
+      const startTime = timeFilter.split("'")[1];
+      supabaseQuery = supabaseQuery.gte('timestamp', startTime);
+    }
+  }
+
+  const { data: rawData, error } = await supabaseQuery.not('quantity_consumed', 'is', null);
+
+  if (error) {
+    console.error('Database error:', error);
+    return { response: "Sorry, there was an error retrieving the data.", data: null };
+  }
+
+  if (!rawData || rawData.length === 0) {
+    return { response: "No data found for the specified time period.", data: [] };
+  }
+
+  // Aggregate data by dish
+  const dishStats = rawData.reduce((acc: any, item: any) => {
+    const dishName = item.dish_name;
+    if (!acc[dishName]) {
+      acc[dishName] = {
+        dish_name: dishName,
+        total_consumed: 0,
+        total_prepared: 0,
+        total_wasted: 0,
+        orders: 0
+      };
+    }
+    
+    acc[dishName].total_consumed += item.quantity_consumed || 0;
+    acc[dishName].total_prepared += item.quantity_prepared || 0;
+    acc[dishName].total_wasted += (item.quantity_prepared || 0) - (item.quantity_consumed || 0);
+    acc[dishName].orders += 1;
+    
+    return acc;
+  }, {});
+
+  const aggregatedData = Object.values(dishStats);
+
+  // Sort based on operation
+  let sortedData;
+  let responseText;
+
+  switch (operation) {
+    case 'most_popular':
+    case 'most_consumed':
+      sortedData = aggregatedData.sort((a: any, b: any) => b.total_consumed - a.total_consumed);
+      responseText = `Most consumed dish${time_filter !== 'all_time' ? ` ${time_filter}` : ''}: **${sortedData[0].dish_name}** with ${sortedData[0].total_consumed} units consumed`;
+      break;
+      
+    case 'least_popular':
+    case 'least_consumed':
+      sortedData = aggregatedData.sort((a: any, b: any) => a.total_consumed - b.total_consumed);
+      responseText = `Least consumed dish${time_filter !== 'all_time' ? ` ${time_filter}` : ''}: **${sortedData[0].dish_name}** with ${sortedData[0].total_consumed} units consumed`;
+      break;
+      
+    case 'food_waste':
+      sortedData = aggregatedData.sort((a: any, b: any) => b.total_wasted - a.total_wasted);
+      responseText = `Food waste analysis${time_filter !== 'all_time' ? ` ${time_filter}` : ''}:\n`;
+      responseText += sortedData.slice(0, 5).map((item: any, index: number) => 
+        `${index + 1}. **${item.dish_name}**: ${item.total_wasted} units wasted (${item.total_prepared} prepared, ${item.total_consumed} consumed)`
+      ).join('\n');
+      break;
+      
+    default:
+      sortedData = aggregatedData.sort((a: any, b: any) => b.total_consumed - a.total_consumed);
+      responseText = `Food consumption summary${time_filter !== 'all_time' ? ` ${time_filter}` : ''}:\n`;
+      responseText += sortedData.slice(0, limit).map((item: any, index: number) => 
+        `${index + 1}. **${item.dish_name}**: ${item.total_consumed} consumed, ${item.total_wasted} wasted`
+      ).join('\n');
+  }
+
+  return {
+    response: responseText,
+    data: sortedData.slice(0, limit)
+  };
+}
+
+async function handleSimpleQuery(supabase: any, config: any) {
+  let supabaseQuery = supabase.from(config.table);
+
+  // Apply action
+  if (config.action === 'count') {
+    supabaseQuery = supabaseQuery.select('*', { count: 'exact', head: true });
+  } else if (config.action === 'average' && config.columns?.length > 0) {
+    supabaseQuery = supabaseQuery.select(config.columns.join(','));
+  } else {
+    const columns = config.columns && config.columns.length > 0 
+      ? config.columns.join(',') 
+      : '*';
+    supabaseQuery = supabaseQuery.select(columns);
+  }
+
+  // Apply filters
+  if (config.filters) {
+    for (const [column, value] of Object.entries(config.filters)) {
+      if (column === 'date_filter' && value) {
+        const today = new Date();
+        let dateFilter;
+        
+        if (value === 'today') {
+          dateFilter = today.toISOString().split('T')[0];
+          supabaseQuery = supabaseQuery.gte('timestamp', `${dateFilter}T00:00:00`)
+                                     .lt('timestamp', `${dateFilter}T23:59:59`);
+        } else if (value === 'yesterday') {
+          const yesterday = new Date(today);
+          yesterday.setDate(yesterday.getDate() - 1);
+          dateFilter = yesterday.toISOString().split('T')[0];
+          supabaseQuery = supabaseQuery.gte('timestamp', `${dateFilter}T00:00:00`)
+                                     .lt('timestamp', `${dateFilter}T23:59:59`);
+        } else if (value === 'this_week') {
+          const weekStart = new Date(today);
+          weekStart.setDate(today.getDate() - today.getDay());
+          supabaseQuery = supabaseQuery.gte('timestamp', weekStart.toISOString());
+        }
+      } else if (value && column !== 'date_filter') {
+        supabaseQuery = supabaseQuery.eq(column, value);
+      }
+    }
+  }
+
+  // Apply limit
+  if (config.limit && config.action !== 'count') {
+    supabaseQuery = supabaseQuery.limit(config.limit);
+  }
+
+  const { data, error, count } = await supabaseQuery;
+
+  if (error) {
+    console.error('Database error:', error);
+    return { response: "Sorry, there was an error executing your query.", data: null };
+  }
+
+  let response = "";
+  
+  if (config.action === 'count') {
+    response = `Found ${count || 0} records.`;
+  } else if (config.action === 'average' && data && data.length > 0 && config.columns?.length > 0) {
+    const column = config.columns[0];
+    const values = data.map(row => parseFloat(row[column])).filter(val => !isNaN(val));
+    if (values.length > 0) {
+      const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+      response = `The average ${column} is ${average.toFixed(2)}.`;
+    } else {
+      response = `No valid data found for calculating average of ${column}.`;
+    }
+  } else if (!data || data.length === 0) {
+    response = "No data found for your query.";
+  } else {
+    response = `Here's what I found:\n\n`;
+    const displayData = data.slice(0, 10);
+    displayData.forEach((row, index) => {
+      response += `${index + 1}. `;
+      const entries = Object.entries(row);
+      entries.forEach(([key, value], entryIndex) => {
+        if (entryIndex > 0) response += ", ";
+        response += `${key}: ${value}`;
+      });
+      response += '\n';
+    });
+    
+    if (data.length > 10) {
+      response += `\n... and ${data.length - 10} more results.`;
+    }
+    
+    response += `\nTotal results: ${data.length}`;
+  }
+
+  return { response, data };
+}
