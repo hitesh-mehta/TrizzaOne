@@ -30,7 +30,7 @@ interface FoodHistory {
 
 type TimePeriod = 'hourly' | 'daily' | 'weekly';
 
-const OrderHistory = () => {
+const OrderHistory: React.FC = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
   const [dishes, setDishes] = useState<Dish[]>([]);
@@ -303,11 +303,12 @@ const OrderHistory = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">{t('orderHistory', 'Order History & Menu Management')}</h1>
+    <div className="space-y-6 p-6">
+      <div>
+        <h2 className="text-3xl font-bold mb-2">{t('orderHistory.title')}</h2>
+        <p className="text-muted-foreground">{t('orderHistory.subtitle')}</p>
       </div>
-
+      
       {/* Today's Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-r from-mintGreen/10 to-mintGreen/5 border-mintGreen/20">
@@ -368,15 +369,15 @@ const OrderHistory = () => {
       </div>
 
       {/* Rating Chart */}
-      <Card>
+      <Card className="neumorphic-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <BarChart className="h-5 w-5" />
-                {t('ratingTrends', 'Rating Trends')}
+                {t('ratingTrends')}
               </CardTitle>
-              <CardDescription>{t('avgRatingsOverTime', 'Average ratings over time')}</CardDescription>
+              <CardDescription>{t('avgRatingsOverTime')}</CardDescription>
             </div>
             <Select value={ratingPeriod} onValueChange={(value: TimePeriod) => setRatingPeriod(value)}>
               <SelectTrigger className="w-32">
@@ -386,16 +387,16 @@ const OrderHistory = () => {
                 <SelectItem value="hourly">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    {t('hourly', 'Hourly')}
+                    {t('hourly')}
                   </div>
                 </SelectItem>
                 <SelectItem value="daily">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    {t('daily', 'Daily')}
+                    {t('daily')}
                   </div>
                 </SelectItem>
-                <SelectItem value="weekly">{t('weekly', 'Weekly')}</SelectItem>
+                <SelectItem value="weekly">{t('weekly')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -426,63 +427,61 @@ const OrderHistory = () => {
       </Card>
 
       {/* Charts */}
-      {chartData.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('todayOrderPopularity', "Today's Order Popularity")}</CardTitle>
-              <CardDescription>{t('quantityConsumedByDish', 'Quantity consumed by dish')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300} key={`bar-${chartKey}`}>
-                <RechartsBar data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="quantity" fill="#4ECCA3" />
-                </RechartsBar>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="neumorphic-card">
+          <CardHeader>
+            <CardTitle>{t('orderHistory.todayOrderPopularity')}</CardTitle>
+            <CardDescription>{t('quantityConsumedByDish')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300} key={`bar-${chartKey}`}>
+              <RechartsBar data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="quantity" fill="#4ECCA3" />
+              </RechartsBar>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('orderDistribution', 'Order Distribution')}</CardTitle>
-              <CardDescription>{t('todayOrdersByPercentage', "Today's orders by percentage")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300} key={`pie-${chartKey}`}>
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="quantity"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+        <Card className="neumorphic-card">
+          <CardHeader>
+            <CardTitle>{t('orderHistory.orderDistribution')}</CardTitle>
+            <CardDescription>{t('todayOrdersByPercentage')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300} key={`pie-${chartKey}`}>
+              <PieChart>
+                <Pie
+                  data={chartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="quantity"
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Menu Management */}
-      <Card>
+      <Card className="neumorphic-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>{t('menuManagement', 'Menu Management')}</CardTitle>
-              <CardDescription>{t('manageDishesAndPrices', 'Manage your dishes and prices')}</CardDescription>
+              <CardTitle>{t('orderHistory.menuManagement')}</CardTitle>
+              <CardDescription>{t('manageDishesAndPrices')}</CardDescription>
             </div>
             <Button onClick={() => setIsAddingDish(true)} className="bg-mintGreen hover:bg-mintGreen/90">
               <Plus className="h-4 w-4 mr-2" />
@@ -595,10 +594,10 @@ const OrderHistory = () => {
       </Card>
 
       {/* Order History Table */}
-      <Card>
+      <Card className="neumorphic-card">
         <CardHeader>
-          <CardTitle>{t('recentOrderHistory', 'Recent Order History')}</CardTitle>
-          <CardDescription>{t('latestFoodOrdersData', 'Latest food orders and consumption data')}</CardDescription>
+          <CardTitle>{t('orderHistory.recentOrderHistory')}</CardTitle>
+          <CardDescription>{t('latestFoodOrdersData')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>

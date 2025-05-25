@@ -80,24 +80,29 @@ const Botato: React.FC<BototatoProps> = ({ isOpen, onToggle }) => {
         
         // Show top 3 records in a formatted way
         const displayRecords = data.slice(0, 3);
-        formattedResponse += `\n📋 **Sample Records:**\n`;
+        formattedResponse += `\n📋 **Sample Records:**\n\n`;
         
         displayRecords.forEach((record, index) => {
-          formattedResponse += `\n**Record ${index + 1}:**\n`;
+          formattedResponse += `**Record ${index + 1}:**\n`;
           Object.entries(record).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
               formattedResponse += `• ${key}: ${value}\n`;
             }
           });
+          formattedResponse += `\n`; // Add space between records
         });
         
         if (data.length > 3) {
-          formattedResponse += `\n... and ${data.length - 3} more records.`;
+          formattedResponse += `... and ${data.length - 3} more records.`;
         }
       }
+    } else {
+      // For regular responses, improve formatting by adding better line breaks
+      formattedResponse = response.replace(/(\d+\.\s)/g, '\n$1'); // Add line breaks before numbered lists
+      formattedResponse = formattedResponse.replace(/,\s(?=\w+:)/g, ',\n• '); // Better formatting for key-value pairs
     }
     
-    return response;
+    return formattedResponse;
   };
 
   const handleSendMessage = async () => {
