@@ -49,7 +49,7 @@ const RealtimeControls: React.FC<RealtimeControlsProps> = ({
           <div className="space-y-1">
             <p className="text-sm font-medium">Real-time Simulation</p>
             <p className="text-xs text-muted-foreground">
-              Automatically generate new sensor data
+              Automatically generate sensor data
             </p>
           </div>
           <div className="flex items-center gap-2">

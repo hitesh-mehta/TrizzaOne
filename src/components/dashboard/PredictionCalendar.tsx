@@ -62,7 +62,7 @@ const PredictionCalendar: React.FC<PredictionCalendarProps> = ({ forecastData, d
                         <div className="text-center">
                           <p className="font-semibold">{dishName}</p>
                           <p className="text-sm">{date.toLocaleDateString()}</p>
-                          <p className="text-sm font-bold">{quantity.toFixed(2)} units recommended</p>
+                          <p className="text-sm font-bold text-mintGreen">{quantity.toFixed(2)} units recommended</p>
                         </div>
                       </TooltipContent>
                     </Tooltip>

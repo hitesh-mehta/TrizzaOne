@@ -16,7 +16,9 @@ import {
   YAxis, 
   CartesianGrid,
   BarChart,
-  Bar
+  Bar,
+  AreaChart,
+  Area
 } from 'recharts';
 import { supabase } from '@/integrations/supabase/client';
 import { Leaf, Zap, Droplets, Utensils } from 'lucide-react';
@@ -34,7 +36,7 @@ const Sustainability: React.FC = () => {
   const [selectedMetric, setSelectedMetric] = useState('energy');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock sustainability data for pie chart
+  // Sustainability data for pie chart
   const pieData = [
     { name: 'Food Usage', value: 45, color: '#FF6B6B' },
     { name: 'Energy Usage', value: 30, color: '#4ECCA3' },
@@ -54,7 +56,12 @@ const Sustainability: React.FC = () => {
         if (error) throw error;
 
         // Process data into hourly aggregates
-        const hourlyMap = new Map<string, { energy: number[], water: number[], food: number[], count: number }>();
+        const hourlyMap = new Map<string, { 
+          energy: number[], 
+          water: number[], 
+          food: number[], 
+          count: number 
+        }>();
 
         iotData?.forEach(record => {
           const hour = new Date(record.timestamp).getHours().toString().padStart(2, '0') + ':00';
@@ -64,11 +71,14 @@ const Sustainability: React.FC = () => {
           }
           
           const hourData = hourlyMap.get(hour)!;
-          hourData.energy.push(record.energy_consumed_kwh);
-          // Use humidity as a proxy for water usage (higher humidity = more water usage)
-          hourData.water.push(record.humidity / 10); 
-          // Use occupancy and temperature as proxies for food usage
-          hourData.food.push((record.occupancy_count * record.temperature) / 100);
+          // Use actual energy data from IoT sensors
+          hourData.energy.push(record.energy_consumed_kwh || 0);
+          // Calculate water usage based on humidity and occupancy
+          const waterUsage = (record.humidity * record.occupancy_count) / 100;
+          hourData.water.push(waterUsage);
+          // Calculate food usage based on occupancy and temperature (food preparation)
+          const foodUsage = (record.occupancy_count * Math.max(0, record.temperature - 20)) / 50;
+          hourData.food.push(foodUsage);
           hourData.count++;
         });
 
@@ -198,17 +208,97 @@ const Sustainability: React.FC = () => {
             ) : (
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={hourlyData}>
+                  <AreaChart data={hourlyData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="hour" />
                     <YAxis label={{ value: getMetricUnit(selectedMetric), angle: -90, position: 'insideLeft' }} />
                     <Tooltip formatter={(value) => [`${value} ${getMetricUnit(selectedMetric)}`, selectedMetric.charAt(0).toUpperCase() + selectedMetric.slice(1)]} />
-                    <Line 
+                    <Area 
                       type="monotone" 
                       dataKey={selectedMetric} 
                       stroke={getMetricColor(selectedMetric)} 
+                      fill={getMetricColor(selectedMetric)}
+                      fillOpacity={0.3}
                       strokeWidth={2}
-                      dot={{ fill: getMetricColor(selectedMetric) }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="neumorphic-card">
+          <CardHeader>
+            <CardTitle>Hourly Resource Comparison</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-80">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mintGreen"></div>
+              </div>
+            ) : (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={hourlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="hour" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="energy" fill="#4ECCA3" name="Energy (kWh)" />
+                    <Bar dataKey="water" fill="#1A535C" name="Water (L)" />
+                    <Bar dataKey="food" fill="#FF6B6B" name="Food (kg)" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="neumorphic-card">
+          <CardHeader>
+            <CardTitle>Resource Efficiency Trends</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex items-center justify-center h-80">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mintGreen"></div>
+              </div>
+            ) : (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={hourlyData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="hour" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="energy" 
+                      stroke="#4ECCA3" 
+                      strokeWidth={2}
+                      dot={{ fill: '#4ECCA3' }}
+                      name="Energy Efficiency"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="water" 
+                      stroke="#1A535C" 
+                      strokeWidth={2}
+                      dot={{ fill: '#1A535C' }}
+                      name="Water Efficiency"
+                    />
+                    <Line 
+                      type="monotone" 
+                      dataKey="food" 
+                      stroke="#FF6B6B" 
+                      strokeWidth={2}
+                      dot={{ fill: '#FF6B6B' }}
+                      name="Food Efficiency"
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -217,34 +307,6 @@ const Sustainability: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-
-      <Card className="neumorphic-card">
-        <CardHeader>
-          <CardTitle>24-Hour Resource Comparison</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center h-80">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-mintGreen"></div>
-            </div>
-          ) : (
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={hourlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="energy" fill="#4ECCA3" name="Energy (kWh)" />
-                  <Bar dataKey="water" fill="#1A535C" name="Water (L)" />
-                  <Bar dataKey="food" fill="#FF6B6B" name="Food (kg)" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </CardContent>
-      </Card>
       
       <div className="bg-green-500/10 p-4 rounded-lg border border-green-500/20">
         <div className="flex items-center">

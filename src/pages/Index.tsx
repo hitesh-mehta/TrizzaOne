@@ -127,14 +127,14 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="text-center max-w-md mx-auto glass-card p-8 rounded-xl backdrop-blur-md bg-background/40 border border-mintGreen/30 shadow-2xl transform hover:scale-105 transition-all duration-300">
+          <div className="text-center max-w-md mx-auto glass-card p-8 rounded-xl backdrop-blur-md bg-background/70 border border-mintGreen/30 shadow-2xl transform hover:scale-105 transition-all duration-300">
             <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-6 shadow-lg animate-pulse">
               <span className="font-bold text-3xl text-navy">T1</span>
             </div>
             <h1 className="text-5xl font-bold mb-4 text-gradient bg-gradient-to-r from-navy via-mintGreen to-coral bg-clip-text text-transparent animate-fade-in">
               {t('app.welcomeTitle')}
             </h1>
-            <p className="mb-8 text-lg text-muted-foreground animate-fade-in delay-100">{t('app.welcomeDesc')}</p>
+            <p className="mb-8 text-lg text-foreground/80 animate-fade-in delay-100">{t('app.welcomeDesc')}</p>
             <button 
               onClick={() => navigate('/auth')}
               className="px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-navy font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-fade-in delay-200"
