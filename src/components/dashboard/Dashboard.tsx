@@ -128,7 +128,7 @@ const Dashboard: React.FC = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="facility" className="space-y-6 relative z-20">
+        <TabsContent value="facility" className="space-y-6 relative z-30">
           <FacilityMap />
         </TabsContent>
       </Tabs>

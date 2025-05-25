@@ -26,6 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -84,36 +85,52 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
   };
 
   const handleUpdateProfile = async () => {
+    if (isUpdating) return;
+    
+    setIsUpdating(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session?.user) return;
+      if (!sessionData.session?.user) {
+        throw new Error('No authenticated user found');
+      }
 
+      // Update profile in database
       const { error } = await supabase
         .from('profiles')
         .upsert({
           id: sessionData.session.user.id,
-          first_name: firstName,
-          last_name: lastName,
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'id'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profile update error:', error);
+        throw error;
+      }
 
       toast({
         title: "Profile Updated",
         description: "Your profile has been updated successfully.",
       });
+      
       setShowProfile(false);
     } catch (error: any) {
+      console.error('Profile update failed:', error);
       toast({
         title: "Error",
-        description: error.message,
+        description: error.message || "Failed to update profile. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
   return (
-    <div className="h-16 border-b border-border flex items-center justify-between px-4">
+    <div className="h-16 border-b border-border bg-background flex items-center justify-between px-4">
       <div className="flex items-center">
         {/* Left side - empty for now */}
       </div>
@@ -131,59 +148,65 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56 bg-popover border-border">
             <div className="flex flex-col space-y-1 p-2">
-              <p className="font-medium leading-none">{isLoading ? 'Loading...' : getDisplayName()}</p>
+              <p className="font-medium leading-none text-popover-foreground">{isLoading ? 'Loading...' : getDisplayName()}</p>
               <p className="text-xs text-muted-foreground">{userEmail}</p>
             </div>
             <DropdownMenuSeparator />
             
             <Dialog open={showProfile} onOpenChange={setShowProfile}>
               <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-popover-foreground">
                   <User className="mr-2 h-4 w-4" />
                   <span>{t('nav.profile')}</span>
                 </DropdownMenuItem>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="bg-background border-border">
                 <DialogHeader>
-                  <DialogTitle>Profile Settings</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-foreground">Profile Settings</DialogTitle>
+                  <DialogDescription className="text-muted-foreground">
                     Update your profile information here.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="profile-first-name">First Name</Label>
+                      <Label htmlFor="profile-first-name" className="text-foreground">First Name</Label>
                       <Input
                         id="profile-first-name"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         placeholder="Enter first name"
+                        className="bg-background border-border text-foreground"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="profile-last-name">Last Name</Label>
+                      <Label htmlFor="profile-last-name" className="text-foreground">Last Name</Label>
                       <Input
                         id="profile-last-name"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Enter last name"
+                        className="bg-background border-border text-foreground"
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="profile-email">Email</Label>
+                    <Label htmlFor="profile-email" className="text-foreground">Email</Label>
                     <Input
                       id="profile-email"
                       value={userEmail}
                       disabled
-                      className="bg-gray-100"
+                      className="bg-muted border-border text-muted-foreground"
                     />
                   </div>
-                  <Button onClick={handleUpdateProfile} className="w-full">
-                    Update Profile
+                  <Button 
+                    onClick={handleUpdateProfile} 
+                    className="w-full"
+                    disabled={isUpdating}
+                  >
+                    {isUpdating ? 'Updating...' : 'Update Profile'}
                   </Button>
                 </div>
               </DialogContent>
@@ -191,25 +214,25 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
 
             <Dialog open={showSettings} onOpenChange={setShowSettings}>
               <DialogTrigger asChild>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-popover-foreground">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>{t('nav.settings')}</span>
                 </DropdownMenuItem>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="bg-background border-border">
                 <DialogHeader>
-                  <DialogTitle>Application Settings</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="text-foreground">Application Settings</DialogTitle>
+                  <DialogDescription className="text-muted-foreground">
                     Customize your app preferences.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Language</Label>
+                    <Label className="text-foreground">Language</Label>
                     <LanguageSelector />
                   </div>
                   <div className="space-y-2">
-                    <Label>Theme</Label>
+                    <Label className="text-foreground">Theme</Label>
                     <ThemeToggle />
                   </div>
                 </div>
@@ -217,7 +240,7 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
             </Dialog>
             
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onLogout}>
+            <DropdownMenuItem onClick={onLogout} className="text-popover-foreground">
               <LogOut className="mr-2 h-4 w-4" />
               <span>{t('nav.logout')}</span>
             </DropdownMenuItem>

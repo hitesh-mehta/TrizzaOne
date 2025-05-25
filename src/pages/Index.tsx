@@ -133,10 +133,10 @@ const Index = () => {
               <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-6 shadow-lg animate-pulse">
                 <span className="font-bold text-3xl text-white">T1</span>
               </div>
-              <h1 className="text-5xl font-bold mb-4 text-navy animate-fade-in">
+              <h1 className="text-5xl font-bold mb-4 text-foreground animate-fade-in">
                 {t('app.welcomeTitle')}
               </h1>
-              <p className="mb-8 text-lg text-navy/90 animate-fade-in delay-100 font-medium">{t('app.welcomeDesc')}</p>
+              <p className="mb-8 text-lg text-muted-foreground animate-fade-in delay-100 font-medium">{t('app.welcomeDesc')}</p>
               <button 
                 onClick={() => navigate('/auth')}
                 className="px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-white font-semibold rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300 animate-fade-in delay-200"
@@ -167,7 +167,8 @@ const Index = () => {
             
             <div className="flex-1 overflow-auto">
               <div className="relative min-h-full flex flex-col">
-                <div className="absolute right-10 top-6 opacity-10 -z-10 pointer-events-none">
+                {/* 3D animation background - now with lower z-index */}
+                <div className="absolute right-10 top-6 opacity-10 -z-20 pointer-events-none">
                   <FoodModel3D 
                     type={activeItem === 'dashboard' ? 'plate' : 
                           activeItem === 'sustainability' ? 'donut' : 'burger'}
