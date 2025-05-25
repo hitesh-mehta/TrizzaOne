@@ -15,11 +15,11 @@ interface Feedback {
   Timestamp: string;
   Name: string;
   Email: string;
-  "Ontime Service": string;
-  Cleanliness: string;
-  Comfortability: string;
-  "Staff Response": string;
-  Overall: string;
+  "Ontime Service": number;
+  Cleanliness: number;
+  Comfortability: number;
+  "Staff Response": number;
+  Overall: number;
   "Phone number": string;
   "Suggestions ": string;
 }
@@ -43,7 +43,7 @@ const Feedback: React.FC = () => {
       }
       const data = await response.json();
       
-      // Transform data to add unique IDs and normalize ratings
+      // Transform data to add unique IDs and convert string ratings to numbers
       const transformedData = data.map((item: any, index: number) => ({
         ...item,
         id: `feedback_${index}_${Date.now()}`,
