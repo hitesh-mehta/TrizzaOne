@@ -136,9 +136,6 @@ const RealtimeControls: React.FC<RealtimeControlsProps> = ({
               <Activity className="h-4 w-4 text-mintGreen mt-0.5 animate-pulse" />
               <div className="text-xs">
                 <p className="font-medium text-mintGreen">Simulation Active</p>
-                <p className="text-muted-foreground">
-                  New data points are being generated every {interval} seconds based on Indian climate conditions.
-                </p>
               </div>
             </div>
           </div>

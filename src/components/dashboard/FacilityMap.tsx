@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -61,10 +62,6 @@ const FacilityMap: React.FC = () => {
   };
 
   const currentData = mockData[selectedArea as keyof typeof mockData];
-
-  const handleAreaClick = (areaValue: string) => {
-    setSelectedArea(areaValue);
-  };
 
   return (
     <div className="space-y-6">
@@ -168,10 +165,11 @@ const FacilityMap: React.FC = () => {
               <div className="grid grid-cols-4 gap-4 h-64">
                 {/* Kitchen */}
                 <button 
+                  type="button"
                   className={`bg-orange-200 rounded-lg p-4 cursor-pointer transition-all hover:bg-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 ${
                     selectedArea === 'kitchen' ? 'ring-2 ring-orange-500 bg-orange-300 shadow-lg' : ''
                   }`}
-                  onClick={() => handleAreaClick('kitchen')}
+                  onClick={() => setSelectedArea('kitchen')}
                 >
                   <div className="text-center">
                     <Thermometer className="h-8 w-8 mx-auto mb-2 text-orange-600" />
@@ -182,10 +180,11 @@ const FacilityMap: React.FC = () => {
 
                 {/* Dining Area */}
                 <button 
+                  type="button"
                   className={`bg-blue-200 rounded-lg p-4 col-span-2 cursor-pointer transition-all hover:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     selectedArea === 'dining' ? 'ring-2 ring-blue-500 bg-blue-300 shadow-lg' : ''
                   }`}
-                  onClick={() => handleAreaClick('dining')}
+                  onClick={() => setSelectedArea('dining')}
                 >
                   <div className="text-center">
                     <Users className="h-8 w-8 mx-auto mb-2 text-blue-600" />
@@ -196,10 +195,11 @@ const FacilityMap: React.FC = () => {
 
                 {/* Storage */}
                 <button 
+                  type="button"
                   className={`bg-cyan-200 rounded-lg p-4 cursor-pointer transition-all hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
                     selectedArea === 'storage' ? 'ring-2 ring-cyan-500 bg-cyan-300 shadow-lg' : ''
                   }`}
-                  onClick={() => handleAreaClick('storage')}
+                  onClick={() => setSelectedArea('storage')}
                 >
                   <div className="text-center">
                     <Droplets className="h-8 w-8 mx-auto mb-2 text-cyan-600" />
@@ -210,10 +210,11 @@ const FacilityMap: React.FC = () => {
 
                 {/* Hallway */}
                 <button 
+                  type="button"
                   className={`bg-mintGreen/40 rounded-lg p-4 col-span-4 cursor-pointer transition-all hover:bg-mintGreen/60 focus:outline-none focus:ring-2 focus:ring-mintGreen ${
                     selectedArea === 'hallway' ? 'ring-2 ring-mintGreen bg-mintGreen/60 shadow-lg' : ''
                   }`}
-                  onClick={() => handleAreaClick('hallway')}
+                  onClick={() => setSelectedArea('hallway')}
                 >
                   <div className="text-center">
                     <Wifi className="h-8 w-8 mx-auto mb-2 text-mintGreen" />

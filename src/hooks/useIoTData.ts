@@ -102,6 +102,11 @@ export const useIoTData = () => {
       // Update local state immediately
       setData(prev => [insertedData, ...prev.slice(0, 99)]);
       
+      toast({
+        title: "Data fetched",
+        description: "New sensor data has been updated",
+      });
+      
     } catch (err: any) {
       console.error('Error inserting new data point:', err);
       toast({
@@ -169,10 +174,10 @@ export const useIoTData = () => {
 
   // Set up data generation interval
   useEffect(() => {
-    let intervalId: number | undefined;
+    let intervalId: NodeJS.Timeout | undefined;
 
     if (isRealtime && data.length > 0) {
-      intervalId = window.setInterval(() => {
+      intervalId = setInterval(() => {
         const lastRecord = data[0];
         generateNewDataPoint(lastRecord);
       }, interval * 1000);
@@ -180,7 +185,7 @@ export const useIoTData = () => {
 
     return () => {
       if (intervalId !== undefined) {
-        window.clearInterval(intervalId);
+        clearInterval(intervalId);
       }
     };
   }, [isRealtime, interval, data, generateNewDataPoint]);
