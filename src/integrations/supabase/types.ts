@@ -9,6 +9,65 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      dishes: {
+        Row: {
+          dish_id: number
+          dish_name: string
+          dish_price: number
+        }
+        Insert: {
+          dish_id?: number
+          dish_name: string
+          dish_price: number
+        }
+        Update: {
+          dish_id?: number
+          dish_name?: string
+          dish_price?: number
+        }
+        Relationships: []
+      }
+      food_history: {
+        Row: {
+          dish_name: string
+          food_rating: number | null
+          gas_consumption: number | null
+          order_price: number | null
+          quantity_consumed: number | null
+          quantity_prepared: number | null
+          timestamp: string
+          water_consumption: number | null
+        }
+        Insert: {
+          dish_name: string
+          food_rating?: number | null
+          gas_consumption?: number | null
+          order_price?: number | null
+          quantity_consumed?: number | null
+          quantity_prepared?: number | null
+          timestamp: string
+          water_consumption?: number | null
+        }
+        Update: {
+          dish_name?: string
+          food_rating?: number | null
+          gas_consumption?: number | null
+          order_price?: number | null
+          quantity_consumed?: number | null
+          quantity_prepared?: number | null
+          timestamp?: string
+          water_consumption?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_history_dish_name_fkey"
+            columns: ["dish_name"]
+            isOneToOne: false
+            referencedRelation: "dishes"
+            referencedColumns: ["dish_name"]
+          },
+        ]
+      }
       iot_data: {
         Row: {
           air_purifier_status: Database["public"]["Enums"]["air_purifier_status"]
