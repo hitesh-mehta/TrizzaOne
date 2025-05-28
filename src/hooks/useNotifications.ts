@@ -18,7 +18,62 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [lastMostPopular, setLastMostPopular] = useState<string | null>(null);
   const [lastIoTData, setLastIoTData] = useState<any>(null);
-  const [lastConsumptionData, setLastConsumptionData] = useState<any>(null);
+  const [processedNotificationIds, setProcessedNotificationIds] = useState<Set<string>>(new Set());
+
+  // Check if notifications are supported
+  const isNotificationSupported = () => {
+    return 'Notification' in window;
+  };
+
+  // Request notification permission
+  const requestNotificationPermission = async () => {
+    if (!isNotificationSupported()) {
+      console.warn('This browser does not support notifications');
+      return false;
+    }
+
+    if (Notification.permission === 'granted') {
+      return true;
+    }
+
+    if (Notification.permission !== 'denied') {
+      const permission = await Notification.requestPermission();
+      return permission === 'granted';
+    }
+
+    return false;
+  };
+
+  // Show browser notification
+  const showBrowserNotification = async (title: string, message: string) => {
+    const hasPermission = await requestNotificationPermission();
+    
+    if (hasPermission) {
+      try {
+        const notification = new Notification(title, {
+          body: message,
+          icon: '/favicon.ico',
+          badge: '/favicon.ico',
+          tag: 'trizzaone-notification',
+          renotify: true,
+          requireInteraction: false,
+          silent: false
+        });
+
+        // Auto close after 5 seconds
+        setTimeout(() => {
+          notification.close();
+        }, 5000);
+
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+      } catch (error) {
+        console.error('Error showing notification:', error);
+      }
+    }
+  };
 
   // Function to detect sharp changes in IoT data
   const detectIoTChanges = (newData: any, oldData: any) => {
@@ -34,7 +89,7 @@ export const useNotifications = () => {
     };
 
     for (const [key, threshold] of Object.entries(thresholds)) {
-      if (newData[key] && oldData[key]) {
+      if (newData[key] && oldData[key] && oldData[key] > 0) {
         const change = Math.abs((newData[key] - oldData[key]) / oldData[key]);
         if (change > threshold) {
           const direction = newData[key] > oldData[key] ? 'increased' : 'decreased';
@@ -95,7 +150,32 @@ export const useNotifications = () => {
     return null;
   };
 
+  // Add notification with duplicate prevention
+  const addNotification = (notification: NotificationData) => {
+    const notificationKey = `${notification.type}_${notification.title}_${notification.message}`;
+    
+    if (!processedNotificationIds.has(notificationKey)) {
+      setNotifications(prev => [notification, ...prev.slice(0, 4)]);
+      setProcessedNotificationIds(prev => new Set([...prev, notificationKey]));
+      
+      // Show toast notification
+      toast({
+        title: notification.title,
+        description: notification.message,
+        variant: notification.type === 'alert' || notification.type === 'iot_change' ? "destructive" : "default",
+      });
+
+      // Show browser notification for important alerts
+      if (notification.type === 'alert' || notification.type === 'iot_change' || notification.type === 'consumption_spike') {
+        showBrowserNotification(notification.title, notification.message);
+      }
+    }
+  };
+
   useEffect(() => {
+    // Request notification permission on mount
+    requestNotificationPermission();
+
     // Set up real-time subscription for IoT data changes
     const iotChannel = supabase
       .channel('iot-notifications')
@@ -122,13 +202,7 @@ export const useNotifications = () => {
                 type: 'iot_change'
               };
               
-              setNotifications(prev => [notification, ...prev.slice(0, 4)]);
-              
-              toast({
-                title: notification.title,
-                description: notification.message,
-                variant: "destructive",
-              });
+              addNotification(notification);
             });
           }
           
@@ -152,39 +226,27 @@ export const useNotifications = () => {
           
           // Create notification for new order
           const orderNotification: NotificationData = {
-            id: `order-${Date.now()}`,
-            title: t('notifications.newOrder'),
-            message: t('notifications.orderReceived', { dish: newOrder.dish_name }),
+            id: `order-${Date.now()}-${Math.random()}`,
+            title: t('newOrder'),
+            message: t('orderReceived', { dish: newOrder.dish_name }),
             timestamp: new Date(),
             type: 'order'
           };
           
-          setNotifications(prev => [orderNotification, ...prev.slice(0, 4)]);
-          
-          // Show toast notification
-          toast({
-            title: orderNotification.title,
-            description: orderNotification.message,
-          });
+          addNotification(orderNotification);
 
           // Check for consumption spikes
           const spike = await detectConsumptionSpikes();
           if (spike) {
             const spikeNotification: NotificationData = {
-              id: `spike-${Date.now()}`,
+              id: `spike-${Date.now()}-${Math.random()}`,
               title: '📈 Consumption Spike Detected!',
               message: `Food consumption increased by ${spike.increase}% in the last hour`,
               timestamp: new Date(),
               type: 'consumption_spike'
             };
             
-            setNotifications(prev => [spikeNotification, ...prev.slice(0, 4)]);
-            
-            toast({
-              title: spikeNotification.title,
-              description: spikeNotification.message,
-              variant: "destructive",
-            });
+            addNotification(spikeNotification);
           }
         }
       )
@@ -213,19 +275,14 @@ export const useNotifications = () => {
 
           if (currentMostPopular && lastMostPopular && currentMostPopular !== lastMostPopular) {
             const popularityNotification: NotificationData = {
-              id: `popularity-${Date.now()}`,
-              title: t('notifications.newMostPopular'),
-              message: t('notifications.dishIsNowMostPopular', { dish: currentMostPopular }),
+              id: `popularity-${Date.now()}-${Math.random()}`,
+              title: t('newMostPopular'),
+              message: t('dishIsNowMostPopular', { dish: currentMostPopular }),
               timestamp: new Date(),
               type: 'popularity'
             };
 
-            setNotifications(prev => [popularityNotification, ...prev.slice(0, 4)]);
-            
-            toast({
-              title: popularityNotification.title,
-              description: popularityNotification.message,
-            });
+            addNotification(popularityNotification);
           }
 
           setLastMostPopular(currentMostPopular);
@@ -240,20 +297,14 @@ export const useNotifications = () => {
       const spike = await detectConsumptionSpikes();
       if (spike) {
         const spikeNotification: NotificationData = {
-          id: `spike-${Date.now()}`,
+          id: `spike-${Date.now()}-${Math.random()}`,
           title: '📈 Consumption Spike Detected!',
           message: `Food consumption increased by ${spike.increase}% in the last hour`,
           timestamp: new Date(),
           type: 'consumption_spike'
         };
         
-        setNotifications(prev => [spikeNotification, ...prev.slice(0, 4)]);
-        
-        toast({
-          title: spikeNotification.title,
-          description: spikeNotification.message,
-          variant: "destructive",
-        });
+        addNotification(spikeNotification);
       }
     }, 300000); // 5 minutes
 
@@ -263,10 +314,12 @@ export const useNotifications = () => {
       clearInterval(popularityInterval);
       clearInterval(consumptionInterval);
     };
-  }, [t, toast, lastMostPopular, lastIoTData]);
+  }, [t, lastMostPopular, lastIoTData]);
 
   return {
     notifications,
-    notificationCount: notifications.length
+    notificationCount: notifications.length,
+    requestNotificationPermission,
+    isNotificationSupported
   };
 };

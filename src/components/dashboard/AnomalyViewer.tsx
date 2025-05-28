@@ -11,8 +11,16 @@ const AnomalyViewer: React.FC = () => {
   const { t } = useTranslation();
   const { anomalies, isLoading } = useAnomalyDetection();
 
-  // Limit to top 5 anomalies
-  const topAnomalies = anomalies.slice(0, 5);
+  // Filter unique anomalies and limit to top 5
+  const uniqueAnomalies = anomalies
+    .filter((anomaly, index, array) => {
+      // Remove duplicates based on iot_data_id, zone, and prediction timestamp
+      const key = `${anomaly.iot_data_id}_${anomaly.zone}_${anomaly.api_timestamp}_${anomaly.prediction}`;
+      return array.findIndex(a => 
+        `${a.iot_data_id}_${a.zone}_${a.api_timestamp}_${a.prediction}` === key
+      ) === index;
+    })
+    .slice(0, 5);
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel.toLowerCase()) {
@@ -27,6 +35,14 @@ const AnomalyViewer: React.FC = () => {
     return prediction === 'Anomaly' ? 
       <AlertTriangle className="h-4 w-4 text-red-500" /> : 
       <CheckCircle className="h-4 w-4 text-green-500" />;
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    try {
+      return format(new Date(timestamp), 'HH:mm');
+    } catch (error) {
+      return 'Invalid time';
+    }
   };
 
   if (isLoading) {
@@ -51,15 +67,15 @@ const AnomalyViewer: React.FC = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-3 max-h-80 overflow-y-auto">
-          {topAnomalies.length === 0 ? (
+          {uniqueAnomalies.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <CheckCircle className="h-12 w-12 mx-auto mb-2 text-green-500" />
               <p>No anomaly data available</p>
             </div>
           ) : (
-            topAnomalies.map((anomaly) => (
+            uniqueAnomalies.map((anomaly) => (
               <div
-                key={anomaly.id}
+                key={`${anomaly.id}_${anomaly.api_timestamp}`}
                 className={`p-3 rounded-lg border transition-colors ${
                   anomaly.prediction === 'Anomaly' 
                     ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20' 
@@ -76,7 +92,7 @@ const AnomalyViewer: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="h-3 w-3" />
-                    {format(new Date(anomaly.created_at), 'HH:mm')}
+                    {formatTimestamp(anomaly.created_at)}
                   </div>
                 </div>
                 

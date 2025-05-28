@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -79,6 +78,26 @@ User Query: "${query}"
 
 Analyze the user's question and determine what information they want. Based on the query, respond with ONLY a JSON object in this exact format:
 
+For queries about temperature, IoT sensor data:
+{
+  "analysis_type": "iot",
+  "table": "iot_data",
+  "operation": "max_temperature|min_temperature|avg_temperature|latest_temperature",
+  "time_filter": "past_hour|past_day|today|yesterday|this_week|all_time",
+  "columns": ["temperature", "zone", "timestamp"],
+  "limit": 10
+}
+
+For queries about sales, order prices, revenue:
+{
+  "analysis_type": "sales",
+  "table": "food_history", 
+  "operation": "total_sales|avg_price|total_orders",
+  "time_filter": "past_hour|past_day|today|yesterday|this_week|all_time",
+  "columns": ["order_price", "dish_name", "timestamp"],
+  "limit": 50
+}
+
 For queries about popularity, most/least consumed items, or food waste:
 {
   "analysis_type": "aggregated",
@@ -105,15 +124,14 @@ For unsupported queries:
 {"error": "CANNOT_ANSWER"}
 
 Examples:
+- "highest temp in past hour" → analysis_type: "iot", operation: "max_temperature", time_filter: "past_hour"
+- "total prices of sales in last 1 day" → analysis_type: "sales", operation: "total_sales", time_filter: "past_day"
 - "most popular dish today" → analysis_type: "aggregated", operation: "most_popular", time_filter: "today"
-- "least popular dish" → analysis_type: "aggregated", operation: "least_popular", time_filter: "all_time"
-- "food wasted today" → analysis_type: "aggregated", operation: "food_waste", time_filter: "today"
-- "most consumed item" → analysis_type: "aggregated", operation: "most_consumed", time_filter: "all_time"
 
 Rules:
 1. Only use tables: dishes, food_history, iot_data, profiles
 2. Only use SELECT operations (no INSERT, UPDATE, DELETE)
-3. For date filters, use "today", "yesterday", "this_week", or "all_time"
+3. For date filters, use "past_hour", "past_day", "today", "yesterday", "this_week", or "all_time"
 4. If the query cannot be answered, respond with: {"error": "CANNOT_ANSWER"}
 5. Return ONLY the JSON object, no explanations
 
@@ -194,13 +212,19 @@ Generate the JSON:`;
     let response = "";
     let data = null;
 
-    if (queryConfig.analysis_type === 'aggregated') {
-      // Handle aggregated queries for food analysis
+    if (queryConfig.analysis_type === 'iot') {
+      const result = await handleIoTQuery(supabase, queryConfig);
+      response = result.response;
+      data = result.data;
+    } else if (queryConfig.analysis_type === 'sales') {
+      const result = await handleSalesQuery(supabase, queryConfig);
+      response = result.response;
+      data = result.data;
+    } else if (queryConfig.analysis_type === 'aggregated') {
       const result = await handleAggregatedQuery(supabase, queryConfig);
       response = result.response;
       data = result.data;
     } else {
-      // Handle simple queries
       const result = await handleSimpleQuery(supabase, queryConfig);
       response = result.response;
       data = result.data;
@@ -220,6 +244,121 @@ Generate the JSON:`;
     });
   }
 });
+
+async function handleIoTQuery(supabase: any, config: any) {
+  const { operation, time_filter, columns, limit = 10 } = config;
+  
+  let supabaseQuery = supabase.from('iot_data').select(columns.join(','));
+  
+  // Apply time filter
+  const now = new Date();
+  if (time_filter === 'past_hour') {
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    supabaseQuery = supabaseQuery.gte('timestamp', oneHourAgo.toISOString());
+  } else if (time_filter === 'past_day') {
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    supabaseQuery = supabaseQuery.gte('timestamp', oneDayAgo.toISOString());
+  } else if (time_filter === 'today') {
+    const todayStr = now.toISOString().split('T')[0];
+    supabaseQuery = supabaseQuery.gte('timestamp', `${todayStr}T00:00:00`)
+                                 .lt('timestamp', `${todayStr}T23:59:59`);
+  }
+
+  // Apply ordering based on operation
+  if (operation.includes('max') || operation.includes('highest')) {
+    supabaseQuery = supabaseQuery.order('temperature', { ascending: false });
+  } else if (operation.includes('min') || operation.includes('lowest')) {
+    supabaseQuery = supabaseQuery.order('temperature', { ascending: true });
+  } else {
+    supabaseQuery = supabaseQuery.order('timestamp', { ascending: false });
+  }
+
+  supabaseQuery = supabaseQuery.limit(limit);
+
+  const { data, error } = await supabaseQuery;
+
+  if (error) {
+    console.error('Database error:', error);
+    return { response: "Sorry, there was an error retrieving the data.", data: null };
+  }
+
+  if (!data || data.length === 0) {
+    return { response: "No IoT data found for the specified time period.", data: [] };
+  }
+
+  let responseText = "";
+  
+  if (operation === 'max_temperature' || operation.includes('highest')) {
+    const maxTemp = data[0];
+    responseText = `Highest temperature in ${time_filter.replace('_', ' ')}: **${maxTemp.temperature}°C** in ${maxTemp.zone} at ${new Date(maxTemp.timestamp).toLocaleString()}`;
+  } else if (operation === 'min_temperature' || operation.includes('lowest')) {
+    const minTemp = data[0];
+    responseText = `Lowest temperature in ${time_filter.replace('_', ' ')}: **${minTemp.temperature}°C** in ${minTemp.zone} at ${new Date(minTemp.timestamp).toLocaleString()}`;
+  } else if (operation === 'avg_temperature') {
+    const avgTemp = data.reduce((sum, item) => sum + parseFloat(item.temperature), 0) / data.length;
+    responseText = `Average temperature in ${time_filter.replace('_', ' ')}: **${avgTemp.toFixed(1)}°C** (based on ${data.length} readings)`;
+  } else {
+    responseText = `Latest temperature readings (${time_filter.replace('_', ' ')}):\n`;
+    responseText += data.slice(0, 5).map((item, index) => 
+      `${index + 1}. **${item.zone}**: ${item.temperature}°C at ${new Date(item.timestamp).toLocaleString()}`
+    ).join('\n');
+  }
+
+  return { response: responseText, data };
+}
+
+async function handleSalesQuery(supabase: any, config: any) {
+  const { operation, time_filter, columns, limit = 50 } = config;
+  
+  let supabaseQuery = supabase.from('food_history').select(columns.join(','));
+  
+  // Apply time filter
+  const now = new Date();
+  if (time_filter === 'past_hour') {
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+    supabaseQuery = supabaseQuery.gte('timestamp', oneHourAgo.toISOString());
+  } else if (time_filter === 'past_day') {
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    supabaseQuery = supabaseQuery.gte('timestamp', oneDayAgo.toISOString());
+  } else if (time_filter === 'today') {
+    const todayStr = now.toISOString().split('T')[0];
+    supabaseQuery = supabaseQuery.gte('timestamp', `${todayStr}T00:00:00`)
+                                 .lt('timestamp', `${todayStr}T23:59:59`);
+  }
+
+  supabaseQuery = supabaseQuery.not('order_price', 'is', null).limit(limit);
+
+  const { data, error } = await supabaseQuery;
+
+  if (error) {
+    console.error('Database error:', error);
+    return { response: "Sorry, there was an error retrieving the sales data.", data: null };
+  }
+
+  if (!data || data.length === 0) {
+    return { response: "No sales data found for the specified time period.", data: [] };
+  }
+
+  let responseText = "";
+  
+  if (operation === 'total_sales') {
+    const totalSales = data.reduce((sum, item) => sum + (item.order_price || 0), 0);
+    responseText = `Total sales in ${time_filter.replace('_', ' ')}: **$${totalSales.toFixed(2)}** from ${data.length} orders`;
+  } else if (operation === 'avg_price') {
+    const avgPrice = data.reduce((sum, item) => sum + (item.order_price || 0), 0) / data.length;
+    responseText = `Average order price in ${time_filter.replace('_', ' ')}: **$${avgPrice.toFixed(2)}** (based on ${data.length} orders)`;
+  } else if (operation === 'total_orders') {
+    responseText = `Total orders in ${time_filter.replace('_', ' ')}: **${data.length} orders**`;
+  } else {
+    responseText = `Sales summary for ${time_filter.replace('_', ' ')}:\n`;
+    const totalSales = data.reduce((sum, item) => sum + (item.order_price || 0), 0);
+    responseText += `• Total Revenue: **$${totalSales.toFixed(2)}**\n`;
+    responseText += `• Total Orders: **${data.length}**\n`;
+    responseText += `• Average Order: **$${(totalSales / data.length).toFixed(2)}**`;
+  }
+
+  return { response: responseText, data };
+}
 
 async function handleAggregatedQuery(supabase: any, config: any) {
   const { operation, time_filter, limit = 10 } = config;
