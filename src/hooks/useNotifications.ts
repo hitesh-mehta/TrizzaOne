@@ -89,14 +89,17 @@ export const useNotifications = () => {
   // Save notification settings
   const saveNotificationSettings = async (settings: NotificationSettings) => {
     try {
-      // Update local state immediately
+      console.log('Attempting to save notification settings:', settings);
+      
+      // Update local state immediately for better UX
       setNotificationSettings(settings);
 
-      // Save to localStorage
+      // Save to localStorage as the primary storage method
       localStorage.setItem('trizzaone_notification_settings', JSON.stringify(settings));
       
-      console.log('Notification settings saved:', settings);
+      console.log('Successfully saved notification settings to localStorage');
 
+      // Show success toast
       toast({
         title: t('success'),
         description: t('notificationsSaved'),
@@ -106,11 +109,16 @@ export const useNotifications = () => {
       return true;
     } catch (error) {
       console.error('Error saving notification settings:', error);
+      
+      // Revert local state on error
+      loadNotificationSettings();
+      
       toast({
         title: t('error'),
-        description: 'Failed to save notification settings',
+        description: 'Failed to save notification settings. Please try again.',
         variant: "destructive",
       });
+      
       return false;
     }
   };
@@ -122,10 +130,13 @@ export const useNotifications = () => {
       if (saved) {
         const parsedSettings = JSON.parse(saved);
         setNotificationSettings(parsedSettings);
-        console.log('Notification settings loaded:', parsedSettings);
+        console.log('Notification settings loaded successfully:', parsedSettings);
+      } else {
+        console.log('No saved notification settings found, using defaults');
       }
     } catch (error) {
       console.error('Error loading notification settings:', error);
+      // Keep default settings on error
     }
   };
 
@@ -246,7 +257,7 @@ export const useNotifications = () => {
         async (payload) => {
           const newIoTData = payload.new as any;
           
-          // Check for fire alarm
+          // Check for fire alarm - HIGH PRIORITY NOTIFICATION
           if (newIoTData.fire_alarm_triggered === 'yes') {
             const fireNotification: NotificationData = {
               id: `fire-${Date.now()}-${Math.random()}`,
@@ -256,9 +267,19 @@ export const useNotifications = () => {
               type: 'fire_alarm'
             };
             addNotification(fireNotification);
+            
+            // Force show browser notification for fire alarm regardless of settings
+            if (isNotificationSupported() && Notification.permission === 'granted') {
+              new Notification('🚨 FIRE ALARM TRIGGERED!', {
+                body: `Fire alarm activated in ${newIoTData.zone}. Evacuate immediately!`,
+                icon: '/favicon.ico',
+                requireInteraction: true,
+                tag: 'fire-alarm'
+              });
+            }
           }
 
-          // Check for gas leak
+          // Check for gas leak - HIGH PRIORITY NOTIFICATION
           if (newIoTData.gas_leak_detected === 'yes') {
             const gasNotification: NotificationData = {
               id: `gas-${Date.now()}-${Math.random()}`,
@@ -268,6 +289,16 @@ export const useNotifications = () => {
               type: 'gas_leak'
             };
             addNotification(gasNotification);
+            
+            // Force show browser notification for gas leak regardless of settings
+            if (isNotificationSupported() && Notification.permission === 'granted') {
+              new Notification('⚠️ GAS LEAK DETECTED!', {
+                body: `Gas leak detected in ${newIoTData.zone}. Take immediate action!`,
+                icon: '/favicon.ico',
+                requireInteraction: true,
+                tag: 'gas-leak'
+              });
+            }
           }
           
           // Get the latest data from the same zone for comparison

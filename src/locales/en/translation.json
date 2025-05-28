@@ -170,7 +170,7 @@
     "price": "Price",
     "actions": "Actions",
     "enterDishName": "Enter dish name",
-    "enterPrice": "Enter price",
+    "enterPrice": "Enter price in ₹",
     "recentOrderHistory": "Recent Order History",
     "latestFoodOrdersData": "Latest food orders and consumption data",
     "quantityConsumed": "Quantity Consumed",
@@ -221,6 +221,38 @@
     "previous": "Previous",
     "finish": "Finish",
     "needTour": "Need a Tour?"
+  },
+  "realtimeControls": {
+    "title": "Real-time Data Controls",
+    "simulation": "Real-time Simulation",
+    "simulationDesc": "Automatically generate sensor data",
+    "updateInterval": "Update Interval",
+    "manualRefresh": "Manual Refresh",
+    "refresh": "Refresh",
+    "totalRecords": "Total Records",
+    "lastUpdate": "Last Update",
+    "status": "Status",
+    "live": "LIVE",
+    "paused": "PAUSED",
+    "simulationActive": "Simulation Active",
+    "5seconds": "5 seconds",
+    "30seconds": "30 seconds",
+    "1minute": "1 minute",
+    "5minutes": "5 minutes"
+  },
+  "anomalies": {
+    "title": "Anomaly Detection",
+    "realtime": "Real-time",
+    "noAnomalies": "No anomalies detected",
+    "systemMonitoring": "System monitoring in real-time",
+    "riskProbability": "Risk Probability",
+    "highRisk": "High Risk",
+    "mediumRisk": "Medium Risk",
+    "lowRisk": "Low Risk",
+    "anomaly": "Anomaly",
+    "normal": "Normal",
+    "anomalyDetected": "🚨 Anomaly Detected!",
+    "realtimeAnomalyDetected": "🚨 Real-time Anomaly Detected!"
   },
   "buttons": {
     "save": "Save",
@@ -273,5 +305,7 @@
   "newMostPopular": "New Most Popular Dish",
   "dishIsNowMostPopular": "{{dish}} is now the most popular dish today!",
   "newOrder": "New Order",
-  "orderReceived": "New order received for {{dish}}"
+  "orderReceived": "New order received for {{dish}}",
+  "currency": "₹",
+  "inr": "INR"
 }

@@ -39,6 +39,15 @@ const AnomalyViewer: React.FC = () => {
     }
   };
 
+  const getRiskTranslation = (riskLevel: string) => {
+    switch (riskLevel.toLowerCase()) {
+      case 'high': return t('anomalies.highRisk');
+      case 'medium': return t('anomalies.mediumRisk');
+      case 'low': return t('anomalies.lowRisk');
+      default: return riskLevel;
+    }
+  };
+
   const getPredictionIcon = (prediction: string) => {
     return prediction === 'Anomaly' ? 
       <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" /> : 
@@ -71,7 +80,9 @@ const AnomalyViewer: React.FC = () => {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
             <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className={isMobile ? "text-sm" : ""}>Anomaly Detection (Real-time)</span>
+            <span className={isMobile ? "text-sm" : ""}>
+              {t('anomalies.title')} ({t('anomalies.realtime')})
+            </span>
           </CardTitle>
           <Button
             variant="ghost"
@@ -88,8 +99,8 @@ const AnomalyViewer: React.FC = () => {
           {uniqueAnomalies.length === 0 ? (
             <div className="text-center text-muted-foreground py-6 sm:py-8">
               <CheckCircle className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 text-green-500" />
-              <p className="text-sm sm:text-base">No anomalies detected</p>
-              <p className="text-xs text-muted-foreground mt-1">System monitoring in real-time</p>
+              <p className="text-sm sm:text-base">{t('anomalies.noAnomalies')}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('anomalies.systemMonitoring')}</p>
             </div>
           ) : (
             uniqueAnomalies.map((anomaly, index) => (
@@ -106,7 +117,7 @@ const AnomalyViewer: React.FC = () => {
                     {getPredictionIcon(anomaly.prediction)}
                     <span className="font-medium text-foreground text-sm sm:text-base">{anomaly.zone}</span>
                     <Badge variant={getRiskColor(anomaly.risk_level)} className="text-xs">
-                      {isMobile ? anomaly.risk_level.charAt(0) : anomaly.risk_level} Risk
+                      {isMobile ? getRiskTranslation(anomaly.risk_level).charAt(0) : getRiskTranslation(anomaly.risk_level)}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -117,20 +128,20 @@ const AnomalyViewer: React.FC = () => {
                 
                 <div className="text-xs sm:text-sm space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status:</span>
+                    <span className="text-muted-foreground">{t('realtimeControls.status')}:</span>
                     <span className={`font-medium ${
                       anomaly.prediction === 'Anomaly' 
                         ? 'text-red-600 dark:text-red-400' 
                         : 'text-green-600 dark:text-green-400'
                     }`}>
-                      {anomaly.prediction}
+                      {anomaly.prediction === 'Anomaly' ? t('anomalies.anomaly') : t('anomalies.normal')}
                     </span>
                   </div>
                   
                   {anomaly.prediction === 'Anomaly' && (
                     <>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Risk Probability:</span>
+                        <span className="text-muted-foreground">{t('anomalies.riskProbability')}:</span>
                         <span className="text-red-600 dark:text-red-400 font-medium">
                           {(anomaly.anomaly_probability * 100).toFixed(1)}%
                         </span>
@@ -138,11 +149,11 @@ const AnomalyViewer: React.FC = () => {
                       
                       <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-border text-xs">
                         <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-2'} gap-1 sm:gap-2 text-muted-foreground`}>
-                          <div>Occupancy: <span className="text-foreground">{anomaly.input_data.occupancy}</span></div>
+                          <div>{t('iot.occupancy')}: <span className="text-foreground">{anomaly.input_data.occupancy}</span></div>
                           <div>Hour: <span className="text-foreground">{anomaly.input_data.hour}:00</span></div>
                           <div>Power: <span className="text-foreground">{anomaly.input_data.power_use} kWh</span></div>
                           <div>Water: <span className="text-foreground">{anomaly.input_data.water_use} L</span></div>
-                          <div className="col-span-2">Status: <span className="text-foreground">{anomaly.input_data.cleaning_status}</span></div>
+                          <div className="col-span-2">{t('iot.cleaningStatus')}: <span className="text-foreground">{anomaly.input_data.cleaning_status}</span></div>
                         </div>
                       </div>
                     </>

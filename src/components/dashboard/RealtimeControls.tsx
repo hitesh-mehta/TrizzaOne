@@ -30,10 +30,10 @@ const RealtimeControls: React.FC<RealtimeControlsProps> = ({
   const { t } = useTranslation();
 
   const intervalOptions = [
-    { value: 5, label: '5 seconds' },
-    { value: 30, label: '30 seconds' },
-    { value: 60, label: '1 minute' },
-    { value: 300, label: '5 minutes' },
+    { value: 5, label: t('realtimeControls.5seconds') },
+    { value: 30, label: t('realtimeControls.30seconds') },
+    { value: 60, label: t('realtimeControls.1minute') },
+    { value: 300, label: t('realtimeControls.5minutes') },
   ];
 
   return (
@@ -41,15 +41,15 @@ const RealtimeControls: React.FC<RealtimeControlsProps> = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-mintGreen" />
-          Real-time Data Controls
+          {t('realtimeControls.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium">Real-time Simulation</p>
+            <p className="text-sm font-medium">{t('realtimeControls.simulation')}</p>
             <p className="text-xs text-muted-foreground">
-              Automatically generate sensor data
+              {t('realtimeControls.simulationDesc')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -59,14 +59,14 @@ const RealtimeControls: React.FC<RealtimeControlsProps> = ({
               id="realtime-toggle"
             />
             <Badge variant={isRealtime ? 'default' : 'secondary'}>
-              {isRealtime ? 'ON' : 'OFF'}
+              {isRealtime ? t('iot.on') : t('iot.off')}
             </Badge>
           </div>
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Update Interval</p>
+            <p className="text-sm font-medium">{t('realtimeControls.updateInterval')}</p>
             <Select
               value={interval.toString()}
               onValueChange={(value) => onUpdateInterval(Number(value) as 5 | 30 | 60 | 300)}
@@ -86,7 +86,7 @@ const RealtimeControls: React.FC<RealtimeControlsProps> = ({
           </div>
 
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Manual Refresh</p>
+            <p className="text-sm font-medium">{t('realtimeControls.manualRefresh')}</p>
             <Button
               variant="outline"
               size="sm"
@@ -94,36 +94,36 @@ const RealtimeControls: React.FC<RealtimeControlsProps> = ({
               className="flex items-center gap-1"
             >
               <RefreshCw className="h-4 w-4" />
-              Refresh
+              {t('realtimeControls.refresh')}
             </Button>
           </div>
         </div>
 
         <div className="border-t pt-4 space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Total Records:</span>
+            <span className="text-muted-foreground">{t('realtimeControls.totalRecords')}:</span>
             <span className="font-medium">{dataCount}</span>
           </div>
           {lastUpdate && (
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Last Update:</span>
+              <span className="text-muted-foreground">{t('realtimeControls.lastUpdate')}:</span>
               <span className="font-medium text-xs">
                 {new Date(lastUpdate).toLocaleTimeString()}
               </span>
             </div>
           )}
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Status:</span>
+            <span className="text-muted-foreground">{t('realtimeControls.status')}:</span>
             <div className="flex items-center gap-1">
               {isRealtime ? (
                 <>
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-500 text-xs font-medium">LIVE</span>
+                  <span className="text-green-500 text-xs font-medium">{t('realtimeControls.live')}</span>
                 </>
               ) : (
                 <>
                   <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                  <span className="text-gray-500 text-xs font-medium">PAUSED</span>
+                  <span className="text-gray-500 text-xs font-medium">{t('realtimeControls.paused')}</span>
                 </>
               )}
             </div>
@@ -135,7 +135,7 @@ const RealtimeControls: React.FC<RealtimeControlsProps> = ({
             <div className="flex items-start gap-2">
               <Activity className="h-4 w-4 text-mintGreen mt-0.5 animate-pulse" />
               <div className="text-xs">
-                <p className="font-medium text-mintGreen">Simulation Active</p>
+                <p className="font-medium text-mintGreen">{t('realtimeControls.simulationActive')}</p>
               </div>
             </div>
           </div>
