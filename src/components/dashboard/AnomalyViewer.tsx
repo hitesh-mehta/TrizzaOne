@@ -5,24 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAnomalyDetection } from '@/hooks/useAnomalyDetection';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { AlertTriangle, CheckCircle, Clock } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
 
 const AnomalyViewer: React.FC = () => {
   const { t } = useTranslation();
-  const { anomalies, isLoading } = useAnomalyDetection();
+  const { anomalies, isLoading, refetch } = useAnomalyDetection();
   const isMobile = useIsMobile();
 
-  // Filter unique anomalies and limit to top 5
-  const uniqueAnomalies = anomalies
-    .filter((anomaly, index, array) => {
-      // Remove duplicates based on iot_data_id, zone, and prediction timestamp
-      const key = `${anomaly.iot_data_id}_${anomaly.zone}_${anomaly.api_timestamp}_${anomaly.prediction}`;
-      return array.findIndex(a => 
-        `${a.iot_data_id}_${a.zone}_${a.api_timestamp}_${a.prediction}` === key
-      ) === index;
-    })
-    .slice(0, 5);
+  // Get unique anomalies and limit to top 5
+  const uniqueAnomalies = React.useMemo(() => {
+    const seen = new Set();
+    return anomalies
+      .filter(anomaly => {
+        const key = `${anomaly.iot_data_id}_${anomaly.zone}_${anomaly.api_timestamp}_${anomaly.prediction}`;
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      })
+      .slice(0, 5);
+  }, [anomalies]);
 
   const getRiskColor = (riskLevel: string) => {
     switch (riskLevel.toLowerCase()) {
@@ -62,22 +67,33 @@ const AnomalyViewer: React.FC = () => {
   return (
     <Card className="neumorphic-card">
       <CardHeader className="pb-3 sm:pb-6">
-        <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
-          <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
-          <span className={isMobile ? "text-sm" : ""}>Anomaly Detection Status (Top 5)</span>
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className={isMobile ? "text-sm" : ""}>Anomaly Detection (Real-time)</span>
+          </CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={refetch}
+            className="p-1 h-8 w-8"
+          >
+            <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="p-3 sm:p-6 pt-0">
         <div className="space-y-2 sm:space-y-3 max-h-64 sm:max-h-80 overflow-y-auto">
           {uniqueAnomalies.length === 0 ? (
             <div className="text-center text-muted-foreground py-6 sm:py-8">
               <CheckCircle className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 text-green-500" />
-              <p className="text-sm sm:text-base">No anomaly data available</p>
+              <p className="text-sm sm:text-base">No anomalies detected</p>
+              <p className="text-xs text-muted-foreground mt-1">System monitoring in real-time</p>
             </div>
           ) : (
-            uniqueAnomalies.map((anomaly) => (
+            uniqueAnomalies.map((anomaly, index) => (
               <div
-                key={`${anomaly.id}_${anomaly.api_timestamp}`}
+                key={`${anomaly.id}_${index}_${anomaly.api_timestamp}`}
                 className={`p-2 sm:p-3 rounded-lg border transition-colors ${
                   anomaly.prediction === 'Anomaly' 
                     ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20' 
@@ -100,7 +116,7 @@ const AnomalyViewer: React.FC = () => {
                 
                 <div className="text-xs sm:text-sm space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Prediction:</span>
+                    <span className="text-muted-foreground">Status:</span>
                     <span className={`font-medium ${
                       anomaly.prediction === 'Anomaly' 
                         ? 'text-red-600 dark:text-red-400' 
@@ -113,7 +129,7 @@ const AnomalyViewer: React.FC = () => {
                   {anomaly.prediction === 'Anomaly' && (
                     <>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Anomaly Probability:</span>
+                        <span className="text-muted-foreground">Risk Probability:</span>
                         <span className="text-red-600 dark:text-red-400 font-medium">
                           {(anomaly.anomaly_probability * 100).toFixed(1)}%
                         </span>

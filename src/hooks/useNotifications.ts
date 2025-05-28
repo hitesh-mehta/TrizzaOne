@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +12,12 @@ interface NotificationData {
   type: 'popularity' | 'order' | 'alert' | 'iot_change' | 'consumption_spike';
 }
 
+interface NotificationSettings {
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  marketingEmails: boolean;
+}
+
 export const useNotifications = () => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -18,6 +25,11 @@ export const useNotifications = () => {
   const [lastMostPopular, setLastMostPopular] = useState<string | null>(null);
   const [lastIoTData, setLastIoTData] = useState<any>(null);
   const [processedNotificationIds, setProcessedNotificationIds] = useState<Set<string>>(new Set());
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
+    emailNotifications: true,
+    pushNotifications: true,
+    marketingEmails: false,
+  });
 
   // Check if notifications are supported
   const isNotificationSupported = () => {
@@ -45,6 +57,8 @@ export const useNotifications = () => {
 
   // Show browser notification
   const showBrowserNotification = async (title: string, message: string) => {
+    if (!notificationSettings.pushNotifications) return;
+    
     const hasPermission = await requestNotificationPermission();
     
     if (hasPermission) {
@@ -70,6 +84,48 @@ export const useNotifications = () => {
       } catch (error) {
         console.error('Error showing notification:', error);
       }
+    }
+  };
+
+  // Save notification settings
+  const saveNotificationSettings = async (settings: NotificationSettings) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Update local state immediately
+      setNotificationSettings(settings);
+
+      // Save to localStorage as fallback
+      localStorage.setItem('trizzaone_notification_settings', JSON.stringify(settings));
+
+      toast({
+        title: t('success'),
+        description: t('notificationsSaved'),
+        variant: "default",
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error saving notification settings:', error);
+      toast({
+        title: t('error'),
+        description: 'Failed to save notification settings',
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
+  // Load notification settings
+  const loadNotificationSettings = () => {
+    try {
+      const saved = localStorage.getItem('trizzaone_notification_settings');
+      if (saved) {
+        setNotificationSettings(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error loading notification settings:', error);
     }
   };
 
@@ -171,6 +227,9 @@ export const useNotifications = () => {
   };
 
   useEffect(() => {
+    // Load settings on mount
+    loadNotificationSettings();
+    
     // Request notification permission on mount
     requestNotificationPermission();
 
@@ -312,12 +371,14 @@ export const useNotifications = () => {
       clearInterval(popularityInterval);
       clearInterval(consumptionInterval);
     };
-  }, [t, lastMostPopular, lastIoTData]);
+  }, [t, lastMostPopular, lastIoTData, notificationSettings]);
 
   return {
     notifications,
     notificationCount: notifications.length,
+    notificationSettings,
     requestNotificationPermission,
-    isNotificationSupported
+    isNotificationSupported,
+    saveNotificationSettings
   };
 };

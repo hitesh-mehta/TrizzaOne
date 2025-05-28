@@ -269,6 +269,7 @@
   "marketingEmails": "Marketing Emails",
   "receiveMarketingUpdates": "Receive promotional emails and updates",
   "saveNotificationSettings": "Save Notification Settings",
+  "notificationsSaved": "Notification settings saved successfully",
   "newMostPopular": "New Most Popular Dish",
   "dishIsNowMostPopular": "{{dish}} is now the most popular dish today!",
   "newOrder": "New Order",

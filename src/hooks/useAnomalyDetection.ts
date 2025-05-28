@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -29,7 +29,7 @@ export const useAnomalyDetection = () => {
   const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
-  const fetchAnomalies = async () => {
+  const fetchAnomalies = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
@@ -43,24 +43,27 @@ export const useAnomalyDetection = () => {
         throw error;
       }
       
-      // Type cast the data and filter duplicates based on iot_data_id and timestamp
+      // Type cast the data and create unique entries
       const typedData = (data || []).map(item => ({
         ...item,
         input_data: item.input_data as AnomalyDetection['input_data']
       })) as AnomalyDetection[];
       
-      // Remove duplicates based on iot_data_id and prediction timestamp
+      // Create unique key for each anomaly to prevent duplicates
       const uniqueAnomalies = typedData.filter((anomaly, index, array) => {
-        const key = `${anomaly.iot_data_id}_${anomaly.api_timestamp}_${anomaly.prediction}`;
-        return array.findIndex(a => 
-          `${a.iot_data_id}_${a.api_timestamp}_${a.prediction}` === key
-        ) === index;
+        const uniqueKey = `${anomaly.iot_data_id}_${anomaly.zone}_${anomaly.api_timestamp}_${anomaly.prediction}`;
+        const firstIndex = array.findIndex(a => 
+          `${a.iot_data_id}_${a.zone}_${a.api_timestamp}_${a.prediction}` === uniqueKey
+        );
+        return index === firstIndex; // Keep only the first occurrence
       });
       
       setAnomalies(uniqueAnomalies);
       
-      // Update processed IDs to track what we've seen
-      const newProcessedIds = new Set(uniqueAnomalies.map(a => a.id));
+      // Update processed IDs
+      const newProcessedIds = new Set(uniqueAnomalies.map(a => 
+        `${a.iot_data_id}_${a.zone}_${a.api_timestamp}_${a.prediction}`
+      ));
       setProcessedIds(newProcessedIds);
     } catch (error) {
       console.error('Error fetching anomalies:', error);
@@ -68,7 +71,7 @@ export const useAnomalyDetection = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   const callAnomalyDetection = async (iotData: any) => {
     try {
@@ -88,7 +91,7 @@ export const useAnomalyDetection = () => {
       // If it's an anomaly and we haven't processed this specific combination before
       if (data?.anomalyResult?.prediction === 'Anomaly') {
         const result = data.anomalyResult;
-        const uniqueKey = `${result.iot_data_id}_${result.api_timestamp}_${result.prediction}`;
+        const uniqueKey = `${result.iot_data_id}_${result.input_data.zone}_${result.api_timestamp}_${result.prediction}`;
         
         if (!processedIds.has(uniqueKey)) {
           toast({
@@ -102,10 +105,10 @@ export const useAnomalyDetection = () => {
         }
       }
 
-      // Refresh anomalies list with a small delay to ensure data is committed
+      // Refresh anomalies list after a short delay
       setTimeout(() => {
         fetchAnomalies();
-      }, 1000);
+      }, 1500);
     } catch (error) {
       console.error('Error in anomaly detection:', error);
     }
@@ -129,27 +132,26 @@ export const useAnomalyDetection = () => {
             input_data: payload.new.input_data as AnomalyDetection['input_data']
           } as AnomalyDetection;
           
-          // Check if this is a duplicate based on iot_data_id and timestamp
-          const uniqueKey = `${newAnomaly.iot_data_id}_${newAnomaly.api_timestamp}_${newAnomaly.prediction}`;
+          // Create unique key for this anomaly
+          const uniqueKey = `${newAnomaly.iot_data_id}_${newAnomaly.zone}_${newAnomaly.api_timestamp}_${newAnomaly.prediction}`;
           
           if (!processedIds.has(uniqueKey)) {
             setAnomalies(prev => {
-              // Filter out any existing entries with the same iot_data_id to prevent duplicates
-              const filtered = prev.filter(a => 
-                !(a.iot_data_id === newAnomaly.iot_data_id && 
-                  a.api_timestamp === newAnomaly.api_timestamp &&
-                  a.prediction === newAnomaly.prediction)
-              );
+              // Filter out any existing entries with the same unique key to prevent duplicates
+              const filtered = prev.filter(a => {
+                const existingKey = `${a.iot_data_id}_${a.zone}_${a.api_timestamp}_${a.prediction}`;
+                return existingKey !== uniqueKey;
+              });
               return [newAnomaly, ...filtered.slice(0, 49)];
             });
             
             // Add to processed IDs
-            setProcessedIds(prev => new Set([...prev, uniqueKey, newAnomaly.id]));
+            setProcessedIds(prev => new Set([...prev, uniqueKey]));
             
-            // Show toast for anomalies only if not processed before
+            // Show toast for anomalies only
             if (newAnomaly.prediction === 'Anomaly') {
               toast({
-                title: "🚨 Anomaly Detected!",
+                title: "🚨 Real-time Anomaly Detected!",
                 description: `${newAnomaly.risk_level} risk anomaly in ${newAnomaly.zone}. Probability: ${(newAnomaly.anomaly_probability * 100).toFixed(1)}%`,
                 variant: "destructive",
               });
@@ -162,11 +164,11 @@ export const useAnomalyDetection = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [toast, processedIds]);
+  }, [toast, processedIds, fetchAnomalies]);
 
   useEffect(() => {
     fetchAnomalies();
-  }, []);
+  }, [fetchAnomalies]);
 
   return {
     anomalies,
