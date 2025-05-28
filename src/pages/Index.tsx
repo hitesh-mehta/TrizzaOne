@@ -23,7 +23,8 @@ import ProfileSettings from '@/components/settings/ProfileSettings';
 import Botato from '@/components/chatbot/Botato';
 import WelcomeTour from '@/components/tour/WelcomeTour';
 import { useTour } from '@/hooks/useTour';
-import { HelpCircle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { HelpCircle, Menu, X } from 'lucide-react';
 
 // Import language configuration
 import '@/i18n';
@@ -33,13 +34,23 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { showTour, startTour, closeTour, completeTour } = useTour();
+  const isMobile = useIsMobile();
   const [showSplash, setShowSplash] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [setupComplete, setSetupComplete] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeItem, setActiveItem] = useState('dashboard');
   const [chatbotOpen, setChatbotOpen] = useState(false);
+
+  // Auto-collapse sidebar on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarCollapsed(true);
+      setMobileSidebarOpen(false);
+    }
+  }, [isMobile]);
 
   // Check for authentication and setup status
   useEffect(() => {
@@ -95,6 +106,17 @@ const Index = () => {
   // Handle navigation from navbar
   const handleNavbarNavigation = (item: string) => {
     setActiveItem(item);
+    if (isMobile) {
+      setMobileSidebarOpen(false);
+    }
+  };
+
+  // Handle sidebar item selection on mobile
+  const handleSidebarItemSelect = (item: string) => {
+    setActiveItem(item);
+    if (isMobile) {
+      setMobileSidebarOpen(false);
+    }
   };
   
   // Render active content based on selected sidebar item
@@ -121,7 +143,7 @@ const Index = () => {
   if (isLoading && !showSplash) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <div className="h-12 w-12 rounded-full border-4 border-t-transparent border-mintGreen animate-spin"></div>
+        <div className="h-8 w-8 sm:h-12 sm:w-12 rounded-full border-4 border-t-transparent border-mintGreen animate-spin"></div>
       </div>
     );
   }
@@ -134,39 +156,39 @@ const Index = () => {
       
       {!showSplash && !session && (
         <div className="min-h-screen flex flex-col bg-background">
-          <div className="flex-1 flex items-center justify-center p-6 relative overflow-hidden">
+          <div className="flex-1 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
             {/* Background decorative elements */}
             <div className="absolute inset-0 bg-gradient-to-br from-mintGreen/5 via-background to-coral/5"></div>
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-              <div className="absolute top-20 right-32 opacity-30 scale-75 animate-float -z-10">
-                <FoodModel3D type="burger" rotate={true} size={120} />
+              <div className="absolute top-10 sm:top-20 right-8 sm:right-32 opacity-20 sm:opacity-30 scale-50 sm:scale-75 animate-float -z-10">
+                <FoodModel3D type="burger" rotate={true} size={80} />
               </div>
-              <div className="absolute bottom-32 left-16 opacity-30 scale-75 animate-bounce-slow -z-10">
-                <FoodModel3D type="donut" rotate={true} size={100} />
+              <div className="absolute bottom-16 sm:bottom-32 left-4 sm:left-16 opacity-20 sm:opacity-30 scale-50 sm:scale-75 animate-bounce-slow -z-10">
+                <FoodModel3D type="donut" rotate={true} size={60} />
               </div>
-              <div className="absolute top-1/2 left-1/4 opacity-20 scale-50 animate-pulse -z-10">
-                <FoodModel3D type="pizza" rotate={true} size={80} />
+              <div className="absolute top-1/2 left-1/4 opacity-10 sm:opacity-20 scale-25 sm:scale-50 animate-pulse -z-10">
+                <FoodModel3D type="pizza" rotate={true} size={50} />
               </div>
             </div>
             
             <Card className="w-full max-w-lg mx-auto backdrop-blur-md bg-background/95 border-mintGreen/20 shadow-2xl relative z-10">
-              <CardContent className="p-8 text-center">
-                <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-6 shadow-lg">
-                  <span className="font-bold text-2xl text-white">T1</span>
+              <CardContent className="p-6 sm:p-8 text-center">
+                <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-mintGreen to-coral flex items-center justify-center mb-4 sm:mb-6 shadow-lg">
+                  <span className="font-bold text-lg sm:text-2xl text-white">T1</span>
                 </div>
-                <h1 className="text-4xl font-bold mb-4 text-foreground bg-gradient-to-r from-mintGreen to-coral bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-foreground bg-gradient-to-r from-mintGreen to-coral bg-clip-text text-transparent">
                   {t('app.welcomeTitle')}
                 </h1>
-                <p className="mb-8 text-lg text-muted-foreground font-medium">
+                <p className="mb-6 sm:mb-8 text-base sm:text-lg text-muted-foreground font-medium">
                   {t('app.welcomeDesc')}
                 </p>
                 <button 
                   onClick={() => navigate('/auth')}
-                  className="w-full px-8 py-4 bg-gradient-to-r from-mintGreen to-coral text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-none outline-none focus:ring-2 focus:ring-mintGreen/50"
+                  className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-mintGreen to-coral text-white font-semibold rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-none outline-none focus:ring-2 focus:ring-mintGreen/50 text-sm sm:text-base"
                 >
                   {t('auth.getStarted')} ✨
                 </button>
-                <div className="mt-6 flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+                <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
                   <span>🏢 {t('facility.kitchen')}</span>
                   <span>📊 {t('nav.dashboard')}</span>
                   <span>🌱 {t('nav.sustainability')}</span>
@@ -184,20 +206,42 @@ const Index = () => {
       
       {!showSplash && session && setupComplete && (
         <div className="flex h-screen overflow-hidden bg-background">
-          <Sidebar 
-            collapsed={sidebarCollapsed} 
-            setCollapsed={setSidebarCollapsed}
-            activeItem={activeItem}
-            setActiveItem={setActiveItem}
-          />
+          {/* Mobile overlay */}
+          {isMobile && mobileSidebarOpen && (
+            <div 
+              className="mobile-overlay"
+              onClick={() => setMobileSidebarOpen(false)}
+            />
+          )}
+
+          {/* Mobile menu button */}
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="fixed top-4 left-4 z-50 lg:hidden bg-background/80 backdrop-blur-sm"
+              onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+            >
+              {mobileSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          )}
+          
+          <div className={`${isMobile ? 'mobile-sidebar' : ''} ${isMobile && mobileSidebarOpen ? 'open' : ''}`}>
+            <Sidebar 
+              collapsed={isMobile ? false : sidebarCollapsed} 
+              setCollapsed={setSidebarCollapsed}
+              activeItem={activeItem}
+              setActiveItem={handleSidebarItemSelect}
+            />
+          </div>
           
           <div className="flex flex-col flex-1 overflow-hidden">
             <Navbar onLogout={handleLogout} onNavigate={handleNavbarNavigation} />
             
             <div className="flex-1 overflow-auto bg-background">
               <div className="relative min-h-full flex flex-col">
-                {/* 3D animation background */}
-                <div className="absolute right-10 top-6 opacity-10 -z-20 pointer-events-none">
+                {/* 3D animation background - hidden on mobile for performance */}
+                <div className="mobile-hidden absolute right-10 top-6 opacity-10 -z-20 pointer-events-none">
                   <FoodModel3D 
                     type={activeItem === 'dashboard' ? 'plate' : 
                           activeItem === 'sustainability' ? 'donut' : 
@@ -208,15 +252,16 @@ const Index = () => {
                 </div>
                 
                 {/* Tour Button */}
-                <div className="fixed bottom-6 left-6 z-50">
+                <div className="fixed bottom-4 sm:bottom-6 left-4 sm:left-6 z-50">
                   <Button
                     onClick={startTour}
                     variant="outline"
                     size="sm"
-                    className="bg-background/80 backdrop-blur-sm border-mintGreen/50 hover:bg-mintGreen/10"
+                    className="bg-background/80 backdrop-blur-sm border-mintGreen/50 hover:bg-mintGreen/10 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
                   >
-                    <HelpCircle className="h-4 w-4 mr-2" />
-                    {t('tour.needTour')}
+                    <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">{t('tour.needTour')}</span>
+                    <span className="sm:hidden">Help</span>
                   </Button>
                 </div>
                 

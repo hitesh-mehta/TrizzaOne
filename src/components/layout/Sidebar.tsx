@@ -2,6 +2,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   LayoutDashboard, 
   Leaf, 
@@ -26,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   setActiveItem
 }) => {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   const menuItems = [
     {
@@ -61,34 +63,36 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div className={cn(
       "bg-sidebar-background border-r border-sidebar-border h-full flex flex-col transition-all duration-300",
-      collapsed ? "w-16" : "w-64"
+      isMobile ? "w-64" : (collapsed ? "w-16" : "w-64")
     )}>
       {/* Header */}
-      <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
-        {!collapsed && (
+      <div className="p-3 sm:p-4 border-b border-sidebar-border flex items-center justify-between">
+        {(!collapsed || isMobile) && (
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-full bg-mintGreen flex items-center justify-center">
-              <span className="font-bold text-sm text-navy">T1</span>
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-mintGreen flex items-center justify-center">
+              <span className="font-bold text-xs sm:text-sm text-navy">T1</span>
             </div>
-            <span className="font-semibold text-sidebar-foreground">TrizzaOne</span>
+            <span className="font-semibold text-sidebar-foreground text-sm sm:text-base">TrizzaOne</span>
           </div>
         )}
         
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1 hover:bg-sidebar-accent rounded-md transition-colors"
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4 text-sidebar-foreground" />
-          ) : (
-            <ChevronLeft className="h-4 w-4 text-sidebar-foreground" />
-          )}
-        </button>
+        {!isMobile && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1 hover:bg-sidebar-accent rounded-md transition-colors"
+          >
+            {collapsed ? (
+              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-sidebar-foreground" />
+            ) : (
+              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-sidebar-foreground" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
-        <ul className="space-y-2">
+      <nav className="flex-1 p-3 sm:p-4">
+        <ul className="space-y-1 sm:space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeItem === item.id;
@@ -99,14 +103,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                   onClick={() => setActiveItem(item.id)}
                   data-tour={item.tourId}
                   className={cn(
-                    "w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left",
+                    "w-full flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 rounded-lg transition-colors text-left text-sm sm:text-base",
                     isActive 
                       ? "bg-sidebar-primary text-sidebar-primary-foreground" 
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
-                  <Icon className="h-5 w-5 flex-shrink-0" />
-                  {!collapsed && (
+                  <Icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  {(!collapsed || isMobile) && (
                     <span className="truncate">{item.label}</span>
                   )}
                 </button>

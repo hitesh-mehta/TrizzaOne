@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { IoTData } from '@/hooks/useIoTData';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { format } from 'date-fns';
 
 interface IoTChartsProps {
@@ -11,6 +12,8 @@ interface IoTChartsProps {
 }
 
 const IoTCharts: React.FC<IoTChartsProps> = ({ data }) => {
+  const isMobile = useIsMobile();
+
   if (data.length === 0) return null;
 
   // Prepare data for charts (last 20 records, reversed for chronological order)
@@ -50,19 +53,25 @@ const IoTCharts: React.FC<IoTChartsProps> = ({ data }) => {
     battery: { label: "Battery", color: "#8BC34A" },
   };
 
+  const chartHeight = isMobile ? 250 : 300;
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="responsive-grid-2 lg:grid-cols-2">
       {/* Temperature & Humidity Chart */}
       <Card className="neumorphic-card">
-        <CardHeader>
-          <CardTitle>Temperature & Humidity Trends</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-sm sm:text-base">Temperature & Humidity Trends</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0">
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="time" />
-                <YAxis />
+            <ResponsiveContainer width="100%" height={chartHeight}>
+              <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
+                  interval={isMobile ? 'preserveStartEnd' : 0}
+                />
+                <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line type="monotone" dataKey="temperature" stroke="var(--color-temperature)" strokeWidth={2} name="Temperature (°C)" />
                 <Line type="monotone" dataKey="humidity" stroke="var(--color-humidity)" strokeWidth={2} name="Humidity (%)" />
@@ -74,15 +83,19 @@ const IoTCharts: React.FC<IoTChartsProps> = ({ data }) => {
 
       {/* CO₂ & Light Level Chart */}
       <Card className="neumorphic-card">
-        <CardHeader>
-          <CardTitle>Air Quality & Lighting</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-sm sm:text-base">Air Quality & Lighting</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0">
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={chartData}>
-                <XAxis dataKey="time" />
-                <YAxis />
+            <ResponsiveContainer width="100%" height={chartHeight}>
+              <AreaChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
+                  interval={isMobile ? 'preserveStartEnd' : 0}
+                />
+                <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area type="monotone" dataKey="co2" stackId="1" stroke="var(--color-co2)" fill="var(--color-co2)" fillOpacity={0.3} name="CO₂ (ppm)" />
                 <Area type="monotone" dataKey="light" stackId="2" stroke="var(--color-light)" fill="var(--color-light)" fillOpacity={0.3} name="Light (lux)" />
@@ -94,15 +107,19 @@ const IoTCharts: React.FC<IoTChartsProps> = ({ data }) => {
 
       {/* Occupancy & Energy Chart */}
       <Card className="neumorphic-card">
-        <CardHeader>
-          <CardTitle>Occupancy & Energy Consumption</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-sm sm:text-base">Occupancy & Energy Consumption</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0">
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
-                <XAxis dataKey="time" />
-                <YAxis />
+            <ResponsiveContainer width="100%" height={chartHeight}>
+              <BarChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
+                  interval={isMobile ? 'preserveStartEnd' : 0}
+                />
+                <YAxis tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Bar dataKey="occupancy" fill="var(--color-occupancy)" name="Occupancy" />
                 <Bar dataKey="energy" fill="var(--color-energy)" name="Energy (kWh)" />
@@ -114,15 +131,19 @@ const IoTCharts: React.FC<IoTChartsProps> = ({ data }) => {
 
       {/* Battery Level Chart */}
       <Card className="neumorphic-card">
-        <CardHeader>
-          <CardTitle>Battery Backup Levels</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-sm sm:text-base">Battery Backup Levels</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0">
           <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="time" />
-                <YAxis domain={[0, 100]} />
+            <ResponsiveContainer width="100%" height={chartHeight}>
+              <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                <XAxis 
+                  dataKey="time" 
+                  tick={{ fontSize: isMobile ? 10 : 12 }}
+                  interval={isMobile ? 'preserveStartEnd' : 0}
+                />
+                <YAxis domain={[0, 100]} tick={{ fontSize: isMobile ? 10 : 12 }} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Line type="monotone" dataKey="battery" stroke="var(--color-battery)" strokeWidth={3} name="Battery (%)" />
               </LineChart>
@@ -133,19 +154,20 @@ const IoTCharts: React.FC<IoTChartsProps> = ({ data }) => {
 
       {/* Zone Distribution */}
       <Card className="neumorphic-card">
-        <CardHeader>
-          <CardTitle>Data Distribution by Zone</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-sm sm:text-base">Data Distribution by Zone</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <PieChart>
               <Pie
                 data={zoneData}
                 cx="50%"
                 cy="50%"
-                outerRadius={100}
+                outerRadius={isMobile ? 70 : 100}
                 dataKey="value"
-                label={({ name, value }) => `${name}: ${value}`}
+                label={({ name, value }) => isMobile ? `${name.slice(-2)}` : `${name}: ${value}`}
+                fontSize={isMobile ? 10 : 12}
               >
                 {zoneData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -159,19 +181,20 @@ const IoTCharts: React.FC<IoTChartsProps> = ({ data }) => {
 
       {/* Power Status */}
       <Card className="neumorphic-card">
-        <CardHeader>
-          <CardTitle>Power Status Distribution</CardTitle>
+        <CardHeader className="pb-3 sm:pb-6">
+          <CardTitle className="text-sm sm:text-base">Power Status Distribution</CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <ResponsiveContainer width="100%" height={chartHeight}>
             <PieChart>
               <Pie
                 data={powerData}
                 cx="50%"
                 cy="50%"
-                outerRadius={100}
+                outerRadius={isMobile ? 70 : 100}
                 dataKey="value"
                 label={({ name, value }) => `${name}: ${value}`}
+                fontSize={isMobile ? 10 : 12}
               >
                 {powerData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.fill} />

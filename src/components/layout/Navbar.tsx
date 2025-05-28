@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import ThemeToggle from '../settings/ThemeToggle';
 import LanguageSelector from '../settings/LanguageSelector';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -27,6 +28,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
   const { t } = useTranslation();
   const { notifications, notificationCount } = useNotifications();
+  const isMobile = useIsMobile();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
 
@@ -86,50 +88,54 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
   };
 
   return (
-    <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-6 py-4">
+    <nav className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-3 sm:px-6 py-3 sm:py-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-semibold text-foreground">
-            {t('app.name')}
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground">
+            {isMobile ? 'T1' : t('app.name')}
           </h2>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           {/* Notifications */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
+              <Button variant="ghost" size={isMobile ? "sm" : "icon"} className="relative">
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                 {notificationCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-xs bg-coral">
-                    {notificationCount}
+                  <Badge className="absolute -top-1 -right-1 h-3 w-3 sm:h-4 sm:w-4 p-0 text-xs bg-coral">
+                    {notificationCount > 9 ? '9+' : notificationCount}
                   </Badge>
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 bg-background/95 backdrop-blur-sm border-mintGreen/20" align="end">
-              <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuContent className="w-72 sm:w-80 bg-background/95 backdrop-blur-sm border-mintGreen/20" align="end">
+              <DropdownMenuLabel className="text-sm sm:text-base">Notifications</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {notifications.length === 0 ? (
-                <div className="p-4 text-center text-muted-foreground text-sm">
+                <div className="p-3 sm:p-4 text-center text-muted-foreground text-xs sm:text-sm">
                   No new notifications
                 </div>
               ) : (
-                notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-4 space-y-1">
-                    <div className="font-semibold text-sm">{notification.title}</div>
-                    <div className="text-xs text-muted-foreground">{notification.message}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {notification.timestamp.toLocaleTimeString()}
-                    </div>
-                  </DropdownMenuItem>
-                ))
+                <div className="max-h-60 sm:max-h-80 overflow-y-auto">
+                  {notifications.map((notification) => (
+                    <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3 sm:p-4 space-y-1">
+                      <div className="font-semibold text-xs sm:text-sm">{notification.title}</div>
+                      <div className="text-xs text-muted-foreground">{notification.message}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {notification.timestamp.toLocaleTimeString()}
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                </div>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
           
-          {/* Language Selector */}
-          <LanguageSelector isInNavbar={true} />
+          {/* Language Selector - Hidden on small mobile screens */}
+          <div className="hidden sm:block">
+            <LanguageSelector isInNavbar={true} />
+          </div>
           
           {/* Theme Toggle */}
           <ThemeToggle />
@@ -137,8 +143,8 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar className="h-10 w-10 border-2 border-mintGreen/20">
+              <Button variant="ghost" className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full">
+                <Avatar className="h-8 w-8 sm:h-10 sm:w-10 border-2 border-mintGreen/20">
                   <AvatarImage 
                     src={avatarUrl} 
                     alt={getUserDisplayName()}
@@ -148,16 +154,16 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
                       setAvatarUrl('');
                     }}
                   />
-                  <AvatarFallback className="bg-mintGreen/10 text-mintGreen font-semibold">
+                  <AvatarFallback className="bg-mintGreen/10 text-mintGreen font-semibold text-xs sm:text-sm">
                     {getUserInitials()}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 bg-background/95 backdrop-blur-sm border-mintGreen/20" align="end" forceMount>
+            <DropdownMenuContent className="w-48 sm:w-56 bg-background/95 backdrop-blur-sm border-mintGreen/20" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
+                  <p className="text-xs sm:text-sm font-medium leading-none">
                     {getUserDisplayName()}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
@@ -166,13 +172,20 @@ const Navbar: React.FC<NavbarProps> = ({ onLogout, onNavigate }) => {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer" onClick={handleProfileClick}>
-                <User className="mr-2 h-4 w-4" />
+              <DropdownMenuItem className="cursor-pointer text-xs sm:text-sm" onClick={handleProfileClick}>
+                <User className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span>{t('nav.profile')}</span>
               </DropdownMenuItem>
+              {/* Language selector for mobile */}
+              <div className="sm:hidden">
+                <DropdownMenuSeparator />
+                <div className="p-2">
+                  <LanguageSelector isInNavbar={false} />
+                </div>
+              </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer text-red-600" onClick={onLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
+              <DropdownMenuItem className="cursor-pointer text-red-600 text-xs sm:text-sm" onClick={onLogout}>
+                <LogOut className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                 <span>{t('auth.logout')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
