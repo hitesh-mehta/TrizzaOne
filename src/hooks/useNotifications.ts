@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
@@ -55,7 +54,6 @@ export const useNotifications = () => {
           icon: '/favicon.ico',
           badge: '/favicon.ico',
           tag: 'trizzaone-notification',
-          renotify: true,
           requireInteraction: false,
           silent: false
         });
