@@ -16,14 +16,15 @@ const AnomalyViewer: React.FC = () => {
 
   // Get unique anomalies and limit to top 5
   const uniqueAnomalies = React.useMemo(() => {
-    const seen = new Set();
+    const seen = new Map();
     return anomalies
       .filter(anomaly => {
-        const key = `${anomaly.iot_data_id}_${anomaly.zone}_${anomaly.api_timestamp}_${anomaly.prediction}`;
+        // Create a more comprehensive unique key
+        const key = `${anomaly.iot_data_id}_${anomaly.zone}_${anomaly.api_timestamp}_${anomaly.prediction}_${anomaly.created_at}`;
         if (seen.has(key)) {
           return false;
         }
-        seen.add(key);
+        seen.set(key, true);
         return true;
       })
       .slice(0, 5);
@@ -93,7 +94,7 @@ const AnomalyViewer: React.FC = () => {
           ) : (
             uniqueAnomalies.map((anomaly, index) => (
               <div
-                key={`${anomaly.id}_${index}_${anomaly.api_timestamp}`}
+                key={`${anomaly.id}_${anomaly.created_at}_${index}`}
                 className={`p-2 sm:p-3 rounded-lg border transition-colors ${
                   anomaly.prediction === 'Anomaly' 
                     ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20' 

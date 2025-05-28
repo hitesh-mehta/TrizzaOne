@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
@@ -9,7 +8,7 @@ interface NotificationData {
   title: string;
   message: string;
   timestamp: Date;
-  type: 'popularity' | 'order' | 'alert' | 'iot_change' | 'consumption_spike';
+  type: 'popularity' | 'order' | 'alert' | 'iot_change' | 'consumption_spike' | 'fire_alarm' | 'gas_leak';
 }
 
 interface NotificationSettings {
@@ -90,14 +89,13 @@ export const useNotifications = () => {
   // Save notification settings
   const saveNotificationSettings = async (settings: NotificationSettings) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
       // Update local state immediately
       setNotificationSettings(settings);
 
-      // Save to localStorage as fallback
+      // Save to localStorage
       localStorage.setItem('trizzaone_notification_settings', JSON.stringify(settings));
+      
+      console.log('Notification settings saved:', settings);
 
       toast({
         title: t('success'),
@@ -122,7 +120,9 @@ export const useNotifications = () => {
     try {
       const saved = localStorage.getItem('trizzaone_notification_settings');
       if (saved) {
-        setNotificationSettings(JSON.parse(saved));
+        const parsedSettings = JSON.parse(saved);
+        setNotificationSettings(parsedSettings);
+        console.log('Notification settings loaded:', parsedSettings);
       }
     } catch (error) {
       console.error('Error loading notification settings:', error);
@@ -206,7 +206,7 @@ export const useNotifications = () => {
 
   // Add notification with duplicate prevention
   const addNotification = (notification: NotificationData) => {
-    const notificationKey = `${notification.type}_${notification.title}_${notification.message}`;
+    const notificationKey = `${notification.type}_${notification.title}_${Date.now()}`;
     
     if (!processedNotificationIds.has(notificationKey)) {
       setNotifications(prev => [notification, ...prev.slice(0, 4)]);
@@ -216,11 +216,11 @@ export const useNotifications = () => {
       toast({
         title: notification.title,
         description: notification.message,
-        variant: notification.type === 'alert' || notification.type === 'iot_change' ? "destructive" : "default",
+        variant: notification.type === 'alert' || notification.type === 'iot_change' || notification.type === 'fire_alarm' || notification.type === 'gas_leak' ? "destructive" : "default",
       });
 
       // Show browser notification for important alerts
-      if (notification.type === 'alert' || notification.type === 'iot_change' || notification.type === 'consumption_spike') {
+      if (['alert', 'iot_change', 'consumption_spike', 'fire_alarm', 'gas_leak'].includes(notification.type)) {
         showBrowserNotification(notification.title, notification.message);
       }
     }
@@ -245,6 +245,30 @@ export const useNotifications = () => {
         },
         async (payload) => {
           const newIoTData = payload.new as any;
+          
+          // Check for fire alarm
+          if (newIoTData.fire_alarm_triggered === 'yes') {
+            const fireNotification: NotificationData = {
+              id: `fire-${Date.now()}-${Math.random()}`,
+              title: '🚨 FIRE ALARM TRIGGERED!',
+              message: `Fire alarm activated in ${newIoTData.zone}. Evacuate immediately!`,
+              timestamp: new Date(),
+              type: 'fire_alarm'
+            };
+            addNotification(fireNotification);
+          }
+
+          // Check for gas leak
+          if (newIoTData.gas_leak_detected === 'yes') {
+            const gasNotification: NotificationData = {
+              id: `gas-${Date.now()}-${Math.random()}`,
+              title: '⚠️ GAS LEAK DETECTED!',
+              message: `Gas leak detected in ${newIoTData.zone}. Take immediate action!`,
+              timestamp: new Date(),
+              type: 'gas_leak'
+            };
+            addNotification(gasNotification);
+          }
           
           // Get the latest data from the same zone for comparison
           if (lastIoTData && lastIoTData.zone === newIoTData.zone) {
