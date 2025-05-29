@@ -23,7 +23,7 @@ export interface AnomalyDetection {
   created_at: string;
 }
 
-export const useAnomalyDetection = () => {
+export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSeconds: number = 30) => {
   const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
@@ -43,27 +43,19 @@ export const useAnomalyDetection = () => {
         throw error;
       }
       
-      // Type cast the data
       const typedData = (data || []).map(item => ({
         ...item,
         input_data: item.input_data as AnomalyDetection['input_data']
       })) as AnomalyDetection[];
       
-      // Create a Map to track unique anomalies by ID
-      const uniqueAnomaliesMap = new Map();
-      
-      typedData.forEach(anomaly => {
-        // Use ID as the primary key for uniqueness
-        if (!uniqueAnomaliesMap.has(anomaly.id)) {
-          uniqueAnomaliesMap.set(anomaly.id, anomaly);
-        }
-      });
-      
-      const uniqueAnomalies = Array.from(uniqueAnomaliesMap.values());
+      // Remove duplicates based on ID only
+      const uniqueAnomalies = typedData.filter((anomaly, index, self) => 
+        index === self.findIndex(a => a.id === anomaly.id)
+      );
       
       setAnomalies(uniqueAnomalies);
       
-      // Update processed IDs to track what we've already processed
+      // Update processed IDs
       const newProcessedIds = new Set(uniqueAnomalies.map(a => a.id));
       setProcessedIds(newProcessedIds);
     } catch (error) {
@@ -74,7 +66,7 @@ export const useAnomalyDetection = () => {
     }
   }, []);
 
-  const callAnomalyDetection = async (iotData: any) => {
+  const callAnomalyDetection = useCallback(async (iotData: any) => {
     try {
       console.log('Calling anomaly detection for IoT data:', iotData);
       
@@ -93,7 +85,7 @@ export const useAnomalyDetection = () => {
       if (data?.anomalyResult?.prediction === 'Anomaly') {
         const result = data.anomalyResult;
         
-        if (!processedIds.has(result.iot_data_id)) {
+        if (!processedIds.has(result.id)) {
           toast({
             title: "🚨 Anomaly Detected!",
             description: `${result.risk_level} risk anomaly in ${result.input_data.zone}. Probability: ${(result.anomaly_probability * 100).toFixed(1)}%`,
@@ -101,18 +93,18 @@ export const useAnomalyDetection = () => {
           });
           
           // Add to processed IDs
-          setProcessedIds(prev => new Set([...prev, result.iot_data_id]));
+          setProcessedIds(prev => new Set([...prev, result.id]));
         }
       }
 
-      // Refresh anomalies list
+      // Refresh anomalies list after a short delay
       setTimeout(() => {
         fetchAnomalies();
       }, 1000);
     } catch (error) {
       console.error('Error in anomaly detection:', error);
     }
-  };
+  }, [fetchAnomalies, processedIds, toast]);
 
   // Set up real-time subscription for new anomaly detections
   useEffect(() => {
@@ -167,6 +159,25 @@ export const useAnomalyDetection = () => {
     };
   }, [toast, processedIds]);
 
+  // Set up interval-based anomaly detection when realtime is enabled
+  useEffect(() => {
+    let intervalId: number | undefined;
+
+    if (realtimeEnabled) {
+      // Fetch anomalies at the specified interval
+      intervalId = window.setInterval(() => {
+        fetchAnomalies();
+      }, intervalSeconds * 1000);
+    }
+
+    return () => {
+      if (intervalId !== undefined) {
+        window.clearInterval(intervalId);
+      }
+    };
+  }, [realtimeEnabled, intervalSeconds, fetchAnomalies]);
+
+  // Initial data fetch
   useEffect(() => {
     fetchAnomalies();
   }, [fetchAnomalies]);

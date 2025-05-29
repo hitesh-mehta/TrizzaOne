@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,6 +103,28 @@ const ProfileSettings = () => {
       toast({
         title: t('error', 'Error updating password'),
         description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleNotificationSettingsSave = async () => {
+    setSaving(true);
+    try {
+      // Save to localStorage
+      localStorage.setItem('trizzaone_notification_settings', JSON.stringify(notifications));
+      
+      toast({
+        title: "✅ Settings Saved",
+        description: "Your notification preferences have been saved successfully.",
+        variant: "default",
+      });
+    } catch (error: any) {
+      toast({
+        title: "❌ Error",
+        description: 'Failed to save notification settings. Please try again.',
         variant: "destructive",
       });
     } finally {
@@ -353,8 +374,12 @@ const ProfileSettings = () => {
                 </div>
               </div>
 
-              <Button className="bg-mintGreen hover:bg-mintGreen/90">
-                {t('saveNotificationSettings', 'Save Notification Settings')}
+              <Button 
+                className="bg-mintGreen hover:bg-mintGreen/90"
+                onClick={handleNotificationSettingsSave}
+                disabled={saving}
+              >
+                {saving ? t('saving', 'Saving...') : t('saveNotificationSettings', 'Save Notification Settings')}
               </Button>
             </CardContent>
           </Card>

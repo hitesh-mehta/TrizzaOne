@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAnomalyDetection } from '@/hooks/useAnomalyDetection';
+import { useIoTData } from '@/hooks/useIoTData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AlertTriangle, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
@@ -11,14 +11,14 @@ import { Button } from '@/components/ui/button';
 
 const AnomalyViewer: React.FC = () => {
   const { t } = useTranslation();
-  const { anomalies, isLoading, refetch } = useAnomalyDetection();
+  const { isRealtime, interval } = useIoTData();
+  const { anomalies, isLoading, refetch } = useAnomalyDetection(isRealtime, interval);
   const isMobile = useIsMobile();
 
   // Get unique anomalies based on ID only - limit to top 5
   const uniqueAnomalies = React.useMemo(() => {
     const uniqueMap = new Map();
     anomalies.forEach(anomaly => {
-      // Use ID as the primary key for uniqueness
       if (!uniqueMap.has(anomaly.id)) {
         uniqueMap.set(anomaly.id, anomaly);
       }
@@ -81,6 +81,11 @@ const AnomalyViewer: React.FC = () => {
             <span className={isMobile ? "text-sm" : ""}>
               {t('anomalies.title')} ({t('anomalies.realtime')})
             </span>
+            {isRealtime && (
+              <Badge variant="default" className="text-xs">
+                {t('realtimeControls.live')} - {interval}s
+              </Badge>
+            )}
           </CardTitle>
           <Button
             variant="ghost"
