@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
@@ -86,18 +87,18 @@ export const useNotifications = () => {
     }
   };
 
-  // Save notification settings
+  // Save notification settings - FIXED VERSION
   const saveNotificationSettings = async (settings: NotificationSettings) => {
     try {
-      console.log('Attempting to save notification settings:', settings);
+      console.log('Saving notification settings:', settings);
       
-      // Update local state immediately for better UX
+      // Update local state immediately
       setNotificationSettings(settings);
 
-      // Save to localStorage as the primary storage method
+      // Save to localStorage
       localStorage.setItem('trizzaone_notification_settings', JSON.stringify(settings));
       
-      console.log('Successfully saved notification settings to localStorage');
+      console.log('Notification settings saved successfully');
 
       // Show success toast
       toast({
@@ -110,9 +111,7 @@ export const useNotifications = () => {
     } catch (error) {
       console.error('Error saving notification settings:', error);
       
-      // Revert local state on error
-      loadNotificationSettings();
-      
+      // Show error toast
       toast({
         title: t('error'),
         description: 'Failed to save notification settings. Please try again.',
@@ -130,13 +129,10 @@ export const useNotifications = () => {
       if (saved) {
         const parsedSettings = JSON.parse(saved);
         setNotificationSettings(parsedSettings);
-        console.log('Notification settings loaded successfully:', parsedSettings);
-      } else {
-        console.log('No saved notification settings found, using defaults');
+        console.log('Notification settings loaded:', parsedSettings);
       }
     } catch (error) {
       console.error('Error loading notification settings:', error);
-      // Keep default settings on error
     }
   };
 
@@ -146,11 +142,11 @@ export const useNotifications = () => {
     
     const changes = [];
     const thresholds = {
-      temperature: 0.15, // 15% change
-      humidity: 0.20, // 20% change
-      co2_level: 0.25, // 25% change
-      occupancy_count: 0.30, // 30% change
-      energy_consumed_kwh: 0.20 // 20% change
+      temperature: 0.15,
+      humidity: 0.20,
+      co2_level: 0.25,
+      occupancy_count: 0.30,
+      energy_consumed_kwh: 0.20
     };
 
     for (const [key, threshold] of Object.entries(thresholds)) {
@@ -173,51 +169,9 @@ export const useNotifications = () => {
     return changes;
   };
 
-  // Function to detect consumption spikes
-  const detectConsumptionSpikes = async () => {
-    try {
-      const now = new Date();
-      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-      const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-
-      // Get consumption in last hour vs previous hour
-      const { data: recentConsumption } = await supabase
-        .from('food_history')
-        .select('quantity_consumed, dish_name')
-        .gte('timestamp', oneHourAgo.toISOString())
-        .not('quantity_consumed', 'is', null);
-
-      const { data: previousConsumption } = await supabase
-        .from('food_history')
-        .select('quantity_consumed, dish_name')
-        .gte('timestamp', twoHoursAgo.toISOString())
-        .lt('timestamp', oneHourAgo.toISOString())
-        .not('quantity_consumed', 'is', null);
-
-      if (recentConsumption && previousConsumption) {
-        const recentTotal = recentConsumption.reduce((sum, item) => sum + (item.quantity_consumed || 0), 0);
-        const previousTotal = previousConsumption.reduce((sum, item) => sum + (item.quantity_consumed || 0), 0);
-
-        // Detect 50% increase in consumption
-        if (previousTotal > 0 && ((recentTotal - previousTotal) / previousTotal) > 0.5) {
-          return {
-            type: 'spike',
-            increase: (((recentTotal - previousTotal) / previousTotal) * 100).toFixed(1),
-            recentTotal,
-            previousTotal
-          };
-        }
-      }
-    } catch (error) {
-      console.error('Error detecting consumption spikes:', error);
-    }
-    
-    return null;
-  };
-
   // Add notification with duplicate prevention
   const addNotification = (notification: NotificationData) => {
-    const notificationKey = `${notification.type}_${notification.title}_${Date.now()}`;
+    const notificationKey = `${notification.type}_${notification.title}_${Math.floor(Date.now() / 60000)}`;
     
     if (!processedNotificationIds.has(notificationKey)) {
       setNotifications(prev => [notification, ...prev.slice(0, 4)]);
@@ -257,7 +211,7 @@ export const useNotifications = () => {
         async (payload) => {
           const newIoTData = payload.new as any;
           
-          // Check for fire alarm - HIGH PRIORITY NOTIFICATION
+          // Check for fire alarm - HIGH PRIORITY
           if (newIoTData.fire_alarm_triggered === 'yes') {
             const fireNotification: NotificationData = {
               id: `fire-${Date.now()}-${Math.random()}`,
@@ -267,19 +221,9 @@ export const useNotifications = () => {
               type: 'fire_alarm'
             };
             addNotification(fireNotification);
-            
-            // Force show browser notification for fire alarm regardless of settings
-            if (isNotificationSupported() && Notification.permission === 'granted') {
-              new Notification('🚨 FIRE ALARM TRIGGERED!', {
-                body: `Fire alarm activated in ${newIoTData.zone}. Evacuate immediately!`,
-                icon: '/favicon.ico',
-                requireInteraction: true,
-                tag: 'fire-alarm'
-              });
-            }
           }
 
-          // Check for gas leak - HIGH PRIORITY NOTIFICATION
+          // Check for gas leak - HIGH PRIORITY
           if (newIoTData.gas_leak_detected === 'yes') {
             const gasNotification: NotificationData = {
               id: `gas-${Date.now()}-${Math.random()}`,
@@ -289,19 +233,9 @@ export const useNotifications = () => {
               type: 'gas_leak'
             };
             addNotification(gasNotification);
-            
-            // Force show browser notification for gas leak regardless of settings
-            if (isNotificationSupported() && Notification.permission === 'granted') {
-              new Notification('⚠️ GAS LEAK DETECTED!', {
-                body: `Gas leak detected in ${newIoTData.zone}. Take immediate action!`,
-                icon: '/favicon.ico',
-                requireInteraction: true,
-                tag: 'gas-leak'
-              });
-            }
           }
           
-          // Get the latest data from the same zone for comparison
+          // Check for IoT changes
           if (lastIoTData && lastIoTData.zone === newIoTData.zone) {
             const changes = detectIoTChanges(newIoTData, lastIoTData);
             
@@ -346,87 +280,15 @@ export const useNotifications = () => {
           };
           
           addNotification(orderNotification);
-
-          // Check for consumption spikes
-          const spike = await detectConsumptionSpikes();
-          if (spike) {
-            const spikeNotification: NotificationData = {
-              id: `spike-${Date.now()}-${Math.random()}`,
-              title: '📈 Consumption Spike Detected!',
-              message: `Food consumption increased by ${spike.increase}% in the last hour`,
-              timestamp: new Date(),
-              type: 'consumption_spike'
-            };
-            
-            addNotification(spikeNotification);
-          }
         }
       )
       .subscribe();
 
-    // Check for popularity changes every 30 seconds
-    const popularityInterval = setInterval(async () => {
-      try {
-        const today = new Date().toISOString().split('T')[0];
-        const { data: todayOrders } = await supabase
-          .from('food_history')
-          .select('dish_name, quantity_consumed')
-          .gte('timestamp', today)
-          .not('quantity_consumed', 'is', null);
-
-        if (todayOrders && todayOrders.length > 0) {
-          const dishPopularity = todayOrders.reduce((acc, item) => {
-            acc[item.dish_name] = (acc[item.dish_name] || 0) + (item.quantity_consumed || 0);
-            return acc;
-          }, {} as Record<string, number>);
-
-          const sortedDishes = Object.entries(dishPopularity)
-            .sort((a, b) => b[1] - a[1]);
-
-          const currentMostPopular = sortedDishes[0]?.[0];
-
-          if (currentMostPopular && lastMostPopular && currentMostPopular !== lastMostPopular) {
-            const popularityNotification: NotificationData = {
-              id: `popularity-${Date.now()}-${Math.random()}`,
-              title: t('newMostPopular'),
-              message: t('dishIsNowMostPopular', { dish: currentMostPopular }),
-              timestamp: new Date(),
-              type: 'popularity'
-            };
-
-            addNotification(popularityNotification);
-          }
-
-          setLastMostPopular(currentMostPopular);
-        }
-      } catch (error) {
-        console.error('Error checking popularity:', error);
-      }
-    }, 30000);
-
-    // Check for consumption spikes every 5 minutes
-    const consumptionInterval = setInterval(async () => {
-      const spike = await detectConsumptionSpikes();
-      if (spike) {
-        const spikeNotification: NotificationData = {
-          id: `spike-${Date.now()}-${Math.random()}`,
-          title: '📈 Consumption Spike Detected!',
-          message: `Food consumption increased by ${spike.increase}% in the last hour`,
-          timestamp: new Date(),
-          type: 'consumption_spike'
-        };
-        
-        addNotification(spikeNotification);
-      }
-    }, 300000); // 5 minutes
-
     return () => {
       supabase.removeChannel(iotChannel);
       supabase.removeChannel(foodChannel);
-      clearInterval(popularityInterval);
-      clearInterval(consumptionInterval);
     };
-  }, [t, lastMostPopular, lastIoTData, notificationSettings]);
+  }, [t, lastIoTData, notificationSettings]);
 
   return {
     notifications,

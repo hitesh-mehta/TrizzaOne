@@ -14,20 +14,16 @@ const AnomalyViewer: React.FC = () => {
   const { anomalies, isLoading, refetch } = useAnomalyDetection();
   const isMobile = useIsMobile();
 
-  // Get unique anomalies and limit to top 5
+  // Get unique anomalies based on id and created_at - limit to top 5
   const uniqueAnomalies = React.useMemo(() => {
-    const seen = new Map();
-    return anomalies
-      .filter(anomaly => {
-        // Create a more comprehensive unique key
-        const key = `${anomaly.iot_data_id}_${anomaly.zone}_${anomaly.api_timestamp}_${anomaly.prediction}_${anomaly.created_at}`;
-        if (seen.has(key)) {
-          return false;
-        }
-        seen.set(key, true);
-        return true;
-      })
-      .slice(0, 5);
+    const uniqueMap = new Map();
+    anomalies.forEach(anomaly => {
+      const key = `${anomaly.id}_${anomaly.created_at}`;
+      if (!uniqueMap.has(key)) {
+        uniqueMap.set(key, anomaly);
+      }
+    });
+    return Array.from(uniqueMap.values()).slice(0, 5);
   }, [anomalies]);
 
   const getRiskColor = (riskLevel: string) => {
@@ -103,9 +99,9 @@ const AnomalyViewer: React.FC = () => {
               <p className="text-xs text-muted-foreground mt-1">{t('anomalies.systemMonitoring')}</p>
             </div>
           ) : (
-            uniqueAnomalies.map((anomaly, index) => (
+            uniqueAnomalies.map((anomaly) => (
               <div
-                key={`${anomaly.id}_${anomaly.created_at}_${index}`}
+                key={`${anomaly.id}_${anomaly.created_at}`}
                 className={`p-2 sm:p-3 rounded-lg border transition-colors ${
                   anomaly.prediction === 'Anomaly' 
                     ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20' 
