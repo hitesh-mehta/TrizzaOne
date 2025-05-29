@@ -26,7 +26,6 @@ export interface AnomalyDetection {
 export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSeconds: number = 30) => {
   const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const fetchAnomalies = useCallback(async () => {
@@ -48,16 +47,7 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
         input_data: item.input_data as AnomalyDetection['input_data']
       })) as AnomalyDetection[];
       
-      // Remove duplicates based on ID only
-      const uniqueAnomalies = typedData.filter((anomaly, index, self) => 
-        index === self.findIndex(a => a.id === anomaly.id)
-      );
-      
-      setAnomalies(uniqueAnomalies);
-      
-      // Update processed IDs
-      const newProcessedIds = new Set(uniqueAnomalies.map(a => a.id));
-      setProcessedIds(newProcessedIds);
+      setAnomalies(typedData);
     } catch (error) {
       console.error('Error fetching anomalies:', error);
       setAnomalies([]);
@@ -80,36 +70,17 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
       }
 
       console.log('Anomaly detection response:', data);
-
-      // Only show notification for new anomalies
-      if (data?.anomalyResult?.prediction === 'Anomaly') {
-        const result = data.anomalyResult;
-        
-        if (!processedIds.has(result.id)) {
-          toast({
-            title: "🚨 Anomaly Detected!",
-            description: `${result.risk_level} risk anomaly in ${result.input_data.zone}. Probability: ${(result.anomaly_probability * 100).toFixed(1)}%`,
-            variant: "destructive",
-          });
-          
-          // Add to processed IDs
-          setProcessedIds(prev => new Set([...prev, result.id]));
-        }
-      }
-
-      // Refresh anomalies list after a short delay
-      setTimeout(() => {
-        fetchAnomalies();
-      }, 1000);
     } catch (error) {
       console.error('Error in anomaly detection:', error);
     }
-  }, [fetchAnomalies, processedIds, toast]);
+  }, []);
 
-  // Set up real-time subscription for new anomaly detections
+  // Set up real-time subscription for anomaly detections - ALWAYS ACTIVE
   useEffect(() => {
+    console.log('Setting up real-time anomaly detection subscription...');
+    
     const channel = supabase
-      .channel('anomaly-realtime')
+      .channel('anomaly-realtime-updates')
       .on(
         'postgres_changes',
         {
@@ -118,64 +89,37 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
           table: 'anomaly_detections'
         },
         (payload) => {
-          console.log('Real-time anomaly detected:', payload);
+          console.log('Real-time anomaly received:', payload);
           const newAnomaly = {
             ...payload.new,
             input_data: payload.new.input_data as AnomalyDetection['input_data']
           } as AnomalyDetection;
           
-          // Only process if we haven't seen this ID before
-          if (!processedIds.has(newAnomaly.id)) {
-            setAnomalies(prev => {
-              // Check if this anomaly ID already exists in our current list
-              const exists = prev.some(existing => existing.id === newAnomaly.id);
-              
-              if (!exists) {
-                // Add new anomaly to the beginning of the list and limit to 50
-                const updated = [newAnomaly, ...prev].slice(0, 50);
-                return updated;
-              }
-              return prev;
+          setAnomalies(prev => {
+            // Add new anomaly to the beginning and limit to 50
+            const updated = [newAnomaly, ...prev].slice(0, 50);
+            return updated;
+          });
+          
+          // Show toast for anomalies only
+          if (newAnomaly.prediction === 'Anomaly') {
+            toast({
+              title: "🚨 Real-time Anomaly Detected!",
+              description: `${newAnomaly.risk_level} risk anomaly in ${newAnomaly.zone}. Probability: ${(newAnomaly.anomaly_probability * 100).toFixed(1)}%`,
+              variant: "destructive",
             });
-            
-            // Add to processed IDs
-            setProcessedIds(prev => new Set([...prev, newAnomaly.id]));
-            
-            // Show toast for anomalies only
-            if (newAnomaly.prediction === 'Anomaly') {
-              toast({
-                title: "🚨 Real-time Anomaly Detected!",
-                description: `${newAnomaly.risk_level} risk anomaly in ${newAnomaly.zone}. Probability: ${(newAnomaly.anomaly_probability * 100).toFixed(1)}%`,
-                variant: "destructive",
-              });
-            }
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Anomaly real-time subscription status:', status);
+      });
 
     return () => {
+      console.log('Cleaning up anomaly real-time subscription');
       supabase.removeChannel(channel);
     };
-  }, [toast, processedIds]);
-
-  // Set up interval-based anomaly detection when realtime is enabled
-  useEffect(() => {
-    let intervalId: number | undefined;
-
-    if (realtimeEnabled) {
-      // Fetch anomalies at the specified interval
-      intervalId = window.setInterval(() => {
-        fetchAnomalies();
-      }, intervalSeconds * 1000);
-    }
-
-    return () => {
-      if (intervalId !== undefined) {
-        window.clearInterval(intervalId);
-      }
-    };
-  }, [realtimeEnabled, intervalSeconds, fetchAnomalies]);
+  }, [toast]);
 
   // Initial data fetch
   useEffect(() => {

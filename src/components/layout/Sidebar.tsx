@@ -10,7 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
-  History
+  History,
+  Users
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -46,6 +47,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       id: 'order-history',
       label: t('orderHistory.title'),
       icon: History,
+    },
+    {
+      id: 'community',
+      label: 'Community',
+      icon: Users,
     },
     {
       id: 'sustainability',

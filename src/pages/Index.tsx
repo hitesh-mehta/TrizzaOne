@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -12,6 +11,7 @@ import Navbar from '@/components/layout/Navbar';
 import Dashboard from '@/components/dashboard/Dashboard';
 import Sustainability from '@/components/dashboard/Sustainability';
 import Feedback from '@/components/dashboard/Feedback';
+import Community from '@/components/dashboard/Community';
 import Footer from '@/components/layout/Footer';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -128,6 +128,8 @@ const Index = () => {
         return <Predictions />;
       case 'order-history':
         return <OrderHistory />;
+      case 'community':
+        return <Community />;
       case 'sustainability':
         return <Sustainability />;
       case 'feedback':
