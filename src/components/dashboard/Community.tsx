@@ -233,12 +233,12 @@ const Community: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'sustainabilitymanager': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'operationslead': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'kitchensupervisor': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-      case 'energyanalyst': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-      case 'qualitycontrol': return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300';
-      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+      case 'sustainabilitymanager': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300';
+      case 'operationslead': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300';
+      case 'kitchensupervisor': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-300';
+      case 'energyanalyst': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-300';
+      case 'qualitycontrol': return 'bg-pink-100 text-pink-800 dark:bg-pink-900/20 dark:text-pink-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300';
     }
   };
 
@@ -267,12 +267,12 @@ const Community: React.FC = () => {
       </div>
 
       <Tabs defaultValue="community" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="community" className="flex items-center gap-2">
+        <TabsList className="grid w-full grid-cols-2 bg-muted">
+          <TabsTrigger value="community" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground">
             <MessageSquare className="h-4 w-4" />
             {t('community.feed')}
           </TabsTrigger>
-          <TabsTrigger value="leaderboard" className="flex items-center gap-2">
+          <TabsTrigger value="leaderboard" className="flex items-center gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground">
             <Trophy className="h-4 w-4" />
             {t('community.leaderboard')}
           </TabsTrigger>
@@ -292,7 +292,7 @@ const Community: React.FC = () => {
                 placeholder={t('community.shareUpdatePlaceholder')}
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
-                className="min-h-20 bg-background border-border text-foreground"
+                className="min-h-20 bg-background border-border text-foreground placeholder:text-muted-foreground"
               />
               <div className="flex justify-between items-center">
                 <div className="text-sm text-muted-foreground">
@@ -301,7 +301,7 @@ const Community: React.FC = () => {
                 <Button 
                   onClick={handleSubmitPost}
                   disabled={!newPostContent.trim() || isSubmitting}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 bg-mintGreen hover:bg-mintGreen/90 text-white"
                 >
                   <Send className="h-4 w-4" />
                   {isSubmitting ? t('community.posting') : t('community.share')}
@@ -341,7 +341,7 @@ const Community: React.FC = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleLikePost(post.id)}
-                          className="flex items-center gap-1 text-muted-foreground hover:text-red-500"
+                          className="flex items-center gap-1 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
                         >
                           <Heart className="h-4 w-4" />
                           {post.likes}
@@ -349,7 +349,7 @@ const Community: React.FC = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="flex items-center gap-1 text-muted-foreground"
+                          className="flex items-center gap-1 text-muted-foreground hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20"
                         >
                           <MessageCircle className="h-4 w-4" />
                           {post.replies}
@@ -403,10 +403,10 @@ const Community: React.FC = () => {
                   <div
                     key={entry.id}
                     className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-                      index === 0 ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' :
-                      index === 1 ? 'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700' :
-                      index === 2 ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
-                      'bg-background border-border'
+                      index === 0 ? 'bg-yellow-50/50 border-yellow-200 dark:bg-yellow-900/10 dark:border-yellow-800/50' :
+                      index === 1 ? 'bg-gray-50/50 border-gray-200 dark:bg-gray-800/20 dark:border-gray-700/50' :
+                      index === 2 ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800/50' :
+                      'bg-background/50 border-border/50'
                     }`}
                   >
                     <div className="flex items-center space-x-4">
@@ -430,15 +430,15 @@ const Community: React.FC = () => {
                     <div className="grid grid-cols-3 gap-4 text-center">
                       <div>
                         <p className="text-sm text-muted-foreground">{t('community.efficiency')}</p>
-                        <p className="font-bold text-green-600">{entry.efficiency_score}%</p>
+                        <p className="font-bold text-green-600 dark:text-green-400">{entry.efficiency_score}%</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">{t('community.points')}</p>
-                        <p className="font-bold text-blue-600">{entry.sustainability_points}</p>
+                        <p className="font-bold text-blue-600 dark:text-blue-400">{entry.sustainability_points}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">{t('community.orders')}</p>
-                        <p className="font-bold text-purple-600">{entry.total_orders}</p>
+                        <p className="font-bold text-purple-600 dark:text-purple-400">{entry.total_orders}</p>
                       </div>
                     </div>
                   </div>
