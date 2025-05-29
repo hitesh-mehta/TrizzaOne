@@ -14,13 +14,13 @@ const AnomalyViewer: React.FC = () => {
   const { anomalies, isLoading, refetch } = useAnomalyDetection();
   const isMobile = useIsMobile();
 
-  // Get unique anomalies based on id and created_at - limit to top 5
+  // Get unique anomalies based on ID only - limit to top 5
   const uniqueAnomalies = React.useMemo(() => {
     const uniqueMap = new Map();
     anomalies.forEach(anomaly => {
-      const key = `${anomaly.id}_${anomaly.created_at}`;
-      if (!uniqueMap.has(key)) {
-        uniqueMap.set(key, anomaly);
+      // Use ID as the primary key for uniqueness
+      if (!uniqueMap.has(anomaly.id)) {
+        uniqueMap.set(anomaly.id, anomaly);
       }
     });
     return Array.from(uniqueMap.values()).slice(0, 5);
@@ -52,8 +52,10 @@ const AnomalyViewer: React.FC = () => {
 
   const formatTimestamp = (timestamp: string) => {
     try {
-      return format(new Date(timestamp), 'HH:mm');
+      const date = new Date(timestamp);
+      return format(date, 'HH:mm');
     } catch (error) {
+      console.error('Error formatting timestamp:', error);
       return 'Invalid time';
     }
   };
@@ -101,7 +103,7 @@ const AnomalyViewer: React.FC = () => {
           ) : (
             uniqueAnomalies.map((anomaly) => (
               <div
-                key={`${anomaly.id}_${anomaly.created_at}`}
+                key={anomaly.id}
                 className={`p-2 sm:p-3 rounded-lg border transition-colors ${
                   anomaly.prediction === 'Anomaly' 
                     ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20' 

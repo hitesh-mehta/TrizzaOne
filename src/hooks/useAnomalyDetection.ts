@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -48,27 +49,22 @@ export const useAnomalyDetection = () => {
         input_data: item.input_data as AnomalyDetection['input_data']
       })) as AnomalyDetection[];
       
-      // Remove duplicates based on unique combination of fields
-      const uniqueAnomalies = typedData.reduce((acc, anomaly) => {
-        const uniqueKey = `${anomaly.iot_data_id}_${anomaly.zone}_${anomaly.api_timestamp}_${anomaly.prediction}_${anomaly.created_at}`;
-        
-        // Only add if we haven't seen this exact combination before
-        const exists = acc.some(existing => {
-          const existingKey = `${existing.iot_data_id}_${existing.zone}_${existing.api_timestamp}_${existing.prediction}_${existing.created_at}`;
-          return existingKey === uniqueKey;
-        });
-        
-        if (!exists) {
-          acc.push(anomaly);
+      // Create a Map to track unique anomalies by ID
+      const uniqueAnomaliesMap = new Map();
+      
+      typedData.forEach(anomaly => {
+        // Use ID as the primary key for uniqueness
+        if (!uniqueAnomaliesMap.has(anomaly.id)) {
+          uniqueAnomaliesMap.set(anomaly.id, anomaly);
         }
-        
-        return acc;
-      }, [] as AnomalyDetection[]);
+      });
+      
+      const uniqueAnomalies = Array.from(uniqueAnomaliesMap.values());
       
       setAnomalies(uniqueAnomalies);
       
       // Update processed IDs to track what we've already processed
-      const newProcessedIds = new Set(uniqueAnomalies.map(a => `${a.id}_${a.created_at}`));
+      const newProcessedIds = new Set(uniqueAnomalies.map(a => a.id));
       setProcessedIds(newProcessedIds);
     } catch (error) {
       console.error('Error fetching anomalies:', error);
@@ -96,9 +92,8 @@ export const useAnomalyDetection = () => {
       // Only show notification for new anomalies
       if (data?.anomalyResult?.prediction === 'Anomaly') {
         const result = data.anomalyResult;
-        const uniqueKey = `${result.iot_data_id}_${result.api_timestamp}`;
         
-        if (!processedIds.has(uniqueKey)) {
+        if (!processedIds.has(result.iot_data_id)) {
           toast({
             title: "🚨 Anomaly Detected!",
             description: `${result.risk_level} risk anomaly in ${result.input_data.zone}. Probability: ${(result.anomaly_probability * 100).toFixed(1)}%`,
@@ -106,7 +101,7 @@ export const useAnomalyDetection = () => {
           });
           
           // Add to processed IDs
-          setProcessedIds(prev => new Set([...prev, uniqueKey]));
+          setProcessedIds(prev => new Set([...prev, result.iot_data_id]));
         }
       }
 
@@ -137,16 +132,11 @@ export const useAnomalyDetection = () => {
             input_data: payload.new.input_data as AnomalyDetection['input_data']
           } as AnomalyDetection;
           
-          // Create unique identifier for this anomaly
-          const uniqueKey = `${newAnomaly.id}_${newAnomaly.created_at}`;
-          
-          // Only process if we haven't seen this exact anomaly before
-          if (!processedIds.has(uniqueKey)) {
+          // Only process if we haven't seen this ID before
+          if (!processedIds.has(newAnomaly.id)) {
             setAnomalies(prev => {
-              // Check if this anomaly already exists in our current list
-              const exists = prev.some(existing => 
-                existing.id === newAnomaly.id && existing.created_at === newAnomaly.created_at
-              );
+              // Check if this anomaly ID already exists in our current list
+              const exists = prev.some(existing => existing.id === newAnomaly.id);
               
               if (!exists) {
                 // Add new anomaly to the beginning of the list and limit to 50
@@ -157,7 +147,7 @@ export const useAnomalyDetection = () => {
             });
             
             // Add to processed IDs
-            setProcessedIds(prev => new Set([...prev, uniqueKey]));
+            setProcessedIds(prev => new Set([...prev, newAnomaly.id]));
             
             // Show toast for anomalies only
             if (newAnomaly.prediction === 'Anomaly') {

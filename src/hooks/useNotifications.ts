@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
@@ -87,7 +86,7 @@ export const useNotifications = () => {
     }
   };
 
-  // Save notification settings - FIXED VERSION
+  // Save notification settings - FIXED VERSION with proper success toast
   const saveNotificationSettings = async (settings: NotificationSettings) => {
     try {
       console.log('Saving notification settings:', settings);
@@ -100,10 +99,10 @@ export const useNotifications = () => {
       
       console.log('Notification settings saved successfully');
 
-      // Show success toast
+      // Show success toast with proper message
       toast({
-        title: t('success'),
-        description: t('notificationsSaved'),
+        title: "✅ Settings Saved",
+        description: "Your notification preferences have been saved successfully.",
         variant: "default",
       });
 
@@ -113,7 +112,7 @@ export const useNotifications = () => {
       
       // Show error toast
       toast({
-        title: t('error'),
+        title: "❌ Error",
         description: 'Failed to save notification settings. Please try again.',
         variant: "destructive",
       });
