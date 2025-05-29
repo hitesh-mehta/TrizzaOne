@@ -64,7 +64,7 @@ const Community: React.FC = () => {
         replies: 3,
         created_at: new Date(Date.now() - 3600000).toISOString(),
         user_name: 'Sarah Chen',
-        user_role: 'Sustainability Manager'
+        user_role: 'sustainabilityManager'
       },
       {
         id: '2',
@@ -74,7 +74,7 @@ const Community: React.FC = () => {
         replies: 5,
         created_at: new Date(Date.now() - 7200000).toISOString(),
         user_name: 'Marcus Rodriguez',
-        user_role: 'Operations Lead'
+        user_role: 'operationsLead'
       },
       {
         id: '3',
@@ -84,7 +84,7 @@ const Community: React.FC = () => {
         replies: 7,
         created_at: new Date(Date.now() - 10800000).toISOString(),
         user_name: 'Elena Foster',
-        user_role: 'Kitchen Supervisor'
+        user_role: 'kitchenSupervisor'
       },
       {
         id: '4',
@@ -94,7 +94,7 @@ const Community: React.FC = () => {
         replies: 2,
         created_at: new Date(Date.now() - 14400000).toISOString(),
         user_name: 'David Kim',
-        user_role: 'Energy Analyst'
+        user_role: 'energyAnalyst'
       }
     ];
 
@@ -102,7 +102,7 @@ const Community: React.FC = () => {
       {
         id: '1',
         user_name: 'Elena Foster',
-        user_role: 'Kitchen Supervisor',
+        user_role: 'kitchenSupervisor',
         efficiency_score: 96.8,
         sustainability_points: 1250,
         total_orders: 2340,
@@ -111,7 +111,7 @@ const Community: React.FC = () => {
       {
         id: '2',
         user_name: 'Sarah Chen',
-        user_role: 'Sustainability Manager',
+        user_role: 'sustainabilityManager',
         efficiency_score: 94.2,
         sustainability_points: 1180,
         total_orders: 1890,
@@ -120,7 +120,7 @@ const Community: React.FC = () => {
       {
         id: '3',
         user_name: 'Marcus Rodriguez',
-        user_role: 'Operations Lead',
+        user_role: 'operationsLead',
         efficiency_score: 92.5,
         sustainability_points: 1020,
         total_orders: 2100,
@@ -129,7 +129,7 @@ const Community: React.FC = () => {
       {
         id: '4',
         user_name: 'David Kim',
-        user_role: 'Energy Analyst',
+        user_role: 'energyAnalyst',
         efficiency_score: 90.1,
         sustainability_points: 980,
         total_orders: 1650,
@@ -138,7 +138,7 @@ const Community: React.FC = () => {
       {
         id: '5',
         user_name: 'Lisa Wang',
-        user_role: 'Quality Control',
+        user_role: 'qualityControl',
         efficiency_score: 88.7,
         sustainability_points: 890,
         total_orders: 1420,
@@ -170,8 +170,8 @@ const Community: React.FC = () => {
           setPosts(prev => [newPost, ...prev]);
           
           toast({
-            title: "💬 New Community Post",
-            description: `${newPost.user_name} shared an update`,
+            title: t('community.newCommunityPost'),
+            description: `${newPost.user_name} ${t('community.sharedUpdate')}`,
           });
         }
       )
@@ -180,7 +180,7 @@ const Community: React.FC = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [toast]);
+  }, [toast, t]);
 
   const handleSubmitPost = async () => {
     if (!newPostContent.trim()) return;
@@ -196,20 +196,20 @@ const Community: React.FC = () => {
         replies: 0,
         created_at: new Date().toISOString(),
         user_name: 'You',
-        user_role: 'Team Member'
+        user_role: 'teamMember'
       };
       
       setPosts(prev => [newPost, ...prev]);
       setNewPostContent('');
       
       toast({
-        title: "✅ Post Shared!",
-        description: "Your message has been shared with the community",
+        title: t('community.postShared'),
+        description: t('community.postSharedDesc'),
       });
     } catch (error) {
       console.error('Error posting:', error);
       toast({
-        title: "❌ Error",
+        title: t('error'),
         description: "Failed to share your post",
         variant: "destructive"
       });
@@ -226,18 +226,19 @@ const Community: React.FC = () => {
     ));
     
     toast({
-      title: "❤️ Liked!",
-      description: "You liked this post",
+      title: t('community.liked'),
+      description: t('community.likedPostDesc'),
     });
   };
 
   const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'sustainability manager': return 'bg-green-100 text-green-800';
-      case 'operations lead': return 'bg-blue-100 text-blue-800';
-      case 'kitchen supervisor': return 'bg-orange-100 text-orange-800';
-      case 'energy analyst': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'sustainabilitymanager': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'operationslead': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'kitchensupervisor': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+      case 'energyanalyst': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      case 'qualitycontrol': return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
 
@@ -261,41 +262,41 @@ const Community: React.FC = () => {
   return (
     <div className="space-y-6 p-6">
       <div className="text-center">
-        <h2 className="text-3xl font-bold mb-2">Community & Leaderboard</h2>
-        <p className="text-muted-foreground">Connect with your team and track performance</p>
+        <h2 className="text-3xl font-bold mb-2 text-foreground">{t('community.title')}</h2>
+        <p className="text-muted-foreground">{t('community.subtitle')}</p>
       </div>
 
       <Tabs defaultValue="community" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="community" className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4" />
-            Community Feed
+            {t('community.feed')}
           </TabsTrigger>
           <TabsTrigger value="leaderboard" className="flex items-center gap-2">
             <Trophy className="h-4 w-4" />
-            Leaderboard
+            {t('community.leaderboard')}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="community" className="space-y-6">
           {/* New Post Section */}
-          <Card className="neumorphic-card">
+          <Card className="border border-border bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-card-foreground">
                 <MessageSquare className="h-5 w-5 text-mintGreen" />
-                Share an Update
+                {t('community.shareUpdate')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
-                placeholder="What's happening in your kitchen? Share updates, achievements, or ask questions..."
+                placeholder={t('community.shareUpdatePlaceholder')}
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
-                className="min-h-20"
+                className="min-h-20 bg-background border-border text-foreground"
               />
               <div className="flex justify-between items-center">
                 <div className="text-sm text-muted-foreground">
-                  {newPostContent.length}/500 characters
+                  {newPostContent.length}/500 {t('community.characterCount')}
                 </div>
                 <Button 
                   onClick={handleSubmitPost}
@@ -303,7 +304,7 @@ const Community: React.FC = () => {
                   className="flex items-center gap-2"
                 >
                   <Send className="h-4 w-4" />
-                  {isSubmitting ? 'Posting...' : 'Share'}
+                  {isSubmitting ? t('community.posting') : t('community.share')}
                 </Button>
               </div>
             </CardContent>
@@ -312,18 +313,20 @@ const Community: React.FC = () => {
           {/* Community Posts */}
           <div className="space-y-4">
             {posts.map((post) => (
-              <Card key={post.id} className="neumorphic-card">
+              <Card key={post.id} className="border border-border bg-card">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
                     <Avatar>
-                      <AvatarFallback>{post.user_name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      <AvatarFallback className="bg-muted text-muted-foreground">
+                        {post.user_name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h4 className="font-semibold">{post.user_name}</h4>
+                          <h4 className="font-semibold text-card-foreground">{post.user_name}</h4>
                           <Badge variant="secondary" className={getRoleColor(post.user_role)}>
-                            {post.user_role}
+                            {t(`community.${post.user_role}`)}
                           </Badge>
                         </div>
                         <span className="text-sm text-muted-foreground">
@@ -331,7 +334,7 @@ const Community: React.FC = () => {
                         </span>
                       </div>
                       
-                      <p className="text-sm leading-relaxed">{post.content}</p>
+                      <p className="text-sm leading-relaxed text-card-foreground">{post.content}</p>
                       
                       <div className="flex items-center space-x-4 pt-2">
                         <Button
@@ -363,35 +366,35 @@ const Community: React.FC = () => {
         <TabsContent value="leaderboard" className="space-y-6">
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="neumorphic-card">
+            <Card className="border border-border bg-card">
               <CardContent className="p-6 text-center">
                 <Users className="h-8 w-8 text-mintGreen mx-auto mb-2" />
-                <h3 className="text-2xl font-bold">{leaderboard.length}</h3>
-                <p className="text-muted-foreground">Active Members</p>
+                <h3 className="text-2xl font-bold text-card-foreground">{leaderboard.length}</h3>
+                <p className="text-muted-foreground">{t('community.activeMembers')}</p>
               </CardContent>
             </Card>
-            <Card className="neumorphic-card">
+            <Card className="border border-border bg-card">
               <CardContent className="p-6 text-center">
                 <TrendingUp className="h-8 w-8 text-blue-500 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold">94.2%</h3>
-                <p className="text-muted-foreground">Avg Efficiency</p>
+                <h3 className="text-2xl font-bold text-card-foreground">94.2%</h3>
+                <p className="text-muted-foreground">{t('community.avgEfficiency')}</p>
               </CardContent>
             </Card>
-            <Card className="neumorphic-card">
+            <Card className="border border-border bg-card">
               <CardContent className="p-6 text-center">
                 <Trophy className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                <h3 className="text-2xl font-bold">6,500</h3>
-                <p className="text-muted-foreground">Total Points</p>
+                <h3 className="text-2xl font-bold text-card-foreground">6,500</h3>
+                <p className="text-muted-foreground">{t('community.totalPoints')}</p>
               </CardContent>
             </Card>
           </div>
 
           {/* Leaderboard */}
-          <Card className="neumorphic-card">
+          <Card className="border border-border bg-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-card-foreground">
                 <Trophy className="h-5 w-5 text-yellow-500" />
-                Performance Leaderboard
+                {t('community.performanceLeaderboard')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -400,39 +403,41 @@ const Community: React.FC = () => {
                   <div
                     key={entry.id}
                     className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
-                      index === 0 ? 'bg-yellow-50 border-yellow-200' :
-                      index === 1 ? 'bg-gray-50 border-gray-200' :
-                      index === 2 ? 'bg-amber-50 border-amber-200' :
+                      index === 0 ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800' :
+                      index === 1 ? 'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700' :
+                      index === 2 ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
                       'bg-background border-border'
                     }`}
                   >
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center gap-2">
                         {getRankIcon(entry.rank)}
-                        <span className="font-bold text-lg">#{entry.rank}</span>
+                        <span className="font-bold text-lg text-foreground">#{entry.rank}</span>
                       </div>
                       <Avatar>
-                        <AvatarFallback>{entry.user_name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        <AvatarFallback className="bg-muted text-muted-foreground">
+                          {entry.user_name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
-                        <h4 className="font-semibold">{entry.user_name}</h4>
+                        <h4 className="font-semibold text-foreground">{entry.user_name}</h4>
                         <Badge variant="outline" className={getRoleColor(entry.user_role)}>
-                          {entry.user_role}
+                          {t(`community.${entry.user_role}`)}
                         </Badge>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-3 gap-4 text-center">
                       <div>
-                        <p className="text-sm text-muted-foreground">Efficiency</p>
+                        <p className="text-sm text-muted-foreground">{t('community.efficiency')}</p>
                         <p className="font-bold text-green-600">{entry.efficiency_score}%</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Points</p>
+                        <p className="text-sm text-muted-foreground">{t('community.points')}</p>
                         <p className="font-bold text-blue-600">{entry.sustainability_points}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground">Orders</p>
+                        <p className="text-sm text-muted-foreground">{t('community.orders')}</p>
                         <p className="font-bold text-purple-600">{entry.total_orders}</p>
                       </div>
                     </div>
