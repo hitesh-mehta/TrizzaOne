@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -49,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'community',
-      label: 'Community',
+      label: t('community.title'),
       icon: Users,
       tourId: 'community'
     },
