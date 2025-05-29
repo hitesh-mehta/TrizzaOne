@@ -83,7 +83,13 @@
     "kitchenSupervisor": "Kitchen Supervisor",
     "energyAnalyst": "Energy Analyst",
     "qualityControl": "Quality Control",
-    "teamMember": "Team Member"
+    "teamMember": "Team Member",
+    "justImplemented": "Just implemented a new composting system in Kitchen Zone A! Reduced food waste by 30% this week. Who else is working on sustainability initiatives?",
+    "amazingEfficiency": "Amazing efficiency spike in Zone B today! The new IoT sensors are really helping us optimize our workflows. Occupancy prediction accuracy is at 94%!",
+    "kitchenRecord": "Kitchen Zone C just hit a new record! 250 orders processed with 98% on-time delivery. Team collaboration has been incredible!",
+    "energyConsumption": "Energy consumption down 15% this month thanks to the new power optimization algorithms! The real-time monitoring is a game changer.",
+    "replies": "replies",
+    "you": "You"
   },
   "dashboard": {
     "overview": "Facility Overview",

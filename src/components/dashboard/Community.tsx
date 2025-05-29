@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,7 +58,7 @@ const Community: React.FC = () => {
       {
         id: '1',
         user_id: 'user1',
-        content: '🌱 Just implemented a new composting system in Kitchen Zone A! Reduced food waste by 30% this week. Who else is working on sustainability initiatives?',
+        content: `🌱 ${t('community.justImplemented')}`,
         likes: 12,
         replies: 3,
         created_at: new Date(Date.now() - 3600000).toISOString(),
@@ -69,7 +68,7 @@ const Community: React.FC = () => {
       {
         id: '2',
         user_id: 'user2',
-        content: '📊 Amazing efficiency spike in Zone B today! The new IoT sensors are really helping us optimize our workflows. Occupancy prediction accuracy is at 94%!',
+        content: `📊 ${t('community.amazingEfficiency')}`,
         likes: 8,
         replies: 5,
         created_at: new Date(Date.now() - 7200000).toISOString(),
@@ -79,7 +78,7 @@ const Community: React.FC = () => {
       {
         id: '3',
         user_id: 'user3',
-        content: '🍳 Kitchen Zone C just hit a new record! 250 orders processed with 98% on-time delivery. Team collaboration has been incredible!',
+        content: `🍳 ${t('community.kitchenRecord')}`,
         likes: 15,
         replies: 7,
         created_at: new Date(Date.now() - 10800000).toISOString(),
@@ -89,7 +88,7 @@ const Community: React.FC = () => {
       {
         id: '4',
         user_id: 'user4',
-        content: '⚡ Energy consumption down 15% this month thanks to the new power optimization algorithms! The real-time monitoring is a game changer.',
+        content: `⚡ ${t('community.energyConsumption')}`,
         likes: 6,
         replies: 2,
         created_at: new Date(Date.now() - 14400000).toISOString(),
@@ -149,7 +148,7 @@ const Community: React.FC = () => {
     setPosts(dummyPosts);
     setLeaderboard(dummyLeaderboard);
     setIsLoading(false);
-  }, []);
+  }, [t]);
 
   // Real-time subscription for new posts
   useEffect(() => {
@@ -195,7 +194,7 @@ const Community: React.FC = () => {
         likes: 0,
         replies: 0,
         created_at: new Date().toISOString(),
-        user_name: 'You',
+        user_name: t('community.you'),
         user_role: 'teamMember'
       };
       
@@ -352,7 +351,7 @@ const Community: React.FC = () => {
                           className="flex items-center gap-1 text-muted-foreground hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20"
                         >
                           <MessageCircle className="h-4 w-4" />
-                          {post.replies}
+                          {post.replies} {t('community.replies')}
                         </Button>
                       </div>
                     </div>
