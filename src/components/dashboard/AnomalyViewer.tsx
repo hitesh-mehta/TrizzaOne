@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,9 +15,15 @@ const AnomalyViewer: React.FC = () => {
   const { anomalies, isLoading, refetch } = useAnomalyDetection(isRealtime, interval);
   const isMobile = useIsMobile();
 
-  // Get latest 5 anomalies
-  const latestAnomalies = React.useMemo(() => {
-    return anomalies.slice(0, 5);
+  // Get unique anomalies based on ID only - limit to top 5
+  const uniqueAnomalies = React.useMemo(() => {
+    const uniqueMap = new Map();
+    anomalies.forEach(anomaly => {
+      if (!uniqueMap.has(anomaly.id)) {
+        uniqueMap.set(anomaly.id, anomaly);
+      }
+    });
+    return Array.from(uniqueMap.values()).slice(0, 5);
   }, [anomalies]);
 
   const getRiskColor = (riskLevel: string) => {
@@ -76,9 +81,11 @@ const AnomalyViewer: React.FC = () => {
             <span className={isMobile ? "text-sm" : ""}>
               {t('anomalies.title')} ({t('anomalies.realtime')})
             </span>
-            <Badge variant="default" className="text-xs bg-green-500">
-              LIVE
-            </Badge>
+            {isRealtime && (
+              <Badge variant="default" className="text-xs">
+                {t('realtimeControls.live')} - {interval}s
+              </Badge>
+            )}
           </CardTitle>
           <Button
             variant="ghost"
@@ -92,16 +99,16 @@ const AnomalyViewer: React.FC = () => {
       </CardHeader>
       <CardContent className="p-3 sm:p-6 pt-0">
         <div className="space-y-2 sm:space-y-3 max-h-64 sm:max-h-80 overflow-y-auto">
-          {latestAnomalies.length === 0 ? (
+          {uniqueAnomalies.length === 0 ? (
             <div className="text-center text-muted-foreground py-6 sm:py-8">
               <CheckCircle className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-2 text-green-500" />
               <p className="text-sm sm:text-base">{t('anomalies.noAnomalies')}</p>
               <p className="text-xs text-muted-foreground mt-1">{t('anomalies.systemMonitoring')}</p>
             </div>
           ) : (
-            latestAnomalies.map((anomaly) => (
+            uniqueAnomalies.map((anomaly) => (
               <div
-                key={`${anomaly.id}-${anomaly.created_at}`}
+                key={anomaly.id}
                 className={`p-2 sm:p-3 rounded-lg border transition-colors ${
                   anomaly.prediction === 'Anomaly' 
                     ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20' 
