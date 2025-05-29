@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from '@/hooks/useTheme';
@@ -19,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import FoodModel3D from '@/components/3d/FoodModel3D';
 import Predictions from '@/components/dashboard/Predictions';
 import OrderHistory from '@/components/dashboard/OrderHistory';
+import Community from '@/components/dashboard/Community';
 import ProfileSettings from '@/components/settings/ProfileSettings';
 import Botato from '@/components/chatbot/Botato';
 import WelcomeTour from '@/components/tour/WelcomeTour';
@@ -128,6 +128,8 @@ const Index = () => {
         return <Predictions />;
       case 'order-history':
         return <OrderHistory />;
+      case 'community':
+        return <Community />;
       case 'sustainability':
         return <Sustainability />;
       case 'feedback':
