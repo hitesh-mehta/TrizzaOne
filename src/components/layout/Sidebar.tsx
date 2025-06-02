@@ -1,93 +1,132 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
-  BarChart3, 
-  TrendingUp,
-  Leaf,
+  LayoutDashboard, 
+  Leaf, 
   MessageSquare,
-  Settings,
-  Menu,
-  X,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
+  History,
   Users
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
-const Sidebar = () => {
+interface SidebarProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+  activeItem: string;
+  setActiveItem: (item: string) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({
+  collapsed,
+  setCollapsed,
+  activeItem,
+  setActiveItem
+}) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const menuItems = [
-    { id: 'dashboard', icon: BarChart3, label: t('nav.dashboard'), path: '/' },
-    { id: 'forecast', icon: TrendingUp, label: t('nav.forecast'), path: '/forecast' },
-    { id: 'sustainability', icon: Leaf, label: t('nav.sustainability'), path: '/sustainability' },
-    { id: 'community', icon: Users, label: t('nav.community'), path: '/community' },
-    { id: 'feedback', icon: MessageSquare, label: t('nav.feedback'), path: '/feedback' },
-    { id: 'profile', icon: Settings, label: t('nav.profile'), path: '/profile' },
+    {
+      id: 'dashboard',
+      label: t('nav.dashboard'),
+      icon: LayoutDashboard,
+      tourId: 'dashboard'
+    },
+    {
+      id: 'predictions',
+      label: t('predictions.title'),
+      icon: BarChart3,
+      tourId: 'predictions'
+    },
+    {
+      id: 'order-history',
+      label: t('orderHistory.title'),
+      icon: History,
+    },
+    {
+      id: 'community',
+      label: t('community.title'),
+      icon: Users,
+      tourId: 'community'
+    },
+    {
+      id: 'sustainability',
+      label: t('nav.sustainability'),
+      icon: Leaf,
+      tourId: 'sustainability'
+    },
+    {
+      id: 'feedback',
+      label: t('nav.feedback'),
+      icon: MessageSquare,
+    },
   ];
 
-  const toggleSidebar = () => setIsOpen(!isOpen);
-
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    setIsOpen(false);
-  };
-
   return (
-    <>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="fixed top-4 left-4 z-50 lg:hidden bg-background/80 backdrop-blur-sm border"
-        onClick={toggleSidebar}
-      >
-        {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-      </Button>
-
-      <div className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-background/95 backdrop-blur-sm border-r border-border transition-transform duration-300 ease-in-out lg:translate-x-0",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        <div className="flex flex-col h-full p-4">
-          <div className="mb-8 pt-12 lg:pt-4">
-            <h2 className="text-xl font-bold text-foreground">TrizzaOne</h2>
-            <p className="text-sm text-muted-foreground">SmartOps Center</p>
+    <div className={cn(
+      "bg-sidebar-background border-r border-sidebar-border h-full flex flex-col transition-all duration-300",
+      isMobile ? "w-64" : (collapsed ? "w-16" : "w-64")
+    )}>
+      {/* Header */}
+      <div className="p-3 sm:p-4 border-b border-sidebar-border flex items-center justify-between">
+        {(!collapsed || isMobile) && (
+          <div className="flex items-center space-x-2">
+            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-mintGreen flex items-center justify-center">
+              <span className="font-bold text-xs sm:text-sm text-navy">T1</span>
+            </div>
+            <span className="font-semibold text-sidebar-foreground text-sm sm:text-base">{t('app.name')}</span>
           </div>
-          
-          <nav className="flex-1 space-y-2">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              
-              return (
-                <Button
-                  key={item.id}
-                  variant={isActive ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full justify-start text-left",
-                    isActive && "bg-muted text-foreground"
-                  )}
-                  onClick={() => handleNavigation(item.path)}
-                >
-                  <Icon className="mr-3 h-4 w-4" />
-                  {item.label}
-                </Button>
-              );
-            })}
-          </nav>
-        </div>
+        )}
+        
+        {!isMobile && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1 hover:bg-sidebar-accent rounded-md transition-colors"
+          >
+            {collapsed ? (
+              <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-sidebar-foreground" />
+            ) : (
+              <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4 text-sidebar-foreground" />
+            )}
+          </button>
+        )}
       </div>
 
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden" 
-          onClick={() => setIsOpen(false)}
-        />
-      )}
-    </>
+      {/* Navigation */}
+      <nav className="flex-1 p-3 sm:p-4">
+        <ul className="space-y-1 sm:space-y-2">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeItem === item.id;
+            
+            return (
+              <li key={item.id}>
+                <button
+                  onClick={() => setActiveItem(item.id)}
+                  data-tour={item.tourId}
+                  className={cn(
+                    "w-full flex items-center space-x-2 sm:space-x-3 px-2 sm:px-3 py-2 rounded-lg transition-colors text-left text-sm sm:text-base",
+                    isActive 
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground" 
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  )}
+                >
+                  <Icon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                  {(!collapsed || isMobile) && (
+                    <span className="truncate">{item.label}</span>
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </div>
   );
 };
 

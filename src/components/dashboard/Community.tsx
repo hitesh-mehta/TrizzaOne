@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { 
   MessageSquare, 
@@ -16,6 +17,7 @@ import {
   TrendingUp, 
   Users, 
   Star,
+  ThumbsUp,
   MessageCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -148,11 +150,43 @@ const Community: React.FC = () => {
     setIsLoading(false);
   }, [t]);
 
+  // Real-time subscription for new posts
+  useEffect(() => {
+    console.log('Setting up community real-time subscription...');
+    
+    const channel = supabase
+      .channel('community-posts')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'community_posts'
+        },
+        (payload) => {
+          console.log('New community post:', payload);
+          const newPost = payload.new as CommunityPost;
+          setPosts(prev => [newPost, ...prev]);
+          
+          toast({
+            title: t('community.newCommunityPost'),
+            description: `${newPost.user_name} ${t('community.sharedUpdate')}`,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast, t]);
+
   const handleSubmitPost = async () => {
     if (!newPostContent.trim()) return;
     
     setIsSubmitting(true);
     try {
+      // Simulate posting (in real app, this would go to Supabase)
       const newPost: CommunityPost = {
         id: Date.now().toString(),
         user_id: 'current_user',
