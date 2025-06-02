@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -17,7 +18,7 @@ import { useTour } from '@/hooks/useTour';
 const Index = () => {
   const { t } = useTranslation();
   const [showSplash, setShowSplash] = useState(true);
-  const { showTour, startTour, endTour } = useTour();
+  const { showTour, startTour, closeTour, completeTour, skipTour } = useTour();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,8 +28,17 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
+
+  const handleLogout = () => {
+    // Handle logout logic here if needed
+    console.log('Logout requested');
+  };
+
   if (showSplash) {
-    return <SplashScreen />;
+    return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   return (
@@ -37,7 +47,7 @@ const Index = () => {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_60%,rgba(255,180,120,0.2),transparent_70%)]"></div>
       
       <div className="relative z-10 min-h-screen flex flex-col">
-        <Navbar />
+        <Navbar onLogout={handleLogout} />
         <div className="flex flex-1">
           <Sidebar />
           <main className="flex-1 lg:ml-64">
@@ -54,7 +64,14 @@ const Index = () => {
         <Footer />
       </div>
       
-      {showTour && <WelcomeTour onComplete={endTour} />}
+      {showTour && (
+        <WelcomeTour 
+          isOpen={showTour}
+          onClose={closeTour}
+          onComplete={completeTour}
+          onSkip={skipTour}
+        />
+      )}
     </div>
   );
 };
