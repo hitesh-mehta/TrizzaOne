@@ -99,7 +99,12 @@
     "activeComplaints": "Active Complaints",
     "sustainability": "Sustainability Score",
     "today": "Today",
-    "lastUpdated": "Last Updated"
+    "lastUpdated": "Last Updated",
+    "totalRecords": "Total Records",
+    "lastUpdate": "Last Update",
+    "systemStatus": "System Status",
+    "live": "LIVE",
+    "paused": "PAUSED"
   },
   "iot": {
     "temperature": "Temperature",
