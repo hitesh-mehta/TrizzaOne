@@ -7,6 +7,9 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "predictions": "Predictions",
+    "orderHistory": "Order History",
+    "community": "Community & Leaderboards",
     "sustainability": "Sustainability",
     "feedback": "Feedback",
     "profile": "Profile"
@@ -27,7 +30,7 @@
     "calendar": "Calendar View"
   },
   "community": {
-    "title": "Community",
+    "title": "Community & Leaderboards",
     "subtitle": "Connect with your team and share insights",
     "feed": "Community Feed",
     "leaderboard": "Leaderboard",

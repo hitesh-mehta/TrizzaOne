@@ -332,49 +332,28 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     };
   }, [toast]);
 
-  // REALTIME anomaly generation - generates new practical results every 5 seconds when enabled
+  // FORCE anomaly generation every 5 seconds when realtime is enabled
   useEffect(() => {
     let intervalId: number | undefined;
 
-    if (realtimeEnabled && intervalSeconds === 5) {
-      console.log('Setting up realtime anomaly generation every 5 seconds...');
+    if (realtimeEnabled) {
+      console.log('Setting up forced 5-second anomaly generation...');
       // Generate new anomaly immediately, then every 5 seconds
       generateRealtimeAnomaly();
       
       intervalId = window.setInterval(() => {
-        console.log('Generating new realtime anomaly...');
+        console.log('Generating new anomaly every 5 seconds...');
         generateRealtimeAnomaly();
-      }, 5000); // 5 seconds
+      }, 5000); // Always 5 seconds for anomaly generation
     }
 
     return () => {
       if (intervalId !== undefined) {
-        console.log('Clearing realtime anomaly generation interval');
+        console.log('Clearing 5-second anomaly generation interval');
         window.clearInterval(intervalId);
       }
     };
-  }, [realtimeEnabled, intervalSeconds, generateRealtimeAnomaly]);
-
-  // FORCED refresh interval when realtime is enabled (for database sync)
-  useEffect(() => {
-    let intervalId: number | undefined;
-
-    if (realtimeEnabled && intervalSeconds !== 5) {
-      console.log('Setting up forced anomaly refresh interval:', intervalSeconds, 'seconds');
-      // Fetch anomalies at the specified interval to ensure sync
-      intervalId = window.setInterval(() => {
-        console.log('Force refreshing anomalies...');
-        fetchAnomalies();
-      }, intervalSeconds * 1000);
-    }
-
-    return () => {
-      if (intervalId !== undefined) {
-        console.log('Clearing anomaly refresh interval');
-        window.clearInterval(intervalId);
-      }
-    };
-  }, [realtimeEnabled, intervalSeconds, fetchAnomalies]);
+  }, [realtimeEnabled, generateRealtimeAnomaly]);
 
   // Initial data fetch
   useEffect(() => {

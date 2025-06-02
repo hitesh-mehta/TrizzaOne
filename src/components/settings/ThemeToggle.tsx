@@ -28,7 +28,9 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({ isInNavbar = false }) => {
     </Button>
   ) : (
     <div className="flex items-center space-x-2">
-      <span className="text-sm font-medium">{theme === 'dark' ? t('theme.light') : t('theme.dark')}</span>
+      <span className="text-sm font-medium">
+        {theme === 'dark' ? t('settings.lightMode') : t('settings.darkMode')}
+      </span>
       <Button
         variant="outline"
         size="icon"
