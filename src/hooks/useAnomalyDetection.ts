@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -22,181 +23,11 @@ export interface AnomalyDetection {
   created_at: string;
 }
 
-// Realistic anomaly scenarios for different zones
-const anomalyScenarios = [
-  {
-    zone: 'Kitchen Zone A',
-    prediction: 'Anomaly',
-    anomaly_probability: 0.89,
-    normal_probability: 0.11,
-    risk_level: 'High',
-    input_data: {
-      zone: 'Kitchen Zone A',
-      hour: 14,
-      occupancy: 12,
-      power_use: 45.8,
-      water_use: 120.5,
-      cleaning_status: 'PENDING'
-    }
-  },
-  {
-    zone: 'Kitchen Zone B',
-    prediction: 'Normal',
-    anomaly_probability: 0.15,
-    normal_probability: 0.85,
-    risk_level: 'Low',
-    input_data: {
-      zone: 'Kitchen Zone B',
-      hour: 11,
-      occupancy: 8,
-      power_use: 28.3,
-      water_use: 85.2,
-      cleaning_status: 'DONE'
-    }
-  },
-  {
-    zone: 'Dining Area',
-    prediction: 'Anomaly',
-    anomaly_probability: 0.73,
-    normal_probability: 0.27,
-    risk_level: 'Medium',
-    input_data: {
-      zone: 'Dining Area',
-      hour: 19,
-      occupancy: 45,
-      power_use: 62.1,
-      water_use: 35.8,
-      cleaning_status: 'IN PROGRESS'
-    }
-  },
-  {
-    zone: 'Storage Area',
-    prediction: 'Anomaly',
-    anomaly_probability: 0.94,
-    normal_probability: 0.06,
-    risk_level: 'High',
-    input_data: {
-      zone: 'Storage Area',
-      hour: 22,
-      occupancy: 2,
-      power_use: 18.7,
-      water_use: 5.3,
-      cleaning_status: 'PENDING'
-    }
-  },
-  {
-    zone: 'Kitchen Zone C',
-    prediction: 'Normal',
-    anomaly_probability: 0.08,
-    normal_probability: 0.92,
-    risk_level: 'Low',
-    input_data: {
-      zone: 'Kitchen Zone C',
-      hour: 9,
-      occupancy: 6,
-      power_use: 22.4,
-      water_use: 67.9,
-      cleaning_status: 'DONE'
-    }
-  },
-  {
-    zone: 'Pantry',
-    prediction: 'Anomaly',
-    anomaly_probability: 0.67,
-    normal_probability: 0.33,
-    risk_level: 'Medium',
-    input_data: {
-      zone: 'Pantry',
-      hour: 16,
-      occupancy: 3,
-      power_use: 15.2,
-      water_use: 12.1,
-      cleaning_status: 'IN PROGRESS'
-    }
-  },
-  {
-    zone: 'Kitchen Zone A',
-    prediction: 'Anomaly',
-    anomaly_probability: 0.91,
-    normal_probability: 0.09,
-    risk_level: 'High',
-    input_data: {
-      zone: 'Kitchen Zone A',
-      hour: 8,
-      occupancy: 15,
-      power_use: 52.3,
-      water_use: 145.2,
-      cleaning_status: 'PENDING'
-    }
-  },
-  {
-    zone: 'Dining Area',
-    prediction: 'Normal',
-    anomaly_probability: 0.12,
-    normal_probability: 0.88,
-    risk_level: 'Low',
-    input_data: {
-      zone: 'Dining Area',
-      hour: 10,
-      occupancy: 25,
-      power_use: 35.7,
-      water_use: 22.1,
-      cleaning_status: 'DONE'
-    }
-  }
-];
-
 export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSeconds: number = 30) => {
   const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
-  const [scenarioIndex, setScenarioIndex] = useState(0);
   const { toast } = useToast();
-
-  const generateRealtimeAnomaly = useCallback(() => {
-    const scenario = anomalyScenarios[scenarioIndex % anomalyScenarios.length];
-    const timestamp = new Date().toISOString();
-    const id = `realtime_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Add significant randomness to make results more varied
-    const variationFactor = 0.6 + Math.random() * 0.8; // 0.6 to 1.4 for more variation
-    const newAnomaly: AnomalyDetection = {
-      id,
-      iot_data_id: `iot_${Date.now()}`,
-      zone: scenario.zone,
-      prediction: scenario.prediction,
-      anomaly_probability: Math.min(0.99, Math.max(0.01, scenario.anomaly_probability * variationFactor)),
-      normal_probability: Math.max(0.01, Math.min(0.99, scenario.normal_probability * variationFactor)),
-      risk_level: scenario.risk_level,
-      input_data: {
-        ...scenario.input_data,
-        hour: new Date().getHours(),
-        occupancy: Math.max(1, Math.floor(scenario.input_data.occupancy * variationFactor)),
-        power_use: Math.round(scenario.input_data.power_use * variationFactor * 10) / 10,
-        water_use: Math.round(scenario.input_data.water_use * variationFactor * 10) / 10,
-      },
-      api_timestamp: timestamp,
-      created_at: timestamp
-    };
-
-    console.log('Generated realtime anomaly:', newAnomaly);
-
-    setAnomalies(prev => {
-      const updated = [newAnomaly, ...prev].slice(0, 50);
-      return updated;
-    });
-
-    // Show toast for anomalies only
-    if (newAnomaly.prediction === 'Anomaly') {
-      toast({
-        title: "🚨 Real-time Anomaly Detected!",
-        description: `${newAnomaly.risk_level} risk anomaly in ${newAnomaly.zone}. Probability: ${(newAnomaly.anomaly_probability * 100).toFixed(1)}%`,
-        variant: "destructive",
-      });
-    }
-
-    setScenarioIndex(prev => prev + 1);
-  }, [scenarioIndex, toast]);
 
   const fetchAnomalies = useCallback(async () => {
     try {
@@ -275,7 +106,7 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     }
   }, [fetchAnomalies, processedIds, toast]);
 
-  // Set up real-time subscription for new anomaly detections
+  // Set up real-time subscription for new anomaly detections - FIXED
   useEffect(() => {
     console.log('Setting up real-time anomaly subscription...');
     
@@ -332,28 +163,26 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     };
   }, [toast]);
 
-  // FORCE anomaly generation every 5 seconds when realtime is enabled
+  // FORCED refresh interval when realtime is enabled
   useEffect(() => {
     let intervalId: number | undefined;
 
     if (realtimeEnabled) {
-      console.log('Setting up forced 5-second anomaly generation...');
-      // Generate new anomaly immediately, then every 5 seconds
-      generateRealtimeAnomaly();
-      
+      console.log('Setting up forced anomaly refresh interval:', intervalSeconds, 'seconds');
+      // Fetch anomalies at the specified interval to ensure sync
       intervalId = window.setInterval(() => {
-        console.log('Generating new anomaly every 5 seconds...');
-        generateRealtimeAnomaly();
-      }, 5000); // Always 5 seconds for anomaly generation
+        console.log('Force refreshing anomalies...');
+        fetchAnomalies();
+      }, intervalSeconds * 1000);
     }
 
     return () => {
       if (intervalId !== undefined) {
-        console.log('Clearing 5-second anomaly generation interval');
+        console.log('Clearing anomaly refresh interval');
         window.clearInterval(intervalId);
       }
     };
-  }, [realtimeEnabled, generateRealtimeAnomaly]);
+  }, [realtimeEnabled, intervalSeconds, fetchAnomalies]);
 
   // Initial data fetch
   useEffect(() => {
