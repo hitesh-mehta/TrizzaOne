@@ -48,12 +48,14 @@
     "light": "Heller Modus",
     "dark": "Dunkler Modus"
   },
-  "nav": {
+ "nav": {
     "dashboard": "Dashboard",
     "forecast": "Prognose",
     "sustainability": "Nachhaltigkeit",
-    "feedback": "Feedback",
-    "profile": "Profil"
+    "feedback": "Feedback", 
+    "profile": "Profil",
+    "community": "Gemeinschaft",
+    "leaderboard": "Rangliste"
   },
   "dashboard": {
     "overview": "Anlagenübersicht",

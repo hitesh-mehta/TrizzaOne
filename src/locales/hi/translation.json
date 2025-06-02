@@ -51,9 +51,11 @@
   "nav": {
     "dashboard": "डैशबोर्ड",
     "forecast": "पूर्वानुमान",
-    "sustainability": "स्थिरता",
+    "sustainability": "स्थिरता", 
     "feedback": "प्रतिक्रिया",
-    "profile": "प्रोफ़ाइल"
+    "profile": "प्रोफ़ाइल",
+    "community": "समुदाय",
+    "leaderboard": "लीडरबोर्ड"
   },
   "dashboard": {
     "overview": "सुविधा अवलोकन",

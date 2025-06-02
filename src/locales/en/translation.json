@@ -48,13 +48,17 @@
     "light": "Light Mode",
     "dark": "Dark Mode"
   },
-  "nav": {
-    "dashboard": "Dashboard",
-    "forecast": "Forecast",
-    "sustainability": "Sustainability",
-    "feedback": "Feedback",
-    "profile": "Profile"
-  },
+  
+    "nav": {
+      "dashboard": "Dashboard",
+      "forecast": "Forecast", 
+      "sustainability": "Sustainability",
+      "feedback": "Feedback",
+      "profile": "Profile",
+      "community": "Community",
+      "leaderboard": "Leaderboard"
+    }
+  ,
   "community": {
     "title": "Community & Leaderboard",
     "subtitle": "Connect with your team and track performance",

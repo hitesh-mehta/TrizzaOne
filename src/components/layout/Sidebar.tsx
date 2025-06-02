@@ -1,4 +1,4 @@
-
+// src/components/layout/Sidebar.tsx
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const { t } = useTranslation();
   const isMobile = useIsMobile();
 
-  const menuItems = [
+  // Re-define menuItems to force re-render on language change
+  const menuItems = React.useMemo(() => [
     {
       id: 'dashboard',
       label: t('nav.dashboard'),
@@ -50,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
     {
       id: 'community',
-      label: t('community.title'),
+      label: t('nav.community'), // Changed from t('community.title')
       icon: Users,
       tourId: 'community'
     },
@@ -65,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: t('nav.feedback'),
       icon: MessageSquare,
     },
-  ];
+  ], [t]);
 
   return (
     <div className={cn(
