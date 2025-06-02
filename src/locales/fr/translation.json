@@ -53,7 +53,9 @@
     "forecast": "Prévisions",
     "sustainability": "Durabilité",
     "feedback": "Commentaires",
-    "profile": "Profil"
+    "profile": "Profil", 
+    "community": "Communauté",
+    "leaderboard": "Classement"
   },
   "dashboard": {
     "overview": "Aperçu des installations",
