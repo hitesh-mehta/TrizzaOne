@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -114,6 +113,36 @@ const anomalyScenarios = [
       water_use: 12.1,
       cleaning_status: 'IN PROGRESS'
     }
+  },
+  {
+    zone: 'Kitchen Zone A',
+    prediction: 'Anomaly',
+    anomaly_probability: 0.91,
+    normal_probability: 0.09,
+    risk_level: 'High',
+    input_data: {
+      zone: 'Kitchen Zone A',
+      hour: 8,
+      occupancy: 15,
+      power_use: 52.3,
+      water_use: 145.2,
+      cleaning_status: 'PENDING'
+    }
+  },
+  {
+    zone: 'Dining Area',
+    prediction: 'Normal',
+    anomaly_probability: 0.12,
+    normal_probability: 0.88,
+    risk_level: 'Low',
+    input_data: {
+      zone: 'Dining Area',
+      hour: 10,
+      occupancy: 25,
+      power_use: 35.7,
+      water_use: 22.1,
+      cleaning_status: 'DONE'
+    }
   }
 ];
 
@@ -129,15 +158,15 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     const timestamp = new Date().toISOString();
     const id = `realtime_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
-    // Add some randomness to make it more realistic
-    const variationFactor = 0.8 + Math.random() * 0.4; // 0.8 to 1.2
+    // Add significant randomness to make results more varied
+    const variationFactor = 0.6 + Math.random() * 0.8; // 0.6 to 1.4 for more variation
     const newAnomaly: AnomalyDetection = {
       id,
       iot_data_id: `iot_${Date.now()}`,
       zone: scenario.zone,
       prediction: scenario.prediction,
-      anomaly_probability: Math.min(0.99, scenario.anomaly_probability * variationFactor),
-      normal_probability: Math.max(0.01, scenario.normal_probability * variationFactor),
+      anomaly_probability: Math.min(0.99, Math.max(0.01, scenario.anomaly_probability * variationFactor)),
+      normal_probability: Math.max(0.01, Math.min(0.99, scenario.normal_probability * variationFactor)),
       risk_level: scenario.risk_level,
       input_data: {
         ...scenario.input_data,
@@ -309,7 +338,9 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
 
     if (realtimeEnabled && intervalSeconds === 5) {
       console.log('Setting up realtime anomaly generation every 5 seconds...');
-      // Generate new anomaly every 5 seconds
+      // Generate new anomaly immediately, then every 5 seconds
+      generateRealtimeAnomaly();
+      
       intervalId = window.setInterval(() => {
         console.log('Generating new realtime anomaly...');
         generateRealtimeAnomaly();
