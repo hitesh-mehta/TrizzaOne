@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,12 +23,11 @@ export interface AnomalyDetection {
   created_at: string;
 }
 
-export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSeconds: number = 5) => {
+export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSeconds: number = 30) => {
   const [anomalies, setAnomalies] = useState<AnomalyDetection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
-  const intervalRef = useRef<number>();
 
   const fetchAnomalies = useCallback(async () => {
     try {
@@ -50,10 +49,16 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
       })) as AnomalyDetection[];
       
       console.log('Fetched anomalies:', typedData.length);
-      setAnomalies(typedData);
+      
+      // Remove duplicates based on ID only
+      const uniqueAnomalies = typedData.filter((anomaly, index, self) => 
+        index === self.findIndex(a => a.id === anomaly.id)
+      );
+      
+      setAnomalies(uniqueAnomalies);
       
       // Update processed IDs
-      const newProcessedIds = new Set(typedData.map(a => a.id));
+      const newProcessedIds = new Set(uniqueAnomalies.map(a => a.id));
       setProcessedIds(newProcessedIds);
     } catch (error) {
       console.error('Error fetching anomalies:', error);
@@ -63,28 +68,12 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     }
   }, []);
 
-  const generateRandomIoTData = useCallback(() => {
-    const zones = ['Zone01', 'Zone02', 'Zone03', 'Zone04'];
-    const cleaningStatuses = ['pending', 'inprogress', 'done'];
-    
-    return {
-      id: `iot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      zone: zones[Math.floor(Math.random() * zones.length)],
-      timestamp: new Date().toISOString(),
-      occupancy_count: Math.floor(Math.random() * 15) + 1,
-      energy_consumed_kwh: Math.random() * 10 + 2,
-      cleaning_status: cleaningStatuses[Math.floor(Math.random() * cleaningStatuses.length)],
-      humidity: Math.random() * 40 + 30
-    };
-  }, []);
-
-  const callAnomalyDetection = useCallback(async (iotData?: any) => {
+  const callAnomalyDetection = useCallback(async (iotData: any) => {
     try {
-      const dataToUse = iotData || generateRandomIoTData();
-      console.log('Calling anomaly detection for IoT data:', dataToUse);
+      console.log('Calling anomaly detection for IoT data:', iotData);
       
       const { data, error } = await supabase.functions.invoke('anomaly-detection', {
-        body: { iotData: dataToUse }
+        body: { iotData }
       });
 
       if (error) {
@@ -94,11 +83,11 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
 
       console.log('Anomaly detection response:', data);
 
-      if (data?.anomalyResult) {
+      // Only show notification for new anomalies
+      if (data?.anomalyResult?.prediction === 'Anomaly') {
         const result = data.anomalyResult;
         
-        // Only show notification for new anomalies
-        if (result.prediction === 'Anomaly' && !processedIds.has(result.id)) {
+        if (!processedIds.has(result.id)) {
           toast({
             title: "🚨 Anomaly Detected!",
             description: `${result.risk_level} risk anomaly in ${result.input_data.zone}. Probability: ${(result.anomaly_probability * 100).toFixed(1)}%`,
@@ -115,14 +104,14 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     } catch (error) {
       console.error('Error in anomaly detection:', error);
     }
-  }, [fetchAnomalies, processedIds, toast, generateRandomIoTData]);
+  }, [fetchAnomalies, processedIds, toast]);
 
-  // Set up real-time subscription for new anomaly detections
+  // Set up real-time subscription for new anomaly detections - FIXED
   useEffect(() => {
     console.log('Setting up real-time anomaly subscription...');
     
     const channel = supabase
-      .channel('anomaly-realtime')
+      .channel('anomaly-realtime-fixed')
       .on(
         'postgres_changes',
         {
@@ -139,11 +128,14 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
           
           // Force update anomalies list immediately
           setAnomalies(prev => {
+            // Check if this anomaly ID already exists
             const exists = prev.some(existing => existing.id === newAnomaly.id);
             
             if (!exists) {
               console.log('Adding new anomaly to list:', newAnomaly.id);
-              return [newAnomaly, ...prev].slice(0, 50);
+              // Add new anomaly to the beginning and limit to 50
+              const updated = [newAnomaly, ...prev].slice(0, 50);
+              return updated;
             }
             return prev;
           });
@@ -171,39 +163,26 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     };
   }, [toast]);
 
-  // Set up interval for anomaly detection API calls when realtime is enabled
+  // FORCED refresh interval when realtime is enabled
   useEffect(() => {
+    let intervalId: number | undefined;
+
     if (realtimeEnabled) {
-      console.log(`Setting up anomaly detection API calls every ${intervalSeconds} seconds`);
-      
-      // Clear any existing interval
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      
-      // Call immediately once
-      callAnomalyDetection();
-      
-      // Set up interval for repeated calls
-      intervalRef.current = window.setInterval(() => {
-        console.log('Triggering automatic anomaly detection...');
-        callAnomalyDetection();
+      console.log('Setting up forced anomaly refresh interval:', intervalSeconds, 'seconds');
+      // Fetch anomalies at the specified interval to ensure sync
+      intervalId = window.setInterval(() => {
+        console.log('Force refreshing anomalies...');
+        fetchAnomalies();
       }, intervalSeconds * 1000);
-    } else {
-      // Clear interval when realtime is disabled
-      if (intervalRef.current) {
-        console.log('Clearing anomaly detection interval');
-        clearInterval(intervalRef.current);
-        intervalRef.current = undefined;
-      }
     }
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (intervalId !== undefined) {
+        console.log('Clearing anomaly refresh interval');
+        window.clearInterval(intervalId);
       }
     };
-  }, [realtimeEnabled, intervalSeconds, callAnomalyDetection]);
+  }, [realtimeEnabled, intervalSeconds, fetchAnomalies]);
 
   // Initial data fetch
   useEffect(() => {

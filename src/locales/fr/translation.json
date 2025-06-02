@@ -1,3 +1,4 @@
+
 {
   "app": {
     "name": "TrizzaOne",
@@ -44,8 +45,8 @@
     "select": "Sélectionner la langue"
   },
   "theme": {
-    "light": "Clair",
-    "dark": "Sombre"
+    "light": "Mode clair",
+    "dark": "Mode sombre"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -53,12 +54,6 @@
     "sustainability": "Durabilité",
     "feedback": "Commentaires",
     "profile": "Profil"
-  },
-  "community": {
-    "title": "Communauté & Classement",
-    "subtitle": "Connectez-vous avec votre équipe et suivez les performances",
-    "feed": "Fil Communauté",
-    "leaderboard": "Classement"
   },
   "dashboard": {
     "overview": "Aperçu des installations",
