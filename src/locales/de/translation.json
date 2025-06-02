@@ -1,4 +1,3 @@
-
 {
   "app": {
     "name": "TrizzaOne",
@@ -45,8 +44,8 @@
     "select": "Sprache wählen"
   },
   "theme": {
-    "light": "Heller Modus",
-    "dark": "Dunkler Modus"
+    "light": "Hell",
+    "dark": "Dunkel"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -54,6 +53,42 @@
     "sustainability": "Nachhaltigkeit",
     "feedback": "Feedback",
     "profile": "Profil"
+  },
+  "community": {
+    "title": "Community & Bestenliste",
+    "subtitle": "Verbinden Sie sich mit Ihrem Team und verfolgen Sie die Leistung",
+    "feed": "Community Feed",
+    "leaderboard": "Bestenliste",
+    "shareUpdate": "Update teilen",
+    "shareUpdatePlaceholder": "Was passiert in Ihrer Küche? Teilen Sie Updates, Erfolge oder stellen Sie Fragen...",
+    "characterCount": "Zeichen",
+    "posting": "Senden...",
+    "share": "Teilen",
+    "newCommunityPost": "Neuer Community-Beitrag",
+    "sharedUpdate": "hat ein Update geteilt",
+    "postShared": "Beitrag geteilt!",
+    "postSharedDesc": "Ihre Nachricht wurde mit der Community geteilt",
+    "liked": "Gefällt mir!",
+    "likedPostDesc": "Dieser Beitrag gefällt Ihnen",
+    "activeMembers": "Aktive Mitglieder",
+    "avgEfficiency": "Durchschnittliche Effizienz",
+    "totalPoints": "Gesamtpunkte",
+    "performanceLeaderboard": "Leistungsrangliste",
+    "efficiency": "Effizienz",
+    "points": "Punkte",
+    "orders": "Bestellungen",
+    "sustainabilityManager": "Nachhaltigkeitsmanager",
+    "operationsLead": "Betriebsleiter",
+    "kitchenSupervisor": "Küchenchef",
+    "energyAnalyst": "Energieanalyst",
+    "qualityControl": "Qualitätskontrolle",
+    "teamMember": "Teammitglied",
+    "justImplemented": "Habe gerade ein neues Kompostierungssystem in der Küchenzone A implementiert! Lebensmittelabfälle diese Woche um 30 % reduziert. Wer arbeitet noch an Nachhaltigkeitsinitiativen?",
+    "amazingEfficiency": "Erstaunlicher Effizienzsprung heute in Zone B! Die neuen IoT-Sensoren helfen uns wirklich, unsere Arbeitsabläufe zu optimieren. Die Genauigkeit der Belegungsvorhersage liegt bei 94 %!",
+    "kitchenRecord": "Die Küchenzone C hat gerade einen neuen Rekord aufgestellt! 250 Bestellungen mit 98 % pünktlicher Lieferung bearbeitet. Die Teamzusammenarbeit war unglaublich!",
+    "energyConsumption": "Der Energieverbrauch ist dank der neuen Leistungsoptimierungsalgorithmen diesen Monat um 15 % gesunken! Die Echtzeitüberwachung ist ein Gamechanger.",
+    "replies": "Antworten",
+    "you": "Du"
   },
   "dashboard": {
     "overview": "Anlagenübersicht",
@@ -273,5 +308,44 @@
   "newMostPopular": "Neues beliebtestes Gericht",
   "dishIsNowMostPopular": "{{dish}} ist jetzt das beliebteste Gericht heute!",
   "newOrder": "Neue Bestellung",
-  "orderReceived": "Neue Bestellung für {{dish}} erhalten"
+  "orderReceived": "Neue Bestellung für {{dish}} erhalten",
+  "realtimeControls": {
+    "title": "Echtzeit-Datensteuerung",
+    "simulation": "Echtzeit-Simulation",
+    "simulationDesc": "Automatische Generierung von Sensordaten",
+    "updateInterval": "Aktualisierungsintervall",
+    "manualRefresh": "Manuelle Aktualisierung",
+    "refresh": "Aktualisieren",
+    "totalRecords": "Gesamtzahl der Datensätze",
+    "lastUpdate": "Letzte Aktualisierung",
+    "status": "Status",
+    "live": "LIVE",
+    "paused": "PAUSIERT",
+    "simulationActive": "Simulation aktiv",
+    "5seconds": "5 Sekunden",
+    "30seconds": "30 Sekunden",
+    "1minute": "1 Minute",
+    "5minutes": "5 Minuten"
+  },
+  "anomalies": {
+    "title": "Anomalieerkennung",
+    "realtime": "Echtzeit",
+    "noAnomalies": "Keine Anomalien erkannt",
+    "systemMonitoring": "Systemüberwachung in Echtzeit",
+    "riskProbability": "Risikowahrscheinlichkeit",
+    "highRisk": "Hohes Risiko",
+    "mediumRisk": "Mittleres Risiko",
+    "lowRisk": "Geringes Risiko",
+    "anomaly": "Anomalie",
+    "normal": "Normal",
+    "anomalyDetected": "🚨 Anomalie erkannt!",
+    "realtimeAnomalyDetected": "🚨 Echtzeit-Anomalie erkannt!"
+  },
+  "buttons": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "export": "Exportieren",
+    "view": "Details anzeigen",
+    "submit": "Absenden"
+  }
 }

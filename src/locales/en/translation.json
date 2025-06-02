@@ -45,8 +45,8 @@
     "select": "Select Language"
   },
   "theme": {
-    "light": "Light Mode",
-    "dark": "Dark Mode"
+    "light": "Light",
+    "dark": "Dark"
   },
   "nav": {
     "dashboard": "Dashboard",
