@@ -106,12 +106,14 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     }
   }, [fetchAnomalies, processedIds, toast]);
 
-  // Set up real-time subscription for new anomaly detections - FIXED
+  // Set up real-time subscription for new anomaly detections - FIXED to prevent duplicate subscriptions
   useEffect(() => {
-    console.log('Setting up real-time anomaly subscription...');
+    // Create a unique channel name to prevent conflicts
+    const channelName = `anomaly-realtime-${Date.now()}-${Math.random()}`;
+    console.log('Setting up real-time anomaly subscription with channel:', channelName);
     
     const channel = supabase
-      .channel('anomaly-realtime-fixed')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -161,7 +163,7 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
       console.log('Cleaning up anomaly subscription...');
       supabase.removeChannel(channel);
     };
-  }, [toast]);
+  }, []); // Empty dependency array to prevent re-subscriptions
 
   // FORCED refresh interval when realtime is enabled
   useEffect(() => {
