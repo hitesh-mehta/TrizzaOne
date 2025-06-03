@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -28,6 +28,8 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
   const [isLoading, setIsLoading] = useState(true);
   const [processedIds, setProcessedIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const subscriptionRef = useRef<any>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchAnomalies = useCallback(async () => {
     try {
@@ -106,85 +108,81 @@ export const useAnomalyDetection = (realtimeEnabled: boolean = false, intervalSe
     }
   }, [fetchAnomalies, processedIds, toast]);
 
-  // Set up real-time subscription for new anomaly detections - FIXED to prevent duplicate subscriptions
-  useEffect(() => {
-    // Create a unique channel name to prevent conflicts
-    const channelName = `anomaly-realtime-${Date.now()}-${Math.random()}`;
-    console.log('Setting up real-time anomaly subscription with channel:', channelName);
-    
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'anomaly_detections'
-        },
-        (payload) => {
-          console.log('REAL-TIME anomaly detected:', payload);
-          const newAnomaly = {
-            ...payload.new,
-            input_data: payload.new.input_data as AnomalyDetection['input_data']
-          } as AnomalyDetection;
-          
-          // Force update anomalies list immediately
-          setAnomalies(prev => {
-            // Check if this anomaly ID already exists
-            const exists = prev.some(existing => existing.id === newAnomaly.id);
-            
-            if (!exists) {
-              console.log('Adding new anomaly to list:', newAnomaly.id);
-              // Add new anomaly to the beginning and limit to 50
-              const updated = [newAnomaly, ...prev].slice(0, 50);
-              return updated;
-            }
-            return prev;
-          });
-          
-          // Add to processed IDs
-          setProcessedIds(prev => new Set([...prev, newAnomaly.id]));
-          
-          // Show toast for anomalies only
-          if (newAnomaly.prediction === 'Anomaly') {
-            toast({
-              title: "🚨 Real-time Anomaly Detected!",
-              description: `${newAnomaly.risk_level} risk anomaly in ${newAnomaly.zone}. Probability: ${(newAnomaly.anomaly_probability * 100).toFixed(1)}%`,
-              variant: "destructive",
-            });
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('Anomaly subscription status:', status);
-      });
+  // Clean up previous subscription and interval on unmount or when dependencies change
+  const cleanup = useCallback(() => {
+    if (subscriptionRef.current) {
+      console.log('Cleaning up previous subscription...');
+      supabase.removeChannel(subscriptionRef.current);
+      subscriptionRef.current = null;
+    }
+    if (intervalRef.current) {
+      console.log('Clearing interval...');
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
 
-    return () => {
-      console.log('Cleaning up anomaly subscription...');
-      supabase.removeChannel(channel);
-    };
-  }, []); // Empty dependency array to prevent re-subscriptions
-
-  // FORCED refresh interval when realtime is enabled
+  // Set up real-time subscription and interval
   useEffect(() => {
-    let intervalId: number | undefined;
+    // Clean up any existing subscriptions/intervals first
+    cleanup();
 
     if (realtimeEnabled) {
-      console.log('Setting up forced anomaly refresh interval:', intervalSeconds, 'seconds');
-      // Fetch anomalies at the specified interval to ensure sync
-      intervalId = window.setInterval(() => {
-        console.log('Force refreshing anomalies...');
+      console.log('Setting up real-time anomaly detection...');
+      
+      // Create unique channel
+      const channelName = `anomalies-${Date.now()}`;
+      const channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'anomaly_detections'
+          },
+          (payload) => {
+            console.log('Real-time anomaly detected:', payload);
+            const newAnomaly = {
+              ...payload.new,
+              input_data: payload.new.input_data as AnomalyDetection['input_data']
+            } as AnomalyDetection;
+            
+            // Add to anomalies list
+            setAnomalies(prev => {
+              const exists = prev.some(existing => existing.id === newAnomaly.id);
+              if (!exists) {
+                const updated = [newAnomaly, ...prev].slice(0, 50);
+                return updated;
+              }
+              return prev;
+            });
+            
+            // Show toast for anomalies
+            if (newAnomaly.prediction === 'Anomaly') {
+              toast({
+                title: "🚨 Real-time Anomaly!",
+                description: `${newAnomaly.risk_level} risk in ${newAnomaly.zone}. Probability: ${(newAnomaly.anomaly_probability * 100).toFixed(1)}%`,
+                variant: "destructive",
+              });
+            }
+          }
+        )
+        .subscribe((status) => {
+          console.log('Subscription status:', status);
+        });
+
+      subscriptionRef.current = channel;
+
+      // Set up interval for forced refresh
+      intervalRef.current = setInterval(() => {
+        console.log('Interval refresh - fetching anomalies...');
         fetchAnomalies();
       }, intervalSeconds * 1000);
     }
 
-    return () => {
-      if (intervalId !== undefined) {
-        console.log('Clearing anomaly refresh interval');
-        window.clearInterval(intervalId);
-      }
-    };
-  }, [realtimeEnabled, intervalSeconds, fetchAnomalies]);
+    return cleanup;
+  }, [realtimeEnabled, intervalSeconds, fetchAnomalies, cleanup, toast]);
 
   // Initial data fetch
   useEffect(() => {
